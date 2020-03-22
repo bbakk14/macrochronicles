@@ -1,0 +1,13 @@
+div.main .content .markdown figure {
+width: 100%;
+margin-left: -4%;
+}
+div.main .content .markdown img {
+max-width: 100%;
+width: 100%;
+margin-left: -4%;
+}
+div.main .content .markdown pre {
+width: 100%;
+margin-left: -4%;
+}
