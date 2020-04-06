@@ -10,7 +10,7 @@
 <meta name="description" content="Example blog">
 
 
-    <meta property="twitter:site" content="@example">
+    <meta property="twitter:site" content="@BenBakkum">
 
 <meta property="og:site_name" content="Macro Chronicles: Economics, Markets, Dataviz" />
 <meta property="og:locale" content="en-US" />
@@ -514,14 +514,7 @@ img {
   position: static;
   margin: auto;
 }
-div.main .content .markdown .section img {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  display: block;
-  position: static;
-  margin: auto;
-}
+
 div.main .content {
     width: 100%;
 }
@@ -674,10 +667,15 @@ div.main .content .markdown figure {
 div.main .content .markdown figure img {
   width: 100%;
   height: auto;
-  max-width: 80%;
+  max-width: 100%;
   display: block;
   position: static;
-  margin: auto;
+  margin: 0%;
+}
+div.main .content .markdown img {
+max-width: 100%;
+width: 100%;
+margin-left: 0%;
 }
 div.main .content .markdown table {
   margin-bottom: 1rem;
@@ -986,17 +984,18 @@ margin-top: 0em;
 </style>
 <style media="(min-width: 769px)">
   div.main .content .markdown figure {
-width: 100%;
-margin-left: -4%;
+display: block;
+margin: auto;
+max-width: 615px;
 }
 div.main .content .markdown img {
-max-width: 100%;
-width: 100%;
-margin-left: -4%;
+display: block;
+margin: auto;
+max-width: 615px;
 }
 div.main .content .markdown pre {
 width: 100%;
-margin-left: -4%;
+margin-left: 0%;
 }
 
 </style>
@@ -1215,23 +1214,19 @@ div.main .content .markdown pre, div.main .content .markdown pre code {
         
 
         
-            <a href="https://twitter.com/example" rel=me target="_blank">
+            <a href="https://twitter.com/BenBakkum" rel=me target="_blank">
                 <img class="icon" src="/img/twitter.svg" alt="twitter" />
             </a>
         
 
         
-            <a href="https://www.linkedin.com/in/john-example-aa80ue8%c3%a8" rel=me target="_blank">
-                <img class="icon" src="/img/linkedin.svg" alt="linkedin" />
-            </a>
-        
 
         
 
         
 
         
-            <a href="mailto:you@example.com">
+            <a href="mailto:benjamin.bakkum@gmail.com">
                 <img class="icon" src="/img/email.svg" alt="email" />
             </a>
         
@@ -1286,7 +1281,7 @@ div.main .content .markdown pre, div.main .content .markdown pre code {
       SocialShareKit.init({
         twitter: {
             text: '',
-            via: 'example'
+            via: 'BenBakkum'
         }
       });
     

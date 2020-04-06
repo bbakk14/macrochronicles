@@ -1,12 +1,6 @@
 ---
 title: "Supercaps and the forces that drive them"
 date: 2020-03-20T21:13:14-05:00
-output: 
- html_document:
-   theme: yeti
-   toc: yes
-   toc_float: yes
-
 ---
 
 <style>
@@ -32,6 +26,9 @@ line-height: 26px;
 }
 </style>
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
 
 ```{r load_packages, include = FALSE}
 library(tidyverse)
@@ -53,7 +50,9 @@ A breed of company has established itself, whose businesses are valued at such c
 
 The Supercaps are Google, Apple, Facebook, Amazon, and Microsoft (GAFAM), the top five largest publicly traded US companies, each with a market capitalization of over half a trillion dollars. Apple and Microsoft currently trade at valuations over \$1 trillion. The collective performance of the Supercap equities has been quite strong as of late, as has been the case for most of the last decade. Since only mid-2015, the total market cap of GAFAM has _increased_ by \$2.5 trillion, more than the current _size_ of the German, Italian, and Spanish stock markets combined.^[The [MSCI Germany](https://www.msci.com/documents/10199/d76361cb-d5a5-4185-97ce-ec5e3dd5bf2e), MSCI Italy, and MSCI Spain indices, which cover 85% of each nation's equity market, collectively account for just over $2 trillion in market cap as of November 2019.]
 
-```{r mktcap, echo=FALSE, warning=FALSE, message = FALSE}
+
+
+```{r mktcap, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 
 colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
             'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
@@ -151,7 +150,7 @@ chart1 <- ggplot(data = df4c, aes(x = date, y = value, color = key, linetype = k
   view_follow(fixed_x = TRUE)
 
 anim1 <- animate(chart1, renderer = gifski_renderer(loop = T),
-                 width = 575, height = 393, type = "cairo")
+                 width = 615, height = 420, type = "cairo")
 
 
 chart2 <- ggplot(data = df4c2, aes(x = date2, y = value, color = key, linetype = key)) +
@@ -195,7 +194,7 @@ chart2 <- ggplot(data = df4c2, aes(x = date2, y = value, color = key, linetype =
   view_follow(fixed_x = TRUE)
 
 anim2 <- animate(chart2, renderer = gifski_renderer(loop = T),
-                 width = 575, height = 393, type = "cairo")
+                 width = 615, height = 420, type = "cairo")
 
 gif1 <- image_read(anim1)
 gif2 <- image_read(anim2)
@@ -203,6 +202,8 @@ gif2 <- image_read(anim2)
 gif_final <- c(gif1, gif2, rep(gif2[100], 50))
 gif_final
 ```
+
+
 
 ## The rise of platforms
 

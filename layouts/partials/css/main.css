@@ -499,14 +499,7 @@ img {
   position: static;
   margin: auto;
 }
-div.main .content .markdown .section img {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  display: block;
-  position: static;
-  margin: auto;
-}
+
 div.main .content {
     width: 100%;
 }
@@ -661,10 +654,15 @@ div.main .content .markdown figure {
 div.main .content .markdown figure img {
   width: 100%;
   height: auto;
-  max-width: 80%;
+  max-width: 100%;
   display: block;
   position: static;
-  margin: auto;
+  margin: 0%;
+}
+div.main .content .markdown img {
+max-width: 100%;
+width: 100%;
+margin-left: 0%;
 }
 div.main .content .markdown table {
   margin-bottom: 1rem;

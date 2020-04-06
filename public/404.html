@@ -312,8 +312,6 @@ div.main .content .title-container {
 div.main .content .posts {
   
   
-  margin-bottom: 4em;
-  
 }
 div.main .content .page-heading {
   font-size: 30px;
@@ -486,14 +484,7 @@ img {
   position: static;
   margin: auto;
 }
-div.main .content .markdown .section img {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  display: block;
-  position: static;
-  margin: auto;
-}
+
 div.main .content {
     width: 100%;
 }
@@ -646,10 +637,15 @@ div.main .content .markdown figure {
 div.main .content .markdown figure img {
   width: 100%;
   height: auto;
-  max-width: 80%;
+  max-width: 100%;
   display: block;
   position: static;
-  margin: auto;
+  margin: 0%;
+}
+div.main .content .markdown img {
+max-width: 100%;
+width: 100%;
+margin-left: 0%;
 }
 div.main .content .markdown table {
   margin-bottom: 1rem;
@@ -958,17 +954,18 @@ margin-top: 0em;
 </style>
 <style media="(min-width: 769px)">
   div.main .content .markdown figure {
-width: 100%;
-margin-left: -4%;
+display: block;
+margin: auto;
+max-width: 615px;
 }
 div.main .content .markdown img {
-max-width: 100%;
-width: 100%;
-margin-left: -4%;
+display: block;
+margin: auto;
+max-width: 615px;
 }
 div.main .content .markdown pre {
 width: 100%;
-margin-left: -4%;
+margin-left: 0%;
 }
 
 </style>
