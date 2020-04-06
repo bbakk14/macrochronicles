@@ -514,14 +514,7 @@ img {
   position: static;
   margin: auto;
 }
-div.main .content .markdown .section img {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  display: block;
-  position: static;
-  margin: auto;
-}
+
 div.main .content {
     width: 100%;
 }
@@ -674,10 +667,15 @@ div.main .content .markdown figure {
 div.main .content .markdown figure img {
   width: 100%;
   height: auto;
-  max-width: 80%;
+  max-width: 100%;
   display: block;
   position: static;
-  margin: auto;
+  margin: 0%;
+}
+div.main .content .markdown img {
+max-width: 100%;
+width: 100%;
+margin-left: 0%;
 }
 div.main .content .markdown table {
   margin-bottom: 1rem;
@@ -986,17 +984,18 @@ margin-top: 0em;
 </style>
 <style media="(min-width: 769px)">
   div.main .content .markdown figure {
-width: 100%;
-margin-left: -4%;
+display: block;
+margin: auto;
+max-width: 615px;
 }
 div.main .content .markdown img {
-max-width: 100%;
-width: 100%;
-margin-left: -4%;
+display: block;
+margin: auto;
+max-width: 615px;
 }
 div.main .content .markdown pre {
 width: 100%;
-margin-left: -4%;
+margin-left: 0%;
 }
 
 </style>
@@ -1229,7 +1228,7 @@ line-height: 26px;
 <h2>Introduction</h2>
 <p>A breed of company has established itself, whose businesses are valued at such colossal amounts, that to call its members Supercaps would be more fitting than the Large- and Mega-cap labels traditionally used to describe firms with the biggest market capitalizations. The Supercap group overlaps with some of the stocks popularly referred to as FANG, though Netflix, at a relatively modest ~$150 billion market cap, does not make the cut. Big Tech, another oft-repeated tag, likely does include all of today’s Supercaps, yet its use as an umbrella term for much of the tech industry has made it hard to know the extent of what can be considered Big Tech or not.</p>
 <p>The Supercaps are Google, Apple, Facebook, Amazon, and Microsoft (GAFAM), the top five largest publicly traded US companies, each with a market capitalization of over half a trillion dollars. Apple and Microsoft currently trade at valuations over $1 trillion. The collective performance of the Supercap equities has been quite strong as of late, as has been the case for most of the last decade. Since only mid-2015, the total market cap of GAFAM has <em>increased</em> by $2.5 trillion, more than the current <em>size</em> of the German, Italian, and Spanish stock markets combined.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></p>
-<p><img src="/blog/mktcap_timeseries_files/figure-html/mktcap-1.gif" /><!-- --></p>
+<p><img src="/blog/2020/mktcap_timeseries_files/figure-html/mktcap-1.gif" /><!-- --></p>
 </div>
 <div id="the-rise-of-platforms" class="section level2">
 <h2>The rise of platforms</h2>
@@ -1264,11 +1263,6 @@ line-height: 26px;
             <br>
             <div class="navigation">
                 
-                <div>
-                    <img class="icon" src="/img/back.svg" alt="back" />
-                    <a href="/blog/example-article/">Example article</a>
-                </div>
-                
                 <div style="width: 100%;"></div>
                 
             </div>
@@ -1276,16 +1270,6 @@ line-height: 26px;
             
 
             
-            
-            <div class="post bg-white">
-                <script src="https://utteranc.es/client.js"
-                    repo= "mtn/cocoa-eh-hugo-theme"
-                    issue-term="title"
-                    theme="github-light"
-                    crossorigin="anonymous"
-                    async>
-                </script>
-            </div>
             
 
             

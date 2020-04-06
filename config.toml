@@ -6,12 +6,12 @@ contentdir = "content"
 languageCode = "en-US"
 layoutdir = "layouts"
 publishdir = "public"
-author = "Alexis Tacnet"
+author = "Ben Bakkum"
 title = "Macro Chronicles: Economics, Markets, Dataviz"
 disqusshortname = ""
 pluralizelisttitles = false
 disableKinds = ["taxonomy", "taxonomyTerm"]
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+ignoreFiles = ["_files$", "_cache$"]
  
 [permalinks]
 blog = "blog/:slug/"
@@ -23,17 +23,16 @@ description = "Example blog"
 copyright = "Copyright © 2020 Benjamin Bakkum"
 # copyrightUrl = "https://creativecommons.org/licenses/by-sa/4.0/"
 logofile = "img/gradient3.png"
-faviconfile = "img/logo.png"
+faviconfile = "img/logo.png" 
 highlightjs = true
 progressively = true
 share = true
 # Share to googleplus, twitter, fb, linkedin by default
 # disable by setting share_on_<social network> = false
-# example: share_on_googleplus = false
-latestpostcount = 5
-email = "you@example.com"
-linkedin = "john-example-aa80ue8è"
-twitter = "example"
+# example: share_on_googleplus = false 
+latestpostcount = 1
+email = "benjamin.bakkum@gmail.com"
+twitter = "BenBakkum"
 social_banner = "img/banner.png"
 usesmallsummarycard = true
 posts_navigation = true
@@ -47,7 +46,7 @@ enlarged = true
 
 
 [params.utteranc]
-enable = true
+enable = false
 repo = "mtn/cocoa-eh-hugo-theme"
 issueTerm = "title"
 
