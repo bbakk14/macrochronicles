@@ -3,7 +3,7 @@ date: "2015-08-22"
 title: About
 ---
 
-My name is Ben Bakkum, and I'm the author of Macro Chronicles. I currently work on the data team at GiveDirectly, a nonprofit that operates cash transfer and basic income programs across seven countries in Africa and has provided disaster relief in the US, Puerto Rico, and the Bahamas.
+My name is Ben Bakkum, and I'm the author of Macro Chronicles. I live in New York and work on the data team at GiveDirectly, a nonprofit that operates cash transfer and basic income programs across seven countries in Africa and has provided disaster relief in the US, Puerto Rico, and the Bahamas.
 
 Prior to GiveDirectly, I worked on the Private Bank Chief Investment Officer's team at J.P. Morgan, where I contributed to macroeconomic and global financial market research and analysis. I've passed all three levels of the Chartered Financial Analyst Exams.
 

@@ -148,7 +148,7 @@ section {
   -moz-align-items: center;
   -ms-align-items: center;
   align-items: center;
-  width: 150%;
+  width: 100%;
 }
 div.column {
   display: -webkit-flex;
@@ -164,7 +164,7 @@ div.column {
   -moz-align-items: center;
   -ms-align-items: center;
   align-items: center;
-  width: 150%;
+  width: 100%;
 }
 .container {
   display: -webkit-flex;
@@ -172,7 +172,7 @@ div.column {
   display: -ms-flexbox;
   display: -ms-flex;
   display: flex;
-  width: 150%;
+  width: 100%;
 }
 div.header .container {
   -webkit-align-items: center;
@@ -280,6 +280,7 @@ div.footer .container {
   flex-direction: column-reverse;
   width: 100%;
   text-align: center;
+  padding-top: 30px;
 }
 div.footer .container a {
   font-size: 14px;
@@ -829,12 +830,12 @@ padding: 0 16px;
 margin-left: 100px;
 margin-right: 100px;
 
-max-width: 850px;
+max-width: 900px;
 
 }
 div.column {
 padding: 0 16px;
- 
+
 max-width: 900px;
 
 }
@@ -846,17 +847,10 @@ div.header .container {
 -moz-justify-content: flex-start;
 -ms-justify-content: flex-start;
 justify-content: flex-start;
-max-width: 900px;
 }
 div.header .container .logo {
-max-width: 185px;
-}
-div.header .container .content {
-max-width: 600px;
-}
-
-div.header .container .name {
-max-width: 600px;
+max-width: 200px;
+margin: 0;
 }
 div.header-home .container .logo {
 max-width: 385px;
@@ -865,7 +859,6 @@ margin-left: 0px;
 div.header-home .name-home {
 padding-top: 30px;
 font-size: 40px;
-max-width: 200px;
 }
 div.header-home nav ul a {
 font-size: 18px;
@@ -878,8 +871,6 @@ align-items: flex-start;
 }
 div.header .name {
 color: #333333;
-font-size: 28px;
-max-width: 360px;
 }
 div.header nav {
 font-size: 14px;
@@ -980,7 +971,6 @@ flex-direction: row;
 div.main .content .navigation div {
 margin-top: 0em;
 }
-
 </style>
 <style media="(min-width: 769px)">
   div.main .content .markdown figure {
