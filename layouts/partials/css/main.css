@@ -110,7 +110,7 @@ section {
   -moz-align-items: center;
   -ms-align-items: center;
   align-items: center;
-  width: 150%;
+  width: 100%;
 }
 div.column {
   display: -webkit-flex;
@@ -126,7 +126,7 @@ div.column {
   -moz-align-items: center;
   -ms-align-items: center;
   align-items: center;
-  width: 150%;
+  width: 100%;
 }
 .container {
   display: -webkit-flex;
@@ -134,7 +134,7 @@ div.column {
   display: -ms-flexbox;
   display: -ms-flex;
   display: flex;
-  width: 150%;
+  width: 100%;
 }
 div.header .container {
   -webkit-align-items: center;
@@ -244,6 +244,7 @@ div.footer .container {
   flex-direction: column-reverse;
   width: 100%;
   text-align: center;
+  padding-top: 30px;
 }
 div.footer .container a {
   font-size: 14px;
