@@ -1,0 +1,666 @@
+---
+title: "cases_chart"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(scales)
+library(extrafont)
+library(gganimate)
+library(magick)
+library(xts)
+library(ggrepel)
+library(gifski)
+library(Cairo)
+library(tibbletime)
+```
+
+
+
+```{r setup2, include=FALSE}
+## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\cases.csv")
+
+dat <- raw_dat %>%
+  as_tibble() %>% 
+  rename(Province = `Province/State`, Country = `Country/Region`) %>% 
+  select(-Province,-Lat,-Long) %>% 
+  group_by(Country) %>%
+  summarise_all(sum) %>%
+  rownames_to_column() %>% 
+  gather(var, value, -rowname) %>% 
+  spread(rowname, value) %>% 
+  mutate(var = as.Date(var, "%m/%d/%Y")) %>% 
+  arrange(var)
+
+
+colnames(dat) <- dat[nrow(dat),] 
+  
+rec_count <- tail(dat[-nrow(dat),],1)
+my_names <- colnames(dat)[as.numeric(rec_count[1,]) > 1000][-1]
+dat_sm <- dat %>%
+  rename(date = 'NA') %>% 
+  select(date, my_names, Singapore)
+
+dat_sm2 <- dat_sm[-nrow(dat),] %>% 
+  rename('S Korea' = 'Korea, South') %>%
+  rename(UK = 'United Kingdom') %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>%
+  arrange(date)
+
+dat_sm3 <- dat_sm2[,-1] %>% 
+  map(.f = function(x) {as.numeric(x)}) %>% 
+  cbind(dat_sm2[,1]) %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+
+dat_sm4 <- dat_sm3 %>% 
+  gather(key, value, -date)
+
+dat_sm5 <- dat_sm4 %>% 
+  mutate(crossover = case_when(value >= 100 & lag(value,1) < 100 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(key, idx = cumsum(crossover == 1L)) %>% 
+  mutate(counter = row_number(),
+         counter = as.numeric(counter)) %>% 
+  mutate(days = case_when(value < 100 ~ 0,
+                          value > 100 ~ counter)) %>% 
+  ungroup() %>% 
+  select(-crossover, -idx, -counter) %>% 
+  filter(days > 0) %>% 
+  mutate(days = days - 1)
+
+dat_c <- dat_sm5
+dat_lab <- dat_c %>% filter(key == "US" | key == "UK" | key == "China" | key == "Italy" | key == "S Korea" |
+                            key == "Japan" | key == "Singapore" | key == "India" | key == "Spain" | 
+                            key == "France" | key == "Australia" | key == "Brazil" | key == "Turkey" | 
+                            key == "Iran")
+
+```
+
+
+```{r chart, include=FALSE}
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "COVID-19 case trajectories"
+unit_label <- "Cumulative # of cases, by number of days since 100th case"
+source_1 <- "Source: JHU, WHO, Ben Bakkum." 
+
+line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Italy" = "#1f78b4", 
+               "S Korea" = "#a6cee3", "Turkey" = "#6a3d9a", "UK" = "#fb9a99", "India" = "#33a02c",
+               "Brazil" = "#ff9832", "Australia" = "#cab2d6", "France" = "#6a3d9a", "Germany" = "#CDCDCD",
+               "Canada" = "#CDCDCD", "Austria" = "#CDCDCD", "Luxembourg" = "#CDCDCD", "Peru" = "#CDCDCD",
+               "Malaysia" = "#CDCDCD", "Mexico" = "#CDCDCD", "Netherlands" = "#CDCDCD", "Norway" = "#CDCDCD",
+               "Pakistan" = "#CDCDCD", "Philippines" = "#CDCDCD", "Poland" = "#CDCDCD", "Portugal" = "#CDCDCD",
+               "Romania" = "#CDCDCD", "Saudi Arabia" = "#CDCDCD", "South Africa" = "#CDCDCD", 
+               "Sweden" = "#CDCDCD", "Switzerland" = "#CDCDCD", "Thailand" = "#CDCDCD", "Belgium" = "#CDCDCD",
+               "Chile" = "#CDCDCD", "Czechia" = "#CDCDCD", "Denmark" = "#CDCDCD", "Finland" = "#CDCDCD",
+               "Ecuador" = "#CDCDCD", "Greece" = "#CDCDCD", "Indonesia" = "#CDCDCD", "Iran" = "#e84749",
+               "Ireland" = "#CDCDCD", "Israel" = "#CDCDCD", "Japan" = "#fdbf6f", "Singapore" = "#CDCDCD",
+               "Russia" = "#CDCDCD", "Iceland" = "#CDCDCD", "Panama" = "#CDCDCD", "Serbia" = "#CDCDCD",
+               "Qatar" = "#CDCDCD", "Qatar" = "#CDCDCD", "United Arab Emirates" = "#CDCDCD",
+               "Algeria" = "#CDCDCD", "Colombia" = "#CDCDCD", "Croatia" = "#CDCDCD", 
+               "Dominican Republic" = "#CDCDCD", "Argentina" = "#CDCDCD", "Ukraine" = "#CDCDCD",
+               "Egypt" = "#CDCDCD", "Estonia" = "#CDCDCD", "Morocco" = "#CDCDCD", "Moldova" = "#CDCDCD",
+               "Slovenia" = "#CDCDCD", "New Zealand" = "#CDCDCD", "Belarus" = "#CDCDCD",
+               "Lithuania" = "#CDCDCD", "Azerbaijan" = "#CDCDCD", "North Macedonia" = "#CDCDCD",
+               "Oman" = "#CDCDCD", "Slovakia" = "#CDCDCD", "Slovenia" = "#CDCDCD", "Uzbekistan" = "#CDCDCD",
+               "Bosnia and Herzegovina" = "#CDCDCD", "Armenia" = "#CDCDCD", "Iraq" = "#CDCDCD",
+               "Kazakhstan" = "#CDCDCD", "Kuwait" = "#CDCDCD", "Bangladesh" = "#CDCDCD", 
+               "Afghanistan" = "#CDCDCD", "Ghana" = "#CDCDCD", "Cuba" = "#CDCDCD", "Cameroon" = "#CDCDCD",
+               "Bulgaria" = "#CDCDCD", "Cote d'Ivoire" = "#CDCDCD", "Nigeria" = "#CDCDCD")
+
+
+chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
+  geom_text(data = filter(dat_c, key == "China"), aes(62, 150), color = "#808080", size = 13, alpha = .8, 
+            family = "Open Sans") +
+  geom_line(size = 1.1, alpha = 0.65) +
+  scale_y_log10(labels = comma, breaks = c(100, 200, 500, 1000, 2000, 5000, 10000, 
+                                           20000, 50000, 100000, 200000, 500000)) +
+  scale_color_manual(values = line_cols) +
+  geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
+  geom_text(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
+                                show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
+  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.05, 0.05, 0.05, 0.05), "cm")),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since 100th case",
+       caption = paste("Data as of ", format(tail(dat_c$date,1), "%b %d, %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)  
+
+```
+
+```{r setup-new_cases, include=FALSE}
+## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\cases.csv")
+
+dat <- raw_dat %>%
+  as_tibble() %>% 
+  rename(Province = `Province/State`, Country = `Country/Region`) %>% 
+  select(-Province,-Lat,-Long) %>% 
+  group_by(Country) %>%
+  summarise_all(sum) %>%
+  rownames_to_column() %>% 
+  gather(var, value, -rowname) %>% 
+  spread(rowname, value) %>% 
+  mutate(var = as.Date(var, "%m/%d/%Y")) %>% 
+  arrange(var)
+
+
+colnames(dat) <- dat[nrow(dat),] 
+  
+rec_count <- tail(dat[-nrow(dat),],1)
+my_names <- colnames(dat)[as.numeric(rec_count[1,]) > 1000][-1]
+dat_sm <- dat %>%
+  rename(date = 'NA') %>% 
+  select(date, my_names, Singapore)
+
+dat_sm2 <- dat_sm[-nrow(dat),] %>% 
+  rename('S Korea' = 'Korea, South') %>%
+  rename(UK = 'United Kingdom') %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>%
+  arrange(date)
+
+dat_sm3 <- dat_sm2[,-1] %>% 
+  map(.f = function(x) {as.numeric(x)}) %>% 
+  cbind(dat_sm2[,1]) %>% 
+  select(date, everything())
+
+rolling_mean <- rollify(mean, window = 7)
+
+dat_sm3.5 <- dat_sm3[,-1] %>% 
+  map(.f = function (x) {x - lag(x, 1)}) %>%
+  map(.f = function (x) {rolling_mean(x)}) %>%
+  as_data_frame() %>% 
+  cbind(dat_sm3$date) %>% 
+  rename(date = 'dat_sm3$date') %>% 
+  select(date, everything())
+  
+
+dat_sm4 <- dat_sm3.5 %>% 
+  gather(key, value, -date)
+
+dat_sm5 <- dat_sm4 %>% 
+  mutate(crossover = case_when(value >= 20 & lag(value,1) < 20 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(key, idx = cumsum(crossover == 1L)) %>% 
+  mutate(counter = row_number(),
+         counter = as.numeric(counter)) %>% 
+  mutate(days = case_when(value < 20 ~ 0,
+                          value > 20 ~ counter)) %>% 
+  ungroup() %>% 
+  select(-crossover, -idx, -counter) %>% 
+  filter(days > 0) %>% 
+  mutate(days = days - 1)
+
+dat_c <- dat_sm5 %>% filter(key != "France")
+dat_lab <- dat_c %>% filter(key == "US" | key == "UK" | key == "China" | key == "Italy" | key == "S Korea" |
+                            key == "Japan" | key == "India" | key == "Spain" | 
+                            key == "Australia" | key == "Brazil" | key == "Turkey" | 
+                            key == "Iran")
+
+```
+
+
+```{r chart-new_cases, include=FALSE}
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "COVID-19 daily new cases"
+unit_label <- "Daily change in cases, 7 day moving average"
+source_1 <- "Source: JHU, WHO, @benbakkum." 
+
+line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Italy" = "#1f78b4", 
+               "S Korea" = "#a6cee3", "Turkey" = "#6a3d9a", "UK" = "#fb9a99", "India" = "#33a02c",
+               "Brazil" = "#ff9832", "Australia" = "#cab2d6", "France" = "#6a3d9a", "Germany" = "#CDCDCD",
+               "Canada" = "#CDCDCD", "Austria" = "#CDCDCD", "Luxembourg" = "#CDCDCD", "Peru" = "#CDCDCD",
+               "Malaysia" = "#CDCDCD", "Mexico" = "#CDCDCD", "Netherlands" = "#CDCDCD", "Norway" = "#CDCDCD",
+               "Pakistan" = "#CDCDCD", "Philippines" = "#CDCDCD", "Poland" = "#CDCDCD", "Portugal" = "#CDCDCD",
+               "Romania" = "#CDCDCD", "Saudi Arabia" = "#CDCDCD", "South Africa" = "#CDCDCD", 
+               "Sweden" = "#CDCDCD", "Switzerland" = "#CDCDCD", "Thailand" = "#CDCDCD", "Belgium" = "#CDCDCD",
+               "Chile" = "#CDCDCD", "Czechia" = "#CDCDCD", "Denmark" = "#CDCDCD", "Finland" = "#CDCDCD",
+               "Ecuador" = "#CDCDCD", "Greece" = "#CDCDCD", "Indonesia" = "#CDCDCD", "Iran" = "#e84749",
+               "Ireland" = "#CDCDCD", "Israel" = "#CDCDCD", "Japan" = "#fdbf6f", "Singapore" = "#CDCDCD",
+               "Russia" = "#CDCDCD", "Iceland" = "#CDCDCD", "Panama" = "#CDCDCD", "Serbia" = "#CDCDCD",
+               "Qatar" = "#CDCDCD", "Qatar" = "#CDCDCD", "United Arab Emirates" = "#CDCDCD",
+               "Algeria" = "#CDCDCD", "Colombia" = "#CDCDCD", "Croatia" = "#CDCDCD", 
+               "Dominican Republic" = "#CDCDCD", "Argentina" = "#CDCDCD", "Ukraine" = "#CDCDCD",
+               "Egypt" = "#CDCDCD", "Estonia" = "#CDCDCD", "Morocco" = "#CDCDCD", "Moldova" = "#CDCDCD",
+               "Slovenia" = "#CDCDCD", "New Zealand" = "#CDCDCD", "Belarus" = "#CDCDCD",
+               "Lithuania" = "#CDCDCD", "Azerbaijan" = "#CDCDCD", "North Macedonia" = "#CDCDCD",
+               "Oman" = "#CDCDCD", "Slovakia" = "#CDCDCD", "Slovenia" = "#CDCDCD", "Uzbekistan" = "#CDCDCD",
+               "Bosnia and Herzegovina" = "#CDCDCD", "Armenia" = "#CDCDCD", "Iraq" = "#CDCDCD",
+               "Kazakhstan" = "#CDCDCD", "Kuwait" = "#CDCDCD", "Bangladesh" = "#CDCDCD", 
+               "Afghanistan" = "#CDCDCD", "Ghana" = "#CDCDCD", "Cuba" = "#CDCDCD", "Cameroon" = "#CDCDCD",
+               "Bulgaria" = "#CDCDCD", "Cote d'Ivoire" = "#CDCDCD", "Nigeria" = "#CDCDCD")
+
+
+chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
+  geom_text(data = filter(dat_c, key == "China"), aes(62, 30000), color = "#808080", size = 13, alpha = .8, 
+            family = "Open Sans") +
+  geom_line(size = 1.1, alpha = 0.65) +
+  scale_y_log10(labels = comma, breaks = c(20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 
+                                           20000, 50000)) +
+  scale_color_manual(values = line_cols) +
+  geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
+  geom_text(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
+                                show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
+  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.05, 0.05, 0.05, 0.05), "cm")),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since averaging over 20 new cases a day",
+       caption = paste("Data as of ", format(tail(dat_c$date,1), "%b %d, %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)  
+
+```
+
+
+
+
+```{r setup-deaths, include=FALSE}
+## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\deaths.csv")
+
+dat <- raw_dat %>%
+  as_tibble() %>% 
+  rename(Province = "Province/State", Country = "Country/Region") %>% 
+  select(-Province,-Lat,-Long) %>% 
+  group_by(Country) %>%
+  summarise_all(sum) %>%
+  rownames_to_column() %>% 
+  gather(var, value, -rowname) %>% 
+  spread(rowname, value) %>% 
+  mutate(var = as.Date(var, "%m/%d/%Y")) %>% 
+  arrange(var)
+
+
+colnames(dat) <- dat[nrow(dat),] 
+  
+rec_count <- tail(dat[-nrow(dat),],1)
+my_names <- colnames(dat)[as.numeric(rec_count[1,]) > 100][-1]
+dat_sm <- dat %>% 
+  rename(date = 'NA') %>% 
+  select(date, my_names)
+
+dat_sm2 <- dat_sm[-nrow(dat),] %>% 
+  rename('S Korea' = 'Korea, South') %>%
+  rename(UK = 'United Kingdom') %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>%
+  arrange(date)
+
+dat_sm3 <- dat_sm2[,-1] %>% 
+  map(.f = function(x) {as.numeric(x)}) %>% 
+  cbind(dat_sm2[,1]) %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+
+dat_sm4 <- dat_sm3 %>% 
+  gather(key, value, -date)
+
+dat_sm5 <- dat_sm4 %>% 
+  mutate(crossover = case_when(value >= 10 & lag(value,1) < 10 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(key, idx = cumsum(crossover == 1L)) %>% 
+  mutate(counter = row_number(),
+         counter = as.numeric(counter)) %>% 
+  mutate(days = case_when(value < 10 ~ 0,
+                          value > 10 ~ counter)) %>% 
+  ungroup() %>% 
+  select(-crossover, -idx, -counter) %>% 
+  filter(days > 0) %>% 
+  mutate(days = days - 1)
+
+dat_c <- dat_sm5
+dat_lab <- dat_c %>% filter(key == "US" | key == "UK" | key == "China" | key == "Italy" | key == "Indonesia" |
+                            key == "Japan" | key == "Canada" | key == "India" | key == "Spain" | 
+                            key == "France" | key == "Australia" | key == "Brazil" | key == "Turkey" | 
+                            key == "Sweden" | key == "Iran" | key == "S Korea")
+
+```
+
+
+```{r chart-deaths, include=FALSE}
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "Deaths due to COVID-19"
+unit_label <- "Cumulative # of deaths, by number of days since ~10th death"
+source_1 <- "Source: JHU, WHO, @benbakkum." 
+
+line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Italy" = "#1f78b4", 
+               "Canada" = "#a6cee3", "Turkey" = "#6a3d9a", "UK" = "#fb9a99", "India" = "#33a02c",
+               "Brazil" = "#ff9832", "Australia" = "#cab2d6", "France" = "#6a3d9a", "Germany" = "#CDCDCD",
+               "Indonesia" = "#cab2d6", "Portugal" = "#CDCDCD", "Mexico" = "#CDCDCD", "Netherlands" = "#CDCDCD",
+               "Ireland" = "#CDCDCD", "Sweden" = "#1f78b4", "Switzerland" = "#CDCDCD", "Belgium" = "#CDCDCD",
+               "Morocco" = "#CDCDCD", "Austria" = "#CDCDCD", "Peru" = "#CDCDCD", "Philippines" = "#CDCDCD",
+               "Panama" = "#CDCDCD", "Pakistan" = "#CDCDCD", "Norway" = "#CDCDCD", "Panama" = "#CDCDCD",
+               "Poland" = "#CDCDCD", "Romania" = "#CDCDCD", "Serbia" = "#CDCDCD", "Russia" = "#CDCDCD",
+               "Ukraine" = "#CDCDCD", "Algeria" = "#CDCDCD", "Colombia" = "#CDCDCD", "Czechia" = "#CDCDCD",
+               "Chile" = "#CDCDCD", "Serbia" = "#CDCDCD", "Denmark" = "#CDCDCD", 
+               "Dominican Republic" = "#CDCDCD", "Greece" = "#CDCDCD", "Egypt" = "#CDCDCD",
+               "Ecuador" = "#CDCDCD", "Argentina" = "#CDCDCD", "Hungary" = "#CDCDCD", "Israel" = "#CDCDCD", 
+               "S Korea" = "#a6cee3", "Japan" = "#fdbf6f", "Bangladesh" = "#fdbf6f")
+
+
+chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
+  geom_text(data = filter(dat_c, key == "China"), aes(62, 15), color = "#808080", size = 13, alpha = .8, 
+            family = "Open Sans") +
+  geom_line(size = 1.1, alpha = 0.65) +
+  scale_y_log10(labels = comma, breaks = c(10, 20, 50, 100, 200, 500, 1000, 
+                                           2000, 5000, 10000, 20000, 50000)) +
+  scale_color_manual(values = line_cols) +
+  geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
+  geom_text_repel(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
+                                show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
+  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.05, 0.05, 0.05, 0.05), "cm")),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since 10th death",
+       caption = paste("Data as of ", format(tail(dat_c$date,1), "%b %d, %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)  
+
+```
+
+
+```{r setup-new_deaths, include=FALSE}
+## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\deaths.csv")
+
+dat <- raw_dat %>%
+  as_tibble() %>% 
+  rename(Province = `Province/State`, Country = `Country/Region`) %>% 
+  select(-Province,-Lat,-Long) %>% 
+  group_by(Country) %>%
+  summarise_all(sum) %>%
+  rownames_to_column() %>% 
+  gather(var, value, -rowname) %>% 
+  spread(rowname, value) %>% 
+  mutate(var = as.Date(var, "%m/%d/%Y")) %>% 
+  arrange(var)
+
+
+colnames(dat) <- dat[nrow(dat),] 
+  
+rec_count <- tail(dat[-nrow(dat),],1)
+my_names <- colnames(dat)[as.numeric(rec_count[1,]) > 100][-1]
+dat_sm <- dat %>%
+  rename(date = 'NA') %>% 
+  select(date, my_names, Singapore)
+
+dat_sm2 <- dat_sm[-nrow(dat),] %>% 
+  rename('S Korea' = 'Korea, South') %>%
+  rename(UK = 'United Kingdom') %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>%
+  arrange(date)
+
+dat_sm3 <- dat_sm2[,-1] %>% 
+  map(.f = function(x) {as.numeric(x)}) %>% 
+  cbind(dat_sm2[,1]) %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+
+rolling_mean <- rollify(mean, window = 7)
+
+dat_sm3.5 <- dat_sm3[,-1] %>% 
+  map(.f = function (x) {x - lag(x, 1)}) %>%
+  map(.f = function (x) {rolling_mean(x)}) %>%
+  as_data_frame() %>% 
+  cbind(dat_sm3$date) %>% 
+  rename(date = 'dat_sm3$date') %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+  
+
+dat_sm4 <- dat_sm3.5 %>% 
+  gather(key, value, -date)
+
+keep_cntry <- dat_sm4 %>% 
+  na.omit() %>% 
+  group_by(key) %>% 
+  summarise(max = max(value)) %>% 
+  filter(max > 35) %>% 
+  select(-max)
+
+dat_sm5 <- dat_sm4 %>% 
+  filter(key %in% keep_cntry$key) %>% 
+  mutate(crossover = case_when((value >= 20 & lag(value,1) < 20) | 
+                               (key != lag(key,1))~ 1,
+                               TRUE ~ 0))
+
+dat_sm5[dat_sm5$date == "2020-03-22" & dat_sm5$key == "China", "crossover"] <- 0
+dat_sm5[dat_sm5$date > "2020-04-16" & dat_sm5$key == "China", "crossover"] <- 0
+##dat_sm5[dat_sm5$date == "2020-03-19" & dat_sm5$key == "France", "crossover"] <- 1
+
+
+dat_sm6 <- dat_sm5 %>%
+  group_by(key, idx = cumsum(crossover == 1L)) %>% 
+  mutate(counter = row_number(),
+         counter = as.numeric(counter),
+         phase = case_when((idx %% 2) == 0 ~ "off",
+                           (idx %% 2) != 0 ~ "on")) %>% 
+  mutate(days = case_when(phase == "off" ~ 0,
+                          phase == "on" ~ counter)) %>%
+  ungroup() %>% 
+  select(-crossover, -idx, -counter, -phase) %>% 
+  filter(days > 0) %>% 
+  mutate(days = days - 1)
+
+dat_c <- dat_sm6
+dat_lab <- dat_c %>% filter(key == "US" | key == "UK" | key == "China" | key == "Italy" | key == "S Korea" |
+                            key == "Japan" | key == "India" | key == "Spain" | key == "France" | 
+                            key == "Australia" | key == "Brazil" | key == "Turkey" | 
+                            key == "Iran")
+
+```
+
+
+```{r chart-new_deaths, include=FALSE}
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "COVID-19 daily new deaths"
+unit_label <- "Daily change in deaths, 7 day moving average"
+source_1 <- "Source: JHU, WHO, @benbakkum." 
+
+line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Italy" = "#1f78b4", 
+               "S Korea" = "#a6cee3", "Turkey" = "#6a3d9a", "UK" = "#fb9a99", "India" = "#33a02c",
+               "Brazil" = "#ff9832", "Australia" = "#cab2d6", "France" = "#6a3d9a", "Germany" = "#CDCDCD",
+               "Canada" = "#CDCDCD", "Austria" = "#CDCDCD", "Luxembourg" = "#CDCDCD", "Peru" = "#CDCDCD",
+               "Malaysia" = "#CDCDCD", "Mexico" = "#CDCDCD", "Netherlands" = "#CDCDCD", "Norway" = "#CDCDCD",
+               "Pakistan" = "#CDCDCD", "Philippines" = "#CDCDCD", "Poland" = "#CDCDCD", "Portugal" = "#CDCDCD",
+               "Romania" = "#CDCDCD", "Saudi Arabia" = "#CDCDCD", "South Africa" = "#CDCDCD", 
+               "Sweden" = "#1f78b4", "Switzerland" = "#CDCDCD", "Thailand" = "#CDCDCD", "Belgium" = "#CDCDCD",
+               "Chile" = "#CDCDCD", "Czechia" = "#CDCDCD", "Denmark" = "#CDCDCD", "Finland" = "#CDCDCD",
+               "Ecuador" = "#CDCDCD", "Greece" = "#CDCDCD", "Indonesia" = "#CDCDCD", "Iran" = "#e84749",
+               "Ireland" = "#CDCDCD", "Israel" = "#CDCDCD", "Japan" = "#fdbf6f", "Singapore" = "#CDCDCD",
+               "Russia" = "#CDCDCD", "Iceland" = "#CDCDCD", "Panama" = "#CDCDCD", "Serbia" = "#CDCDCD",
+               "Qatar" = "#CDCDCD", "Qatar" = "#CDCDCD", "United Arab Emirates" = "#CDCDCD",
+               "Algeria" = "#CDCDCD", "Colombia" = "#CDCDCD", "Croatia" = "#CDCDCD", 
+               "Dominican Republic" = "#CDCDCD", "Argentina" = "#CDCDCD", "Ukraine" = "#CDCDCD",
+               "Egypt" = "#CDCDCD", "Estonia" = "#CDCDCD", "Morocco" = "#CDCDCD", "Moldova" = "#CDCDCD",
+               "Slovenia" = "#CDCDCD", "New Zealand" = "#CDCDCD", "Belarus" = "#CDCDCD",
+               "Lithuania" = "#CDCDCD", "Azerbaijan" = "#CDCDCD", "North Macedonia" = "#CDCDCD",
+               "Oman" = "#CDCDCD", "Slovakia" = "#CDCDCD", "Slovenia" = "#CDCDCD", "Uzbekistan" = "#CDCDCD",
+               "Bosnia and Herzegovina" = "#CDCDCD", "Armenia" = "#CDCDCD", "Iraq" = "#CDCDCD",
+               "Kazakhstan" = "#CDCDCD", "Kuwait" = "#CDCDCD", "Bangladesh" = "#CDCDCD")
+
+
+chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
+  geom_text(data = filter(dat_c, key == "China"), aes(62, 2500), color = "#808080", size = 13, alpha = .8, 
+            family = "Open Sans") +
+  geom_line(size = 1.1, alpha = 0.65) +
+  scale_y_log10(labels = fmt_dcmls(0), breaks = c(2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
+                                                           10000, 20000, 50000)) +
+  scale_color_manual(values = line_cols) +
+  geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
+  geom_text(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
+                                show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
+  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.05, 0.05, 0.05, 0.05), "cm")),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since averaging over 20 daily deaths",
+       caption = paste("Data as of ", format(tail(dat_c$date,1), "%b %d, %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)  
+
+```
+
+
+
+
+
+
+
+
+
