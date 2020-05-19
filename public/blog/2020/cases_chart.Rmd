@@ -18,7 +18,7 @@ library(tibbletime)
 ```
 &nbsp;
 &nbsp;
-
+ 
 There surely isn't a country right now whose people aren't collectively wondering when things will be totally back to normal, and whether things can ever be the kind of normal they were before. For countries that have battled the virus to a trickle of new cases or none at all, many appear well on their way in opening their economies up, yet their paths to normalcy resemble less a snapback than a slow, incremental recovery still constrained by uncertainty. For countries in the midst of outbreaks, particularly the US, there exists significant pressure to begin or continue normalizing and lessen the economic damage being wrought. At this point, however, the risk of a Wave 2 appears high. 
 
 ```{r setup2, include=FALSE}
