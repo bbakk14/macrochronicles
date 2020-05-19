@@ -1,6 +1,6 @@
 ---
-title: "Over the hump?"
-date: 2020-04-24T21:13:14-05:00
+title: "Far From Out of the Woods"
+date: 2020-05-18T21:13:14-05:00
 ---
  
 ```{r setup, include=FALSE}
@@ -16,8 +16,10 @@ library(gifski)
 library(Cairo)
 library(tibbletime)
 ```
+&nbsp;
+&nbsp;
 
-
+There surely isn't a country right now whose people aren't collectively wondering when things will be totally back to normal, and whether things can ever be the kind of normal they were before. For countries that have battled the virus to a trickle of new cases or none at all, many appear well on their way in opening their economies up, yet their paths to normalcy resemble less a snapback than a slow, incremental recovery still constrained by uncertainty. For countries in the midst of outbreaks, particularly the US, there exists significant pressure to begin or continue normalizing and lessen the economic damage being wrought. At this point, however, the risk of a Wave 2 appears high. 
 
 ```{r setup2, include=FALSE}
 ## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
@@ -126,20 +128,24 @@ line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Ital
                "Bosnia and Herzegovina" = "#CDCDCD", "Armenia" = "#CDCDCD", "Iraq" = "#CDCDCD",
                "Kazakhstan" = "#CDCDCD", "Kuwait" = "#CDCDCD", "Bangladesh" = "#CDCDCD", 
                "Afghanistan" = "#CDCDCD", "Ghana" = "#CDCDCD", "Cuba" = "#CDCDCD", "Cameroon" = "#CDCDCD",
-               "Bulgaria" = "#CDCDCD", "Cote d'Ivoire" = "#CDCDCD", "Nigeria" = "#CDCDCD")
+               "Bulgaria" = "#CDCDCD", "Cote d'Ivoire" = "#CDCDCD", "Nigeria" = "#CDCDCD",
+               "Sudan" = "#CDCDCD", "Tunisia" = "#CDCDCD", "Djibouti" = "#CDCDCD", "Honduras" = "#CDCDCD",
+               "Guinea" = "#CDCDCD", "Senegal" = "#CDCDCD", "Bolivia" = "#CDCDCD", "Maldives" = "#CDCDCD",
+               "Somalia" = "#CDCDCD", "Congo (Kinshasa)" = "#CDCDCD", "El Salvador" = "#CDCDCD",
+               "Gabon" = "#CDCDCD", "Kyrgyzstan" = "#CDCDCD", "Latvia" = "#CDCDCD", "Guatemala" = "#CDCDCD")
 
 
 chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
-  geom_text(data = filter(dat_c, key == "China"), aes(62, 150), color = "#808080", size = 13, alpha = .8, 
+  geom_text(data = filter(dat_c, key == "China"), aes(86, 150), color = "#808080", size = 13, alpha = .8, 
             family = "Open Sans") +
   geom_line(size = 1.1, alpha = 0.65) +
   scale_y_log10(labels = comma, breaks = c(100, 200, 500, 1000, 2000, 5000, 10000, 
-                                           20000, 50000, 100000, 200000, 500000)) +
+                                           20000, 50000, 100000, 200000, 500000, 1000000)) +
   scale_color_manual(values = line_cols) +
   geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
   geom_text(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
                                 show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
-  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  scale_x_continuous(limits = c(0, 100), expand = c(0,0)) +
   theme(
     legend.position = "none",
     panel.background = element_rect(fill = "white"),
@@ -171,6 +177,8 @@ anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
 
 anim1
 ```
+
+The chart above showing the cumulative number of cases across countries illustrates the effectiveness of shutdowns and other policy measures implemented to flatten the curve. Yet on a log scale, what favorably looks as the case counts leveling off at the top of the chart can disguise still large daily increases in reported cases. The chart below showing the non-cumulative change in new daily cases indicates that the US and several Western European countries have halted the growth in daily cases, and in some cases are seeing declines, but that the daily increases in the case count have almost held steady over recent weeks. Certainly the change in the growth of cases for these countries has not had the same pace on the way down as the exponential increase on the way up.
 
 ```{r setup-new_cases, include=FALSE}
 ## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
@@ -239,6 +247,7 @@ dat_sm5 <- dat_sm4 %>%
   
 
 dat_sm5[dat_sm5$date == "2020-04-23" & dat_sm5$key == "Australia", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-06" & dat_sm5$key == "Australia", "crossover"] <- 0
 dat_sm5[dat_sm5$date == "2020-03-23" & dat_sm5$key == "Bahrain", "crossover"] <- 0
 dat_sm5[dat_sm5$date == "2020-03-31" & dat_sm5$key == "Bahrain", "crossover"] <- 0
 dat_sm5[dat_sm5$date == "2020-03-29" & dat_sm5$key == "Qatar", "crossover"] <- 0
@@ -249,6 +258,20 @@ dat_sm5[dat_sm5$date == "2020-04-04" & dat_sm5$key == "Cote d'Ivoire", "crossove
 dat_sm5[dat_sm5$date == "2020-04-06" & dat_sm5$key == "Cote d'Ivoire", "crossover"] <- 0
 dat_sm5[dat_sm5$date == "2020-04-21" & dat_sm5$key == "Greece", "crossover"] <- 0
 dat_sm5[dat_sm5$date == "2020-04-16" & dat_sm5$key == "Nigeria", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-04-12" & dat_sm5$key == "Bolivia", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-04-13" & dat_sm5$key == "Guinea", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-04-10" & dat_sm5$key == "Honduras", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-04-24" & dat_sm5$key == "Honduras", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-02" & dat_sm5$key == "Spain", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-13" & dat_sm5$key == "Djibouti", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-14" & dat_sm5$key == "Ecuador", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-07" & dat_sm5$key == "Gabon", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-11" & dat_sm5$key == "North Macedonia", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-17" & dat_sm5$key == "Norway", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-05-12" & dat_sm5$key == "S Korea", "crossover"] <- 0
+
+
+
 
 dat_sm6 <- dat_sm5 %>%
   group_by(key, idx = cumsum(crossover == 1L)) %>% 
@@ -263,13 +286,13 @@ dat_sm6 <- dat_sm5 %>%
   filter(days > 0) %>% 
   mutate(days = days - 1)
 
-dat_c <- dat_sm6 %>% filter(key != "France")
+dat_c <- dat_sm6 %>% filter(key != "France" & key != "Spain" & key != "Ecuador")
 dat_lab <- dat_c %>% filter(key == "US" | key == "UK" | key == "China" | key == "Italy" | key == "S Korea" |
-                            key == "Japan" | key == "India" | key == "Spain" | 
+                            key == "Japan" | key == "India" | 
                             key == "Australia" | key == "Brazil" | key == "Turkey" | 
-                            key == "Iran" | key == "Sweden" | key == "Iceland")
+                            key == "Iran" | key == "Sweden" | key == "Iceland" | key == "New Zealand")
 
-#write.csv(dat_sm6, "D:\\Documents\\R directory\\covid19\\new_cases.csv")
+#write.csv(dat_sm5, "D:\\Documents\\R directory\\covid19\\new_cases.csv")
 
 ```
 
@@ -295,7 +318,7 @@ ctitle_1 <- "COVID-19 daily new cases"
 unit_label <- "Daily change in cases, 7 day moving average"
 source_1 <- "Source: JHU, WHO, @benbakkum." 
 
-line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Italy" = "#1f78b4", 
+line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Italy" = "#1f78b4", 
                "S Korea" = "#a6cee3", "Turkey" = "#6a3d9a", "UK" = "#fb9a99", "India" = "#33a02c",
                "Brazil" = "#ff9832", "Australia" = "#cab2d6", "France" = "#6a3d9a", "Germany" = "#CDCDCD",
                "Canada" = "#CDCDCD", "Austria" = "#CDCDCD", "Luxembourg" = "#CDCDCD", "Peru" = "#CDCDCD",
@@ -311,26 +334,30 @@ line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Ital
                "Algeria" = "#CDCDCD", "Colombia" = "#CDCDCD", "Croatia" = "#CDCDCD", 
                "Dominican Republic" = "#CDCDCD", "Argentina" = "#CDCDCD", "Ukraine" = "#CDCDCD",
                "Egypt" = "#CDCDCD", "Estonia" = "#CDCDCD", "Morocco" = "#CDCDCD", "Moldova" = "#CDCDCD",
-               "Slovenia" = "#CDCDCD", "New Zealand" = "#CDCDCD", "Belarus" = "#CDCDCD",
+               "Slovenia" = "#CDCDCD", "New Zealand" = "#cab2d6", "Belarus" = "#CDCDCD",
                "Lithuania" = "#CDCDCD", "Azerbaijan" = "#CDCDCD", "North Macedonia" = "#CDCDCD",
                "Oman" = "#CDCDCD", "Slovakia" = "#CDCDCD", "Slovenia" = "#CDCDCD", "Uzbekistan" = "#CDCDCD",
                "Bosnia and Herzegovina" = "#CDCDCD", "Armenia" = "#CDCDCD", "Iraq" = "#CDCDCD",
                "Kazakhstan" = "#CDCDCD", "Kuwait" = "#CDCDCD", "Bangladesh" = "#CDCDCD", 
                "Afghanistan" = "#CDCDCD", "Ghana" = "#CDCDCD", "Cuba" = "#CDCDCD", "Cameroon" = "#CDCDCD",
-               "Bulgaria" = "#CDCDCD", "Cote d'Ivoire" = "#CDCDCD", "Nigeria" = "#CDCDCD")
+               "Bulgaria" = "#CDCDCD", "Cote d'Ivoire" = "#CDCDCD", "Nigeria" = "#CDCDCD",
+               "Senegal" = "#CDCDCD", "Sudan" = "#CDCDCD", "Tunisia" = "#CDCDCD", "Djibouti" = "#CDCDCD",
+               "Guinea" = "#CDCDCD", "Honduras" = "#CDCDCD", "Maldives" = "#CDCDCD",
+               "Somalia" = "#CDCDCD", "Congo (Kinshasa)" = "#CDCDCD", "El Salvador" = "#CDCDCD",
+               "Gabon" = "#CDCDCD", "Kyrgyzstan" = "#CDCDCD", "Latvia" = "#CDCDCD", "Guatemala" = "#CDCDCD")
 
 
 chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
-  geom_text(data = filter(dat_c, key == "China"), aes(62, 30000), color = "#808080", size = 13, alpha = .8, 
+  geom_text(data = filter(dat_c, key == "China"), aes(86, 0.3), color = "#808080", size = 13, alpha = .8, 
             family = "Open Sans") +
   geom_line(size = 1.1, alpha = 0.65) +
-  scale_y_log10(labels = fmt_dcmls(0), breaks = c(2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 
-                                           20000, 50000)) +
+  scale_y_log10(labels = fmt_dcmls(0), breaks = c(0, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
+                                                  10000, 20000, 50000)) +
   scale_color_manual(values = line_cols) +
   geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
   geom_text(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
                                 show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
-  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  scale_x_continuous(limits = c(0, 100), expand = c(0,0)) +
   theme(
     legend.position = "none",
     panel.background = element_rect(fill = "white"),
@@ -363,8 +390,11 @@ anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
 anim1
 ```
 
+Much has been written about South Korea's success in containing its outbreak, as demonstrated in the chart above. South Korea's approach reflects effective government action, drawing on lessons learned from the country's 2015 Middle East Respiratory Syndrome (MERS) outbreak that killed 38. The government was notably quick to ramp up test production before COVID-19 became widespread, and it set up a large array of testing centers, some of which drive throughs, and others allowing walk-ins that made use of plexiglass chambers similar to phone booths. The government also implemented contact tracing a Korean epidemiologist has likened in intensity to police investigations, and Koreans have accessed alerts and apps on their phones providing detailed information on known cases in their area.^[[Max Fisher and Choe Sang-Hun, "How South Korea Flattened The Curve", _The New York Times_, March 23, 2020.](https://www.nytimes.com/2020/03/23/world/asia/coronavirus-south-korea-flatten-curve.html)] 
 
+The chance for the US to at all mimic South Korea's approach and see similar success passed a long time ago. Volumes will be written on the botched response of the US, but the crisis isn't over, and there remains plenty of opportunity for the response to become even more historic in its failures. The defining factor will be testing. Economist Paul Romer has argued that testing doesn't require the same level of organizational capacity as contact tracing, suggesting it should be possible for the US to coordinate a mass testing effort on a scale of at least \$100 billion. Congress has appropriated $25 billion for testing in its phase 3.5 stimulus bill, but additional investment is warranted given the magnitude of economic losses due to a virus that's hard to pin down without broader testing.^[[Isaac Chotiner, "Paul Romer's Case for Nationwide Coronavirus Testing", _The New Yorker_, May 3, 2020.](https://www.newyorker.com/news/q-and-a/paul-romer-on-how-to-survive-the-chaos-of-the-coronavirus)] 
 
+Ideally, there would be enough capacity to test everyone frequently, quickly isolating fresh cases as they appear. The ability to do that in the US will likely not materialize, but the importance of getting part of the way there lies in not only identifying hotspots and where to focus containment efforts, but also in fostering the public's confidence. States can begin to lift lockdown conditions, as a large number have already, but for the economy to fully bounce back, and for low margin businesses such as restaurants and retailers to become profitable again, the public can also no longer fear infection. The virus' death toll reflects a human experience and tragedy that has terrorized the American people and populations globally. Without robust testing that instills confidence in the safety of certain areas, many will avoid leaving their homes despite authorities assuring them they may. The drop offs in consumption even before lockdowns were implemented provide evidence of this.       
 
 ```{r setup-deaths, include=FALSE}
 ## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
@@ -389,7 +419,7 @@ colnames(dat) <- dat[nrow(dat),]
 rec_count <- tail(dat[-nrow(dat),],1)
 my_names <- colnames(dat)[as.numeric(rec_count[1,]) > 100][-1]
 dat_sm <- dat %>% 
-  rename(date = 'NA') %>% 
+  rename(date = "NA") %>% 
   select(date, my_names)
 
 dat_sm2 <- dat_sm[-nrow(dat),] %>% 
@@ -462,20 +492,26 @@ line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Ital
                "Chile" = "#CDCDCD", "Serbia" = "#CDCDCD", "Denmark" = "#CDCDCD", 
                "Dominican Republic" = "#CDCDCD", "Greece" = "#CDCDCD", "Egypt" = "#CDCDCD",
                "Ecuador" = "#CDCDCD", "Argentina" = "#CDCDCD", "Hungary" = "#CDCDCD", "Israel" = "#CDCDCD", 
-               "S Korea" = "#a6cee3", "Japan" = "#fdbf6f", "Bangladesh" = "#fdbf6f")
+               "S Korea" = "#a6cee3", "Japan" = "#fdbf6f", "Bangladesh" = "#fdbf6f", 
+               "Afghanistan" = "#CDCDCD", "Nigeria" = "#CDCDCD", "Moldova" = "#CDCDCD", "Malaysia" = "#CDCDCD",
+               "South Africa" = "#CDCDCD", "Belarus" = "#CDCDCD", "United Arab Emirates" = "#CDCDCD",
+               "Bolivia" = "#CDCDCD", "Cameroon" = "#CDCDCD", "Malaysia" = "#CDCDCD", "Honduras" = "#CDCDCD",
+               "Iraq" = "#CDCDCD", "Luxembourg" = "#CDCDCD", "North Macedonia" = "#CDCDCD",
+               "Slovenia" = "#CDCDCD", "Bosnia and Herzegovina" = "#CDCDCD", "Bulgaria" = "#CDCDCD",
+               "Kuwait" = "#CDCDCD")
 
 
 chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
-  geom_text(data = filter(dat_c, key == "China"), aes(62, 15), color = "#808080", size = 13, alpha = .8, 
+  geom_text(data = filter(dat_c, key == "China"), aes(86, 15), color = "#808080", size = 13, alpha = .8, 
             family = "Open Sans") +
   geom_line(size = 1.1, alpha = 0.65) +
   scale_y_log10(labels = comma, breaks = c(10, 20, 50, 100, 200, 500, 1000, 
-                                           2000, 5000, 10000, 20000, 50000)) +
+                                           2000, 5000, 10000, 20000, 50000, 100000)) +
   scale_color_manual(values = line_cols) +
   geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
   geom_text_repel(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
                                 show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
-  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  scale_x_continuous(limits = c(0, 100), expand = c(0,0)) +
   theme(
     legend.position = "none",
     panel.background = element_rect(fill = "white"),
@@ -508,6 +544,7 @@ anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
 anim1
 ```
 
+The still large number of daily deaths due to COVID-19 in the US and elsewhere demonstrates the strength and stubbornness of the virus. In the US, while the number of hospitalizations and deaths per day has now now steadily declined in New York, hotspots have emerged across the Midwest and South. The overall trend in deaths in the US indicates that the human cost will continue to increase as states begin to progress through phases of reopening. 
 
 ```{r setup-new_deaths, include=FALSE}
 ## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
@@ -577,6 +614,10 @@ dat_sm5 <- dat_sm4 %>%
 
 dat_sm5[dat_sm5$date == "2020-03-22" & dat_sm5$key == "China", "crossover"] <- 0
 dat_sm5[dat_sm5$date > "2020-04-16" & dat_sm5$key == "China", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-04-18" & dat_sm5$key == "Ecuador", "crossover"] <- 0
+dat_sm5[dat_sm5$date == "2020-04-27" & dat_sm5$key == "Ecuador", "crossover"] <- 0
+dat_sm5[dat_sm5$date > "2020-04-16" & dat_sm5$key == "China", "value"] <- NA
+
 ##dat_sm5[dat_sm5$date == "2020-03-19" & dat_sm5$key == "France", "crossover"] <- 1
 
 
@@ -598,6 +639,8 @@ dat_lab <- dat_c %>% filter(key == "US" | key == "UK" | key == "China" | key == 
                             key == "Japan" | key == "India" | key == "Spain" | key == "France" | 
                             key == "Australia" | key == "Brazil" | key == "Turkey" | key == "Sweden" |
                             key == "Iran")
+
+#write.csv(dat_sm5, "D:\\Documents\\R directory\\covid19\\new_deaths.csv")
 
 ```
 
@@ -643,11 +686,14 @@ line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Ital
                "Lithuania" = "#CDCDCD", "Azerbaijan" = "#CDCDCD", "North Macedonia" = "#CDCDCD",
                "Oman" = "#CDCDCD", "Slovakia" = "#CDCDCD", "Slovenia" = "#CDCDCD", "Uzbekistan" = "#CDCDCD",
                "Bosnia and Herzegovina" = "#CDCDCD", "Armenia" = "#CDCDCD", "Iraq" = "#CDCDCD",
-               "Kazakhstan" = "#CDCDCD", "Kuwait" = "#CDCDCD", "Bangladesh" = "#CDCDCD")
+               "Kazakhstan" = "#CDCDCD", "Kuwait" = "#CDCDCD", "Bangladesh" = "#CDCDCD",
+               "Luxembourg" = "#CDCDCD", "North Macedonia" = "#CDCDCD",
+               "Slovenia" = "#CDCDCD", "Bosnia and Herzegovina" = "#CDCDCD", "Bulgaria" = "#CDCDCD",
+               "Kuwait" = "#CDCDCD")
 
 
 chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
-  geom_text(data = filter(dat_c, key == "China"), aes(62, 2500), color = "#808080", size = 13, alpha = .8, 
+  geom_text(data = filter(dat_c, key == "China"), aes(86, 2500), color = "#808080", size = 13, alpha = .8, 
             family = "Open Sans") +
   geom_line(size = 1.1, alpha = 0.65) +
   scale_y_log10(labels = fmt_dcmls(0), breaks = c(2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
@@ -656,7 +702,7 @@ chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = for
   geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
   geom_text(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
                                 show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
-  scale_x_continuous(limits = c(0, 70), expand = c(0,0)) +
+  scale_x_continuous(limits = c(0, 100), expand = c(0,0)) +
   theme(
     legend.position = "none",
     panel.background = element_rect(fill = "white"),
@@ -689,7 +735,7 @@ anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
 anim1
 ```
 
-
+Researchers at Columbia that have attempted to account for easing in stay-at-home orders in 25 states estimate a rebound in COVID-19 cases and deaths by the end of May. As with the initial outbreak, a lag in confirming cases after infection and insufficient testing supplies would likely mask a resurgence and a return to exponential growth rates in cases, the researchers noted. Porous state borders increase the likelihood that second waves in states quicker to reopen spillover into other states. The risk that the US will still be struggling to contain a widespread virus in the fall is high. Whether or not a Wave 2 crashes soon, the confidence required by the public to resume business as usual remains far off on the horizon.^[[Timothy S. Paul, "Projections Suggest Potential Late May COVID-19 Rebound", Columbia Mailman School of Public Health, May 7, 2020.](https://www.publichealth.columbia.edu/public-health-now/news/projections-suggest-potential-late-may-covid-19-rebound)]  
 
 
 
