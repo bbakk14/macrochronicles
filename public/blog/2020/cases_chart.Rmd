@@ -132,7 +132,8 @@ line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Spain" = "#e31a1c", "Ital
                "Sudan" = "#CDCDCD", "Tunisia" = "#CDCDCD", "Djibouti" = "#CDCDCD", "Honduras" = "#CDCDCD",
                "Guinea" = "#CDCDCD", "Senegal" = "#CDCDCD", "Bolivia" = "#CDCDCD", "Maldives" = "#CDCDCD",
                "Somalia" = "#CDCDCD", "Congo (Kinshasa)" = "#CDCDCD", "El Salvador" = "#CDCDCD",
-               "Gabon" = "#CDCDCD", "Kyrgyzstan" = "#CDCDCD", "Latvia" = "#CDCDCD", "Guatemala" = "#CDCDCD")
+               "Gabon" = "#CDCDCD", "Kyrgyzstan" = "#CDCDCD", "Latvia" = "#CDCDCD", "Guatemala" = "#CDCDCD",
+               "West Bank and Gaza" = "#CDCDCD")
 
 
 chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
@@ -344,7 +345,8 @@ line_cols <- c("US" = "#1f78b4", "China" = "#b15928", "Italy" = "#1f78b4",
                "Senegal" = "#CDCDCD", "Sudan" = "#CDCDCD", "Tunisia" = "#CDCDCD", "Djibouti" = "#CDCDCD",
                "Guinea" = "#CDCDCD", "Honduras" = "#CDCDCD", "Maldives" = "#CDCDCD",
                "Somalia" = "#CDCDCD", "Congo (Kinshasa)" = "#CDCDCD", "El Salvador" = "#CDCDCD",
-               "Gabon" = "#CDCDCD", "Kyrgyzstan" = "#CDCDCD", "Latvia" = "#CDCDCD", "Guatemala" = "#CDCDCD")
+               "Gabon" = "#CDCDCD", "Kyrgyzstan" = "#CDCDCD", "Latvia" = "#CDCDCD", "Guatemala" = "#CDCDCD",
+               "West Bank and Gaza" = "#CDCDCD")
 
 
 chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
