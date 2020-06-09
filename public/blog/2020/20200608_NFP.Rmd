@@ -1,0 +1,385 @@
+---
+title: "Making Sense of the Jobs Numbers"
+date: 2020-06-08T21:13:14-05:00
+---
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(quantmod)
+library(tidyverse)
+library(scales)
+library(gganimate)
+library(magick)
+library(Cairo)
+```
+&nbsp;
+
+------------
+I have recently donated to the [Real Justice PAC](https://realjusticepac.org/), which works to elect reform-minded prosecutors at the county and municipal level, and encourage you to consider also donating.
+------------
+
+&nbsp;
+&nbsp;
+
+Last week's US nonfarm payrolls report caused a lot of head scratching, as it showed total employment increased by 2.5 million jobs in May despite a range of other data points leading up to the report that suggested the economy continued to hemorrhage jobs last month. The unemployment rate changed course and declined 1.4%pts to 13.3%, while some analysts' forecasts placed it as reaching around 20% in May. 
+
+The numbers were unexpected enough that a debate sprung up on Twitter over the possibility of the administration's Bureau of Labor Statistics cooking the books in order to shore up confidence ahead of the November election. While cries of conspiracy are backed by no evidence, any conclusions drawn from the report should acknowledge the difficulties tracking volatile swings in economic measures at a time like this, and that one thing we can say with certainty is that the labor market remains in a dire condition.
+
+First, it's worth caveating that even during non-crisis periods the jobs report can seem akin to a random number generator. It's notoriously hard to predict the country's monthly change in employment, and even the BLS' initial estimates are subject to significant revision. A single monthly data point should not warrant declarations of a new direction for the economy, as the next month's number can just as likely bounce the other way, or the current month's number may eventually be completely different after revisions. That being said, the virus makes averaging several months of labor data to gauge an overall trend fruitless because the economies of pre-March and post-March may just as well have existed in alternate universes. 
+
+Second, commentators aren't wrong to claim the BLS has published headline numbers it knows aren't accurate. Even so, speculation of political influence warping the data has no basis. The BLS has been consistent and transparent in disclosing a misclassification of respondents to their survey that has caused underestimates of the unemployment rate. BLS' interviewers were instructed to record employed persons absent from work due to the virus as 'unemployed on temporary layoff.' Instead, some interviewers have mistakenly marked these persons as 'employed but absent from work due to other reasons.' The BLS has caught this error over the last several months, but it has refrained from reclassifying respondents due to a policy of accepting survey results as recorded, a policy in effect for the exact purpose of preventing any tampering with the politically significant and market-moving jobs data.  
+
+The BLS knows the extent of the issue and has provided estimates of where the unemployment rate would have landed had the problem respondents been reclassified to their proper cohort. The chart below shows the longer-term history of the unemployment rate through this latest report, along with an adjusted rate in recent months showing where the BLS says the unemployment rate would have been reported were it not for the misclassifications.
+
+
+```{r chart1, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+raw_dat <- getSymbols('UNRATE',src='FRED', auto.assign=F) 
+
+dat <- raw_dat %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         UR = UNRATE) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         text = UR)
+
+dat[length(dat$text) - 2,]$text <- dat$text[length(dat$text)-1]
+
+#dat[nrow(dat) + 1,] <- list(tail(dat,1)$date + 1, tail(dat,1)$UR)
+
+dat_mut <- dat %>% 
+  mutate(ind = ifelse(date == "2020-04-01", date + 3500, 
+                      ifelse(date == "2020-05-01", date + 5750, date)),
+         adj = ifelse(date == "2020-04-01", 19.7, 
+                      ifelse(date == "2020-05-01", 16.3, 
+                             ifelse(date == "2020-03-01", 4.4, UR))),
+         text_adj = ifelse(date == "2020-04-01", 19.7, 
+                           ifelse(date == "2020-05-01", 16.3, 
+                                  ifelse(date == "2020-03-01", 19.7, text))))
+
+dat_long <- dat_mut %>%
+  rename('Official UR' = UR,
+         'Adjusted UR' = adj) %>% 
+  select(-text, -text_adj) %>% 
+  gather(key, value, -date, -ind)
+
+
+
+
+start_date <- head(dat$date,1)
+end_date <- tail(dat$date,1)
+
+
+
+ctitle_1 <- "US Unemployment Rate"
+unit_label <- "% of labor force that is unemployed"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+
+
+chart <- dat_long %>%
+  ggplot(aes(x = date, y = value, color = key)) +
+  geom_line(aes(linetype = key, size = key)) +
+  geom_point(size = 2.5) +
+  scale_color_manual(values = c("#33a02c", "#1f78b4")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_size_manual(values = c(0.6, 0.7)) +
+  geom_text(data = dat_mut, aes(x = date, y = adj, label = format(text_adj, nsmall = 1)), nudge_x = 850,
+            show.legend = FALSE, size = 3, family = "Open Sans", color = "#33a02c",  fontface = "bold") +
+  geom_text(data = dat_mut, aes(x = date, y = UR, label = format(text, nsmall = 1)), nudge_x = 850,
+            show.legend = FALSE, size = 3, family = "Open Sans", color = "#1f78b4",  fontface = "bold") +
+  scale_x_date(expand = c(0,0), limits = c(start_date,end_date + 1700), 
+               date_breaks = "8 years", date_labels = "%Y") +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat$date,1), "%b %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(ind, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim <- animate(chart, renderer = gifski_renderer(loop = T), nframe = 360,
+                 width = 615, height = 420, type = "cairo", end_pause = 120)
+
+anim
+```
+
+Two things stand out from the visual above -> (1) However you slice it, whether you're looking at the official or adjusted rates, the surge in unemployment we've seen in the first half of this year is historic and on a scale the US has not grappled with since the Great Depression (2) In May, both official and adjusted rates declined. Even if the higher and more accurate unemployment rate provided by the BLS in a footnote of the report for May had been what had made it into the headlines, the articles would have still had the same narrative because the adjusted rate for April was higher still. 
+
+Also, focusing on either unemployment rate or the 2.5 million net jobs added in May glosses over much of the underlying dynamics of the labor market we can glean from the report. That 2.5 million represents a figure differentiating two other numbers, the gross amount of jobs added and the amount of jobs lost. Though a rebound of the temporarily unemployed back into jobs at reopening businesses such as restaurants and dentists offices outweighed job losses in May, 2.3 million Americans were 'permanent job losers' during the month as described by the BLS, a sign of a labor market in turmoil. 
+
+Looking under the hood of the jobs report, the rebound in food service employment in May on the back of reopening and PPP stimulus partially reversed steep losses in March and April, but employment in the overall leisure and hospitality industry that includes restaurants remains well below levels even in the depths of the Great Financial Crisis, erasing a decade of job growth in the industry and then some. As illustrated by the chart below, between early 2010 and early 2020, leisure and hospitality added nearly 4 million jobs to the US economy. In a matter of months, around 7 million industry jobs have been lost. Retailers have also borne the brunt of the shutdowns.
+
+
+```{r chart2, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+rm(list=setdiff(ls(), "anim"))
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+codes <- c("USCONS", "MANEMP", "USMINE", "USWTRADE", "USTRADE", "CES4300000001", "CES4422000001", "CES6054000001",
+           "USINFO", "USFIRE", "CES6056000001", "CES6561000001", "CES6562000001", "USLAH", "USSERV")
+key <- c("Construction", "Manufacturing", "Mining & Logging", "Wholesale Trade", "Retail Trade",
+           "Transportation & Warehousing", "Utilities", "Professional & Technical Services", "Information", "Financial", 
+           "Administrative & Waste Services", "Educational Services", "Health Care & Social Assistance",
+           "Leisure & Hospitality", "Other Services")
+cat <- c("Goods-producing", "Goods-producing", "Goods-producing", "Service-providing", "Service-providing",
+         "Service-providing", "Service-providing", "Service-providing", "Service-providing", "Service-providing",
+         "Service-providing", "Service-providing", "Service-providing", "Service-providing", "Service-providing")
+cat_map <- data.frame(key, cat)
+
+raw_dat <- getSymbols(codes,src='FRED') 
+
+dat <- merge(USCONS, MANEMP, USMINE, USWTRADE, USTRADE, CES4300000001, CES4422000001, CES6054000001,
+           USINFO, USFIRE, CES6056000001, CES6561000001, CES6562000001, USLAH, USSERV)  %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() 
+
+colnames(dat) <- c("date", key)
+
+dat_wide <- dat %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date > "2010-01-31")
+
+dat_chg <- dat_wide[,-1] %>% 
+  map_df(.f = function (x) {x - first(x)}) %>% 
+  bind_cols(dat_wide[,1]) %>% 
+  select(date, everything())
+  
+dat_long <- dat_chg %>% 
+  gather(key, value, -date) %>% 
+  arrange(key) %>% 
+  group_by(date) %>% 
+  mutate(.r = min_rank(-value * 1),
+         value2 = value,
+         value_loc = ifelse(value > 0, value, 0),
+         Value_lbl = paste0(" ", format(round(value,0),big.mark=",")),
+         ind = ifelse(date == "2020-04-01", date + 3500, 
+                      ifelse(date == "2020-05-01", date + 5750, date))) %>% 
+  ungroup() 
+
+dat_map <- merge(dat_long, cat_map) %>% 
+  as_tibble(rownames = NA)
+
+dat_map$date <- as.yearmon(dat_map$date, "%b %Y")
+
+
+p <- dat_map %>% 
+  ggplot(aes(.r, group = key, fill = as.factor(key), color = as.factor(key))) +
+  geom_tile(aes(y = value2/2,
+                height = value2,
+                width = -0.9),
+            color = NA) +
+  geom_label(aes(y = -300, label = key), size = 5, vjust = 0.55, hjust = 1,
+            family = "Open Sans", fill = "white") +
+  geom_text(aes(y = value_loc, label = format(Value_lbl, big.mark=","), hjust = 0), size = 5,
+            family = "Open Sans") +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_x_reverse() +
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(values = c("#1f78b4", "#a6cee3", "#64b1e4", "#a6cee3", 
+                                "#1f78b4", "#a6cee3", "#ff7f00", "#64b1e4",
+                                "#43a0df", "#43a0df", "#64b1e4", "#ff7f00",
+                                "#43a0df", "#a6cee3", "#1f78b4")) +
+  scale_fill_manual(values = c("#1f78b4", "#a6cee3", "#64b1e4", "#a6cee3", 
+                               "#1f78b4", "#a6cee3", "#ff7f00", "#64b1e4",
+                               "#43a0df", "#43a0df", "#64b1e4", "#ff7f00",
+                               "#43a0df", "#a6cee3", "#1f78b4")) +
+  guides(color = FALSE, fill = FALSE) + 
+  theme(
+    axis.line = element_blank(),
+    axis.text.x = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    text = element_text(size = 15, color = "black", family = "Open Sans"),
+    panel.border = element_rect(color = cpal("border grey"), fill = NA, size = 0.3),
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(size = .1, color = "gray84"),
+    panel.grid.minor.x = element_line(size = .1, color = "gray84"),
+    plot.background = element_blank(),
+    plot.margin = margin(1, 3, 1, 1.75, "cm"),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = "#222222", family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = "#222222", family = "Open Sans"),
+    panel.spacing.x = unit(5, "lines"),
+    strip.text = element_text(color = "#222222", family = "Open Sans", size = 14),
+    strip.background = element_rect(color = cpal("border grey"), fill = "white")) +
+  labs(title = 'Change in workforce across industries through {closest_state}',
+       subtitle = 'Cumulative change in jobs since Feb 2010, th',
+       caption = paste("Data as of ",
+                       format(as.yearmon(tail(dat_long$date,1), "%b %Y")), ". Source: BLS, FRED, ", 
+                       "@benbakkum.",
+                       sep = "")) +
+  transition_states(date, wrap = FALSE) +
+  ease_aes('linear')
+
+anim2 <- animate(p, renderer = gifski_renderer(loop = T),
+                 width = 615, height = 615, nframes = 325, type = "cairo", end_pause = 75)
+
+anim2
+```
+
+In an example of the uneven effects of the virus across socioeconomic groups, retail as well as leisure and hospitality are industries with average hourly earnings at the bottom of the spectrum. While these industries saw wage growth during the 2010s, that growth was not at a speed that lifted them relative to other industries. 
+
+```{r chart3, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+rm(list=setdiff(ls(), c("anim", "anim2")))
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+codes <- c("CES3000000003", "CES1000000003", "CES4142000003", "CES4200000003", 
+           "CES4300000003", "CES4422000003", "CES5000000003", "CES5500000003", 
+           "CES6000000003", "CES6500000003", "CES7000000003", "CES8000000003")
+key <- c("Manufacturing", "Mining & Logging", "Wholesale Trade", "Retail Trade",
+           "Transportation & Warehousing", "Utilities", "Information", "Financial", 
+           "Professional & Business Services", "Educational & Health Services", "Leisure & Hsptlty", "Other Services")
+
+raw_dat <- getSymbols(codes,src='FRED') 
+
+dat <- merge(CES3000000003, CES1000000003, CES4142000003, CES4200000003, 
+             CES4300000003, CES4422000003, CES5000000003, CES5500000003, 
+             CES6000000003, CES6500000003, CES7000000003, CES8000000003)  %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() 
+
+colnames(dat) <- c("date", key)
+
+dat_wide <- dat %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date > "2010-01-31")
+
+dat_map <- dat_wide %>% 
+  gather(key, value, -date) %>% 
+  arrange(key) %>% 
+  group_by(date) %>% 
+  mutate(.r = min_rank(-value * 1),
+         value2 = value,
+         value_loc = ifelse(value > 0, value, 0),
+         Value_lbl = paste0(" ", format(round(value,1),big.mark=","))) %>% 
+  ungroup() 
+
+dat_map$date <- as.yearmon(dat_map$date, "%b %Y")
+
+
+p <- dat_map %>% 
+  ggplot(aes(.r, group = key, fill = as.factor(key), color = as.factor(key))) +
+  geom_tile(aes(y = value2/2,
+                height = value2,
+                width = -0.9),
+            color = NA) +
+  geom_label(aes(y = 1, label = key), size = 5, vjust = 0.55, hjust = 0,
+            family = "Open Sans", fill = "white") +
+  geom_text(aes(y = value_loc, label = format(Value_lbl, big.mark=","), hjust = 0), size = 5,
+            family = "Open Sans") +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_x_reverse() +
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(values = c("#1f78b4", "#a6cee3", "#a6cee3", "#ff7f00",
+                                "#1f78b4", "#64b1e4", "#a6cee3", "#64b1e4",
+                                "#ff7f00", "#43a0df", "#43a0df", "#64b1e4"
+                                )) +
+  scale_fill_manual(values = c("#1f78b4", "#a6cee3", "#a6cee3", "#ff7f00",
+                               "#1f78b4", "#64b1e4", "#a6cee3", "#64b1e4",
+                               "#ff7f00", "#43a0df", "#43a0df", "#64b1e4"
+                               )) +
+  guides(color = FALSE, fill = FALSE) + 
+  theme(
+    axis.line = element_blank(),
+    axis.text.x = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    text = element_text(size = 15, color = "black", family = "Open Sans"),
+    panel.border = element_rect(color = cpal("border grey"), fill = NA, size = 0.3),
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(size = .1, color = "gray84"),
+    panel.grid.minor.x = element_line(size = .1, color = "gray84"),
+    plot.background = element_blank(),
+    plot.margin = margin(1, 3, 1, 1.75, "cm"),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = "#222222", family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = "#222222", family = "Open Sans"),
+    panel.spacing.x = unit(5, "lines"),
+    strip.text = element_text(color = "#222222", family = "Open Sans", size = 14),
+    strip.background = element_rect(color = cpal("border grey"), fill = "white")) +
+  labs(title = 'Average hourly earnings by industry in {closest_state}',
+       subtitle = '$, Seasonally Adjusted',
+       caption = paste("Data as of ",
+                       format(as.yearmon(tail(dat_map$date,1), "%b %Y")), ". Source: BLS, FRED, ", 
+                       "@benbakkum.",
+                       sep = "")) +
+  transition_states(date, wrap = FALSE) +
+  ease_aes('linear')
+
+anim3 <- animate(p, renderer = gifski_renderer(loop = T),
+                 width = 615, height = 615, nframes = 325, type = "cairo", end_pause = 75)
+
+anim3
+```
+
+We can take some solace in a much better than expected jobs report, but the reality that labor market conditions remain calamitous and may worsen before they further improve should not be ignored.
+
+
+
+

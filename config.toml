@@ -30,7 +30,7 @@ share = true
 # Share to googleplus, twitter, fb, linkedin by default
 # disable by setting share_on_<social network> = false
 # example: share_on_googleplus = false 
-latestpostcount = 1
+latestpostcount = 2
 email = "benjamin.bakkum@gmail.com"
 twitter = "BenBakkum"
 social_banner = "img/banner.png"
