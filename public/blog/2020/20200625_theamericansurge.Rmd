@@ -1,0 +1,516 @@
+---
+title: "The American Surge"
+date: 2020-06-25T21:13:14-05:00
+---
+&nbsp;
+&nbsp;
+
+We’re in the midst of a great, if somewhat semantic, debate about waves. Given a swift increase in the number of new COVID-19 cases each day across a large number of US states in June, commentators have sounded the alarm that The Second Wave is now upon us. Others, including Dr. Fauci, have emphasized that “we’re still in the first wave.”^[Audrey McNamara, ["Fauci says we're 'still in a first wave' of Coronavirus pandemic"](https://www.cbsnews.com/news/coronavirus-first-wave-fauci/), _CBS News_, June 17, 2020.] The first never passed to allow another to follow. Meanwhile, Pence recently penned an op-ed in the Journal entitled “There Isn’t a Coronavirus ‘Second Wave’”^[Mike Pence, ["There Isn’t a Coronavirus ‘Second Wave’”](https://www.wsj.com/articles/there-isnt-a-coronavirus-second-wave-11592327890), _The Wall Street Journal_, June 16, 2020.] and Kudlow took to CNBC at the beginning of the week to claim “there is no second wave coming,”^[Jacob Knutson, ["Kudlow: 'There is no second wave coming'"](https://www.axios.com/larry-kudlow-no-coronavirus-second-wave-4918739e-1817-4191-bc58-7711ac3487cf.html), _Axios_, June 22, 2020.] an immensely credible and eagerly sought after perspective in the wake of his late-February pronouncement that “we have contained this. I won't say [it's] airtight, but it's pretty close to airtight.”^[Fred Imbert, ["Larry Kudlow says US has contained the coronavirus and the economy is holding up nicely"](https://www.cnbc.com/2020/02/25/larry-kudlow-says-us-has-contained-the-coronavirus-and-the-economy-is-holding-up-nicely.html), _CNBC_, February 25, 2020.] 
+
+Regardless of whether we can call the virus’ trajectory in June a wave of a certain number or not, COVID-19 continues to spread in this country, now at an increasing pace. This blog’s mid-May post on the outlook for COVID-19 referenced a Columbia University projection that accounted for easing stay-at-home orders and anticipated a rebound in cases two to four weeks after states began to reopen, coinciding with the end of May. Researchers noted the surge would initially be masked by the lag between infection and case confirmation. That scenario appears to be playing out, driven by a number of states that originally avoided a crisis as dire as New York’s. California, Florida, Arizona, and Texas now garner headlines for the least contained outbreaks in the country.
+
+```{r south_west, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(tidyverse)
+library(scales)
+library(extrafont)
+library(gganimate)
+library(magick)
+library(xts)
+library(ggrepel)
+library(gifski)
+library(tibbletime)
+library(transformr)
+
+raw_wiki <- read.csv(file = '/Users/benbakkum/R directory/covid19/state_cases.csv') %>% 
+  as_tibble()
+
+region_key <- data.frame(state = colnames(raw_wiki)[-1], region = unlist(raw_wiki[1,][-1])) %>% 
+  as_tibble()
+
+# https://github.com/nytimes/covid-19-data
+raw_nyt <- read.csv(file = '/Users/benbakkum/R directory/covid19/us-states_nyt.csv') %>% 
+  as_tibble()
+
+raw_tbl <- raw_nyt %>%
+  mutate(date = as.Date(date, "%Y-%m-%d"))
+
+dat_w <- raw_tbl %>% 
+  select(-fips, -deaths) %>% 
+  mutate(state = as.character(state)) %>% 
+  filter(state == "Alabama" | state == "California" | state == "North Carolina" |
+         state == "Texas" | state == "Arizona" | state == "Florida" |
+         state == "South Carolina"
+         ) %>% 
+  pivot_wider(names_from = state,
+              values_from = cases)
+
+dat_diff <- dat_w[,-1] %>% 
+  map(.f = function(x) {x - lag(x,1)}) %>% 
+  as_tibble() %>% 
+  bind_cols(dat_w[,1]) %>% 
+  pivot_longer(names_to = "key", values_to = "values", -date) %>% 
+  filter(date >= "2020-03-15")
+  
+  
+rolling_mean <- rollify(mean, window = 7)
+
+dat_avg <- dat_w[,-1] %>% 
+  map(.f = function(x) {x - lag(x,1)}) %>% 
+  as_tibble() %>% 
+  bind_cols(dat_w[,1]) %>% 
+  select(date, everything()) %>% 
+  mutate(sum = rowSums(.[2:8]),
+         dma = rolling_mean(sum)) %>% 
+  select(date, dma) %>% 
+  filter(date >= "2020-03-15") %>% 
+  mutate(key = "7 day moving avg")
+
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "Daily new COVID-19 cases in hotspot states"
+unit_label <- "Reported COVID-19 cases by state"
+source_1 <- "Source: The New York Times, @benbakkum."
+
+
+plot <- dat_diff %>% 
+  ggplot() +
+  geom_bar(aes(fill = key, y = values, x = date),
+           position = "stack", stat = "identity") +
+  geom_line(data = dat_avg, aes(x = date, y = dma, linetype = key), size = 1, alpha = .7) +
+  scale_fill_manual(values = c("#a6cee3", "#1f78b4", "#33a02c", "#fb9a99",
+                                "#fdbf6f", "#ff7f00", "#6a3d9a")) +
+  scale_linetype_manual(values = "solid") +
+  scale_y_continuous(labels = comma, expand = c(0,0), limits = c(0,22500)) +
+  scale_x_date(expand = c(0,0)) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 12, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat_diff$date,1), "%b %d, %Y"), ". ", 
+                       source_1[1], sep = "")) 
+
+plot
+```
+
+Rather than the waves we seem hung up on, the virus may be better likened to a fire sparked by the first cases arriving to a country. The fire can burn dimly before breaking out as it finds fuel in the form of densely packed urban areas and large indoor gatherings. Many societies have suppressed the fire, depriving it of oxygen through social distancing, mask wearing, and quarantines etc. These measures have battled the blaze to a flickering flame in many places globally, with a select few countries snuffing it out altogether. Yet in the places where the fire has been brought down to a smoldering remnant, a handful of embers can still exist that erupt again when oxygen returns as shutdowns abate. 
+
+We have seen this occur around the world. South Korea, the gold standard in COVID-19 containment, reclosed schools last month after reopening them due to a new spike in cases.^[Jake Kwon and Sophie Leong, ["Hundreds of South Korea schools close again after reopening"](https://www.cnn.com/2020/05/29/asia/south-korea-coronavirus-shuts-down-again-intl/index.html), _CNN_, May 29, 2020.] Schools in Israel were also forced closed again after they were reopened.^[Daniel Estrin, ["After Reopening Schools, Israel Orders Them To Shut If COVID-19 Cases Are Discovered"](https://www.npr.org/sections/coronavirus-live-updates/2020/06/03/868507524/israel-orders-schools-to-close-when-covid-19-cases-are-discovered), _NPR_, June 3, 2020.] China now contends with a new outbreak in Beijing.^[Nectar Gan, ["Beijing's new outbreak is a reminder to the world that coronavirus can return at anytime"](https://www.cnn.com/2020/06/18/asia/beijing-coronavirus-reminder-intl-hnk/index.html), _CNN_, June 19, 2020.] Germany imposed fresh lockdowns this week in the western district of Gütersloh after a major outbreak at a meat processing plant.^[Sui-Lee Wee, Benjamin Mueller and Emma Bubola, ["From China to Germany, the World Learns to Live With the Coronavirus"](https://www.nytimes.com/2020/06/24/world/europe/countries-reopening-coronavirus.html), _The New York Times_, June 24, 2020.]
+
+In the US, the growing fires appear in the South and West, as the northeast continues to make progress in dampening the virus. The South looks as though it has reached daily new case numbers as high as the peak of the outbreak in the Northeast. 
+
+
+```{r region_facet, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+fips_key <- read.csv(file = '/Users/benbakkum/R directory/covid19/fips_key.csv') %>% 
+  as_tibble() %>% 
+  select(Postal.code, FIPS) %>% 
+  rename(state = Postal.code,
+         fips = FIPS)
+
+m_key <- merge(region_key, fips_key) %>% 
+  select(fips, region)
+
+dat_m <- merge(m_key, raw_tbl)
+
+dat_s <- dat_m %>% 
+  select(-fips, -deaths) %>% 
+  group_by(region, date) %>% 
+  summarize(total = sum(cases)) %>% 
+  ungroup()
+
+dat_sdif <- dat_s %>% 
+  select(date, region, total) %>% 
+  mutate(region = as.character(region)) %>% 
+  pivot_wider(names_from = region, values_from = total) %>% 
+  select(-date) %>% 
+  map(.f = function(x) {x - lag(x,1)}) %>% 
+  as_tibble() %>% 
+  bind_cols(as_tibble(unique(dat_s$date))) %>% 
+  rename(date = value) %>% 
+  select(date, everything())
+  
+sdif_long <- dat_sdif %>%   
+  pivot_longer(names_to = "key", values_to = "values", -date) %>% 
+  filter(date >= "2020-03-10")
+
+avg_long <- dat_sdif %>% 
+  mutate(West_avg = rolling_mean(West),
+         Midwest_avg = rolling_mean(Midwest),
+         South_avg = rolling_mean(South),
+         Northeast_avg = rolling_mean(Northeast)) %>% 
+  select(date, West_avg, Midwest_avg, South_avg, Northeast_avg) %>% 
+  rename(West = West_avg,
+         Midwest = Midwest_avg,
+         South = South_avg,
+         Northeast = Northeast_avg) %>% 
+  pivot_longer(names_to = "key", values_to = "values", -date) %>% 
+  mutate(legend = "7 day moving avg") %>% 
+  filter(date >= "2020-03-10")
+
+
+
+ctitle_1 <- "Daily new COVID-19 cases across US regions"
+unit_label <- "Reported COVID-19 cases by region"
+source_1 <- "Source: The New York Times, @benbakkum."
+
+
+sdif_long %>% 
+  ggplot() +
+  geom_bar(aes(fill = key, y = values, x = date),
+           position = "stack", stat = "identity", width = 1, alpha = .75) +
+  geom_line(data = avg_long, aes(x = date, y = values, linetype = legend), size = 1, alpha = .5) +
+  scale_fill_manual(values = c("#33a02c", "#1f78b4", "#a6cee3", "#fdbf6f")) +
+  facet_wrap(~key) + 
+  scale_y_continuous(labels = comma, expand = c(0,100), 
+                     limits = c(0, max(sdif_long$values) + 1000)) +
+  scale_x_date(expand = c(0,0), limits = c(head(sdif_long$date,1), tail(sdif_long$date,1) + 1)) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat_diff$date,1), "%b %d, %Y"), ". ", 
+                       source_1[1], sep = "")) 
+
+
+```
+
+Fortunately, the hardest hit states in the South and West have experienced a low death toll relative to the Northeast when it faced a worsening situation in March and April. I’m unsure exactly to what we can attribute the South and West’s relatively better mortality figures. The reasons, however, likely include concentrations of new cases occurring in less vulnerable populations such as the young as reopening has progressed yet the elderly have remained hunkered down. New York and New Jersey’s outbreak may have also actually first swept through populations less prone to death when infected, but this may have been hidden due to less testing capacity in February and March as well as a higher likelihood of asymptomatic infections in these groups. As hospitalizations have started to increase in the Southern and Western states, I worry the deaths may soon also rise on a lag.
+
+```{r hotspots_deaths, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+raw_wiki <- read.csv(file = '/Users/benbakkum/R directory/covid19/state_cases.csv') %>% 
+  as_tibble()
+
+region_key <- data.frame(state = colnames(raw_wiki)[-1], region = unlist(raw_wiki[1,][-1])) %>% 
+  as_tibble()
+
+raw_nyt <- read.csv(file = '/Users/benbakkum/R directory/covid19/us-states_nyt.csv') %>% 
+  as_tibble()
+
+raw_tbl <- raw_nyt %>%
+  mutate(date = as.Date(date, "%Y-%m-%d"))
+
+dat_w <- raw_tbl %>% 
+  select(-fips, -cases) %>% 
+  mutate(state = as.character(state)) %>% 
+  filter(state == "Alabama" | state == "California" | state == "North Carolina" |
+         state == "Texas" | state == "Arizona" | state == "Florida" |
+         state == "South Carolina"
+         ) %>% 
+  pivot_wider(names_from = state,
+              values_from = deaths)
+
+dat_diff <- dat_w[,-1] %>% 
+  map(.f = function(x) {x - lag(x,1)}) %>% 
+  as_tibble() %>% 
+  bind_cols(dat_w[,1]) %>% 
+  pivot_longer(names_to = "key", values_to = "values", -date) %>% 
+  filter(date >= "2020-03-15")
+  
+  
+rolling_mean <- rollify(mean, window = 7)
+
+dat_avg <- dat_w[,-1] %>% 
+  map(.f = function(x) {x - lag(x,1)}) %>% 
+  as_tibble() %>% 
+  bind_cols(dat_w[,1]) %>% 
+  select(date, everything()) %>% 
+  mutate(sum = rowSums(.[2:8]),
+         dma = rolling_mean(sum)) %>% 
+  select(date, dma) %>% 
+  filter(date >= "2020-03-15") %>% 
+  mutate(key = "7 day moving avg")
+
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "Daily new COVID-19 deaths in hotspot states"
+unit_label <- "Reported COVID-19 deaths by state"
+source_1 <- "Source: The New York Times, @benbakkum."
+
+
+plot <- dat_diff %>% 
+  ggplot() +
+  geom_bar(aes(fill = key, y = values, x = date),
+           position = "stack", stat = "identity") +
+  geom_line(data = dat_avg, aes(x = date, y = dma, linetype = key), size = 1, alpha = .7) +
+  scale_fill_manual(values = c("#a6cee3", "#1f78b4", "#33a02c", "#fb9a99",
+                                "#fdbf6f", "#ff7f00", "#6a3d9a")) +
+  scale_linetype_manual(values = "solid") +
+  scale_y_continuous(labels = comma, expand = c(0,0), limits = c(0,400)) +
+  scale_x_date(expand = c(0,0)) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 12, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat_diff$date,1), "%b %d, %Y"), ". ", 
+                       source_1[1], sep = "")) 
+
+plot
+```
+
+As the US grapples with a surge in cases and may need to resort to shutting back down pockets of the country, with Texas just announcing a pause in its reopening process, the situation overall internationally also remains far from a place where we could deem the virus under control. Though Western Europe has now largely limited the spread, Latin America and Asia ex-China have emerged as hotbeds of COVID-19.
+
+```{r setup_global, include=FALSE}
+## data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
+
+raw_dat <- read_csv("/Users/benbakkum/R directory/covid19/time_series_covid19_confirmed_global.csv")
+
+dat <- raw_dat %>%
+  as_tibble() %>% 
+  rename(Province = `Province/State`, Country = `Country/Region`) %>% 
+  select(-Province,-Lat,-Long) %>% 
+  group_by(Country) %>%
+  summarise_all(sum) %>%
+  rownames_to_column() %>% 
+  gather(var, value, -rowname) %>% 
+  spread(rowname, value) %>% 
+  mutate(var = as.Date(var, "%m/%d/%Y")) %>% 
+  arrange(var)
+colnames(dat) <- dat[nrow(dat),] 
+  
+rec_count <- tail(dat[-nrow(dat),],1)
+
+my_names <- colnames(dat)[as.numeric(rec_count[1,]) > 100000][-1]
+
+dat_sm <- dat %>%
+  rename(date = 'NA') %>% 
+  select(date, my_names, Mexico)
+
+dat_sm2 <- dat_sm[-nrow(dat),] %>% 
+  rename(UK = 'United Kingdom') %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>%
+  arrange(date)
+
+dat_sm3 <- dat_sm2[,-1] %>% 
+  map(.f = function(x) {as.numeric(x)}) %>% 
+  cbind(dat_sm2[,1]) %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+
+dat_sm4 <- dat_sm3 %>% 
+  gather(key, value, -date)
+
+dat_sm5 <- dat_sm4 %>% 
+  mutate(crossover = case_when(value >= 10000 & lag(value,1) < 10000 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(key, idx = cumsum(crossover == 1L)) %>% 
+  mutate(counter = row_number(),
+         counter = as.numeric(counter)) %>% 
+  mutate(days = case_when(value < 10000 ~ 0,
+                          value > 10000 ~ counter)) %>% 
+  ungroup() %>% 
+  select(-crossover, -idx, -counter) %>% 
+  filter(days > 0) %>% 
+  mutate(days = days - 1)
+
+dat_c <- dat_sm5
+
+dat_lab <- dat_c %>% filter(key == "US" | key == "UK" | key == "Italy" | key == "Russia" |
+                            key == "Pakistan" | key == "India" | key == "Spain" | key == "Germany" |
+                            key == "France" | key == "Mexico" | key == "Brazil" | key == "Turkey" | 
+                            key == "Iran" | key == "Peru" | key == "Chile" | key == "Canada" |
+                            key == "Saudi Arabia")
+
+regions <- data.frame(key = c("US", "Canada",
+             "Spain", "Italy", "Germany", "France", "UK",
+             "Russia", "Turkey", "Saudi Arabia", "Pakistan", "Iran", "India",
+             "Brazil", "Peru", "Mexico", "Chile"),
+              region = c("US & Canada", "US & Canada",
+             "Europe", "Europe", "Europe", "Europe", "Europe",
+             "Asia", "Asia", "Asia", "Asia", "Asia", "Asia",
+             "Latin America", "Latin America", "Latin America", "Latin America")) %>% 
+  mutate(key = as.character(key),
+         region = as.character(region))
+
+dat_c <- merge(dat_c, regions) %>% 
+  group_by(key) %>% 
+  arrange(date) %>% 
+  ungroup()
+
+dat_lab <- merge(dat_lab, regions)
+
+
+
+```
+
+
+
+```{r chart_global, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "COVID-19 case trajectories"
+unit_label <- "Cumulative # of cases, by number of days since 10,000th case"
+source_1 <- "Source: JHU, WHO, @benbakkum." 
+line_cols <- c("US & Canada" = "#b15928", 
+               "Europe" = "#6a3d9a", 
+               "Asia" = "#1f78b4",
+               "Latin America" = "#33a02c")
+               
+
+
+
+chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = region, group = key,
+                                   label = format(date, '%b %d'))) +
+  geom_text(data = filter(dat_lab, key == "Italy"), aes(110, 15000), color = "#808080", 
+            size = 13, alpha = .8, 
+            family = "Open Sans") +
+  geom_line(size = 1.1, alpha = 0.3) +
+  scale_y_log10(labels = comma, breaks = c(10000, 20000, 50000, 100000, 
+                                           200000, 500000, 1000000, 2000000),
+                limits = c(10000, 2700000)) +
+  scale_color_manual(values = line_cols) +
+  geom_point(data = dat_c, aes(x = days, y = value), size = 2.7) +
+  geom_text_repel(data = dat_lab, aes(x = days, y = value, label = key), 
+            nudge_x = 3.5, nudge_y = 0.15,
+            show.legend = FALSE, size = 4, family = "Open Sans", 
+            fontface = "bold") +
+  scale_x_continuous(limits = c(0, 130), expand = c(0,0)) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.2, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.05, 0.05, 0.05, 0.05), "cm")),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since 10,000th case",
+       caption = paste("Data as of ", format(tail(dat_c$date,1), "%b %d, %Y"), ". ", 
+                       source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
+                 width = 615, height = 420, end_pause = 200)
+
+anim1
+```
+
+This thing does not look like it’s going away anytime soon. 
+
+
