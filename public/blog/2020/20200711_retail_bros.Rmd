@@ -1,0 +1,159 @@
+---
+title: "On Trading and the Poster Boy of Retail Bros"
+date: 2020-07-11T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+When the market crashed in late-February and March, a lot of Americans decided it was time to open up a brokerage account or more actively trade their existing one. Apart from trading volumes, Tesla’s stock going to the moon, and Hertz’s rising share price as the company filed for Chapter 11 bankruptcy, we can tell retail trading has increased by the interest people have expressed in their Google search bars. 
+
+```{r gtrends_chart, echo=FALSE, fig.align="center", warning=FALSE, message = FALSE, tidy=FALSE}
+library(gtrendsR)
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(scales)
+library(extrafont)
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+raw <- list()
+raw[[1]] <- gtrends(keyword = "Call option", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[2]] <- gtrends(keyword = "Margin account", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[3]] <- gtrends(keyword = "Etrade", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[4]] <- gtrends(keyword = "Robinhood", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[5]] <- gtrends(keyword = "thinkorswim", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+
+
+list_dat <- list()
+for (i in 1:length(raw)) {
+  list_dat[[i]] <- raw[[i]]$interest_over_time %>% 
+        as_data_frame() %>% 
+        select(date, hits, keyword) %>% 
+        mutate(date = as.Date(date, "%Y-%b-%d"))
+  }
+
+all_dat <- do.call(rbind.data.frame, list_dat) %>% 
+  rename(value = hits,
+         key = keyword) %>% 
+  mutate(value = as.numeric(value),
+         key = paste(key, "  "))
+
+
+ctitle_1 <- "Retail trading Google search term popularity"
+unit_label <- "Interest over time of keyword relative to itself, 0 to 100"
+source_1 <- "Source: Google Trends, @benbakkum."
+
+
+chart <- all_dat %>% 
+  ggplot(aes(x = date, y = value, color = key)) +
+  geom_line(aes(linetype = key)) +
+  geom_point(size = 2.5) +
+  scale_color_manual(values = c("#a6cee3", "#1f78b4", "#33a02c", 
+                                "#fb9a99", "#6a3d9a")) +
+  scale_linetype_manual(values = c("dashed", "solid", "longdash", "solid", "solid")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,100)) +
+  scale_x_date(expand = c(0,0), limits = c(as.Date("2015-07-12"), as.Date("2020-09-12"))) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(all_dat$date,1), "%b, %Y"), ". ", 
+                       source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+
+  
+anim1 <- animate(chart, renderer = gifski_renderer(loop = T), nframe = 300,
+                 width = 615, height = 420, end_pause = 200)
+
+anim1
+```
+
+A host of new character’s have entered the market, likely including a lot of employees stuck at home with a stimulus check in hand and without a manager looking over their shoulder, as well as a good amount of Gen Z apparently. 
+
+
+```{r tweet1, echo=FALSE, fig.align="center"}
+library(tweetrmd)
+include_tweet("https://twitter.com/jsmauro13/status/1270415543657529350",
+              align = "center")
+
+```
+&nbsp;
+
+The new characters also include Barstool Sports founder Dave Portnoy, who turned to the market after live sporting events to bet on disappeared. As livestreams of his own day trading became widely viewed and he gained notoriety for comedically picking beefs with wall street “suits,” financial news media couldn’t help but latch on to his entertaining shtick and the phenomenon of “retail bros.”
+
+If there’s anything we’ve learned over the last few years, it should be that we don’t need to take so seriously many of the things we once did. The highest office in the land—that previously appeared to require decades of political experience and a campaign chock-full of brilliant strategists to attain—doesn’t seem as hallowed when an unsophisticated TV personality with a spotty career in real estate can stumble his way in. The five days a week of facetime at the office thought to be a minimum requirement for a career in many fields don’t feel as fundamental when quarantines invalidate expectations attached to work and many teams maintain their productivity. Dave Portnoy offers an example of why we also don’t need to take financial media too seriously.     
+
+Pundits have largely honed in on the lack of rigorous analysis and the exceptional risk that goes with Portnoy’s trading, holding him up as a standard-bearer of a horde of charlatans flocking to the market and an omen of a speculative bubble. Yet commentators have reflected little on what his popularity and profits, however long they last, say about stock picking. If Portnoy can look smart by catching the rip in airlines within months after first sitting down to trade, is it possible that the flood of smart-sounding analysis on CNBC may have just as much substance as his, with references to a PE ratio far from its long term average putting a gloss on what is otherwise a just as arbitrary call on a stock? Do 60 seconds of anecdotes rattled off by an analyst provide that much more of a convincing case for an investment than Portnoy shouting buy based on a share price falling much lower than it was a year ago?  
+
+Also, similar to anyone managing money that either held through the crash or added to long positions at any point since mid-March, Portnoy has benefitted from the sharp rally in the overall market. Some sectors have performed better than others, but it would have been hard to lose money while long over the last couple of months. This can prove true over more extended time frames as well. The US equity market tends to deliver decent performance, posting a solid ~12% annualized return over the last 30 years. Portnoy loves to say “stocks only go up,” an obvious overstatement given the first quarter’s selloff, but investors applying his advice to the overall market historically would have done quite well. Therein lies a source of much of the investment management industries’ returns: the rising tide of the broad market, commonly known as beta.
+
+Far be it from me to be inclined to cite anything associated with Breitbart, but a tweet by their Economics and Finance editor likely has a grain of truth in it. 
+
+
+```{r tweet2, echo=FALSE, fig.align="center"}
+library(tweetrmd)
+include_tweet("https://twitter.com/carney/status/1275541136183037953",
+              align = "center")
+
+```
+&nbsp;
+
+Portnoy’s good fortune to date, as well as much of the hand wringing done by the financial commentariat in the face of an influx of retail traders and a market seemingly disconnecting from the real economy, reflects a fundamental fact of managing money. Investing is an endeavor concerning the future, and the future is defined by a range of possible outcomes, or a probabilistic distribution of events and consequences. The river of time cuts a single path behind us, but before us always lies a river delta, where the often arbitrary currents of human affairs may push us into any of its many branches. Work can be done to better understand what outcomes may be most probable, yet the possibility of the less likely outcome occurring can’t be erased. This reality means that the most well-reasoned forecast, the “right” call that identifies the most likely event at the time it’s made, can look completely wrong in retrospect. The flipside involves misguided predictions sometimes luckily proving accurate.
+
+The impossibility of predicting future outcomes with complete certainty partly accounts for why Michael Batnick can fill his book Big Mistakes: The Best Investors and Their Worst Investments with stories of the brightest in the industry entering trades that blow up in their faces. It also helps explain why Pershing Square’s Bill Ackman can appear deluded for taking large positions in JCPenney, Valeant, and (short) Herbalife but also look incredibly prescient for anticipating Chipotle’s rebound and buying a hefty amount of credit default swaps before any lockdowns in the US this year. 
+
+
+<img src="/img/yolo_wolf.jpg" width="27%"/>
+&nbsp;
+
+The fickle relationship between skill and results predates us all. Fintwit’s resident financial historian Jamie Catherwood recently dug up an 1890 newspaper article on market speculators that conveys it with a chess metaphor. The author noted that “the profoundest chess player may see an inevitable mate, and yet, if the chandelier falls upon the pieces, may never win that game.” Investors and traders can do a lot to manage risk, but in essence they place bets on an uncertain future, and Dave Portnoy is a betting man. 
+
+Separately, Portnoy’s rise to prominence in financial media shows to what extent the industry can’t take a joke, or at least goes out of its way to not let on that it can. His appearances on TV have met earnest questions regarding his claims that he can invest better than the likes of Warren Buffett and Howard Marks. Portnoy responds seemingly sincerely that he considers himself superior at this point in time, and the segment ends sans any acknowledgement that it all contributes to the man’s over-the-top persona, which draws clicks and views. Ben Carlson, who blogs at A Wealth of Common Sense, said it well:
+
+
+```{r tweet3, eval = TRUE, echo=FALSE, fig.align="center"}
+library(tweetrmd)
+include_tweet("https://twitter.com/awealthofcs/status/1272293289266479104",
+              align = "center")
+```
+&nbsp;
+
+Portnoy has brought the same flare to livestreaming his day trading that he does his [daily pizza reviews](https://www.tiktok.com/@stoolpresidente/video/6846505698629537029?lang=en
+) and the rest of his successful efforts to build a media empire. To the question of how seriously he takes himself as a trader, his picking stocks based on the ticker symbol spelled out by [scrabble pieces drawn from a bag](https://www.tiktok.com/@stoolpresidente/video/6840846579562302725?lang=en) should be enough of an answer. Regardless of how his trades turn out, his audience on Twitter, Snapchat, Instagram, and TikTok will continue to grow, likely what he actually cares about, and he’ll still tout that [“stocks always go up, and even when they don’t, they do.”](https://twitter.com/stoolpresidente/status/1281313846158819328) 
+
+
