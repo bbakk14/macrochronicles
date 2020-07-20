@@ -266,7 +266,7 @@ p <- dat_long %>%
   ease_aes('linear')
 
 anim2 <- animate(p, renderer = gifski_renderer(loop = T), nframes = 300, end_pause = 75,
-                type = "cairo")
+                 width = 615, height = 420, type = "cairo")
 
 anim2
 
