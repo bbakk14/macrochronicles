@@ -4,12 +4,12 @@
   
   <url>
     <loc>/blog/</loc>
-    <lastmod>2020-07-11T21:13:14-05:00</lastmod>
+    <lastmod>2020-07-19T21:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/</loc>
-    <lastmod>2020-07-11T21:13:14-05:00</lastmod>
+    <loc>/blog/tsla-the-moons-new-neighbor/</loc>
+    <lastmod>2020-07-19T21:13:14-05:00</lastmod>
   </url>
   
   <url>
@@ -34,6 +34,11 @@
   
   <url>
     <loc>/about/</loc>
+    <lastmod>2015-08-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
     <lastmod>2015-08-22T00:00:00+00:00</lastmod>
   </url>
   

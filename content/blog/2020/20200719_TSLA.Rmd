@@ -1,0 +1,302 @@
+---
+title: "TSLA, the Moon's New Neighbor"
+date: 2020-07-19T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+Tesla's share price has risen so far that it has settled down not far from the moon, and who knows how long it will spend outside the stratosphere. The chart below, indexing each stock price to 100 at the end of 2014, shows roughly that if the same amounts were invested in Tesla and other major automakers five and a half years ago, Tesla provided an almost 7x return while most others lost money. I've often read claims that Tesla shouldn't be compared to automakers because it's more of a tech company than a car producer. Anecdotally, people made similar arguments that WeWork's competitive advantage lies in tech rather than real estate, and we know how that turned out. 
+
+```{r share_price, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(tidyverse)
+library(tidyquant)
+library(xts)
+library(tibbletime)
+library(quantmod)
+library(gganimate)
+library(gifski)
+library(Cairo)
+library(magick)
+library(scales)
+
+
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+
+prices  <- tq_get(c("TSLA", "F", "GM", "FCAU", "HMC", "TTM", "TM"), get = "stock.prices", from = "2014-12-31")
+
+p_tbl <- as_tbl_time(prices, date) %>% 
+  group_by(symbol) %>% 
+  as_period("weekly") %>% 
+  ungroup() %>% 
+  select(symbol, date, close) %>% 
+  pivot_wider(names_from = symbol, values_from = close)
+
+p_tbl_ind <- p_tbl %>% 
+  mutate(Tesla = TSLA / p_tbl$TSLA[1] * 100,
+         Ford = F / p_tbl$F[1] * 100,
+         GM = GM / p_tbl$GM[1] * 100,
+         Ferrari = FCAU / p_tbl$FCAU[1] * 100,
+         Honda = HMC / p_tbl$HMC[1] * 100,
+         Tata = TTM / p_tbl$TTM[1] * 100,
+         Toyota = TM / p_tbl$TM[1] * 100) %>% 
+  select(date, Tesla, Ford, GM, Ferrari, Honda, Tata, Toyota) %>% 
+  pivot_longer(names_to = "key", values_to = "value", -date)
+  
+  
+
+
+p_tbl_i <- p_tbl_ind %>%
+  filter(key != "Tesla")
+
+p_tbl_ii <- p_tbl_ind %>%
+  mutate(date2 = date) %>% 
+  select(date2, key, value) %>% 
+  filter(key == "Tesla")
+
+
+start_date <- head(p_tbl_i$date,1)
+end_date <- tail(p_tbl_i$date,1)
+ctitle_1 <- "Automaker equity performance since 2014"
+ctitle_2 <- "Tesla sideways before going to the moon"
+unit_label <- "Stock price, 12/31/2014 = 100"
+source_1 <- "@benbakkum."
+
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+str_pad_custom <- function(labels) {
+  new_labels <- stringr::str_pad(labels, 10, "right")
+  return(new_labels)
+}
+
+
+chart1 <- ggplot(data = p_tbl_i, aes(x = date, y = value, color = key, linetype = key)) +
+  geom_line() +
+  geom_point(size = 2.5) +
+  geom_text(data = p_tbl_i, aes(x = date, y = value, label = round(value, digits = 0)), nudge_x = 53,
+            show.legend = FALSE, size = 4.5, family = "Open Sans") +
+  scale_linetype_manual(values = c("solid", "solid", "solid", "dashed", "longdash", "dotted")) +
+  scale_color_manual(values = c("#a6cee3", "#1f78b4", "#33a02c", 
+                                "#fb9a99", "#6a3d9a", "#b15928")) +
+  scale_x_date(limits = c(start_date, end_date + 100), expand = c(0,0),
+               date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(labels = fmt_dcmls(0)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(p_tbl_i$date,1), "%b %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T),
+                 width = 615, height = 420, type = "cairo")
+
+
+chart2 <- ggplot(data = p_tbl_ii, aes(x = date2, y = value, color = key, linetype = key)) +
+  geom_line() +
+  geom_point(size = 2.5) +
+  geom_line(data = p_tbl_i, aes(x = date, y = value, color = key, linetype = key)) +
+  geom_text(aes(x = date2, y = value, label = round(value, digits = 0)), nudge_x = 53,
+            show.legend = FALSE, size = 4.5, family = "Open Sans") +
+  scale_linetype_manual(values = c("solid", "solid", "solid", 
+                                   "dashed", "longdash", "solid", "dotted"), guide = "none") +
+  scale_color_manual(values = c("#a6cee3", "#1f78b4", "#33a02c", 
+                                "#fb9a99", "#6a3d9a", "#e31a1c", "#b15928"
+                                )) +
+  scale_x_date(limits = c(start_date, end_date + 100), expand = c(0,0),
+               date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(labels = fmt_dcmls(0)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_2, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(p_tbl_i$date,1), "%b %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date2, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim2 <- animate(chart2, renderer = gifski_renderer(loop = T),
+                 width = 615, height = 420, type = "cairo")
+
+gif1 <- image_read(anim1)
+gif2 <- image_read(anim2)
+
+gif_final <- c(gif1, gif2, rep(gif2[100], 50))
+gif_final
+
+
+```
+
+I don't mean to come off as a huge TSLA bear. Comparisons to the rest of the auto industry that pointed to Tesla's valuation reaching unjustified levels were made $1000-in-the-stock-price ago, and I find it conceivable that the stock could rally further still. I don't think it unreasonable, however, to suggest that Tesla's value has become divorced from the underlying fundamentals of the business. The recent rally has taken the stock's market cap well out of the league of the other automakers and into the realm of higher valuations than Intel and Netflix, a stones throw from the value of JPMorgan Chase & Co. 
+
+```{r mkt_cap, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\tsla\\tsla_mkt_caps.csv")
+
+dat <- raw_dat %>% 
+  as_data_frame() %>% 
+  set_names("date", "Tesla", "Ford", "GM", "Honda", "Tata", "Toyota", "JPMC", "Intel", "Netflix") %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y"))
+
+dat_long <- dat %>% 
+  pivot_longer(names_to = "key", values_to = "value", -date) %>%
+  arrange(key, date) %>% 
+  as_tbl_time(date) %>% 
+  group_by(key) %>% 
+  as_period("weekly") %>% 
+  as_data_frame() %>% 
+  ungroup() %>% 
+  group_by(date) %>% 
+  mutate(.r = min_rank(-value * 1),
+         value2 = value,
+         value_loc = ifelse(value > 0, value, 0),
+         Value_lbl = paste0(" ", format(round(value,0),big.mark=","))
+         ) %>% 
+  ungroup()
+
+
+p <- dat_long %>% 
+  ggplot(aes(.r, group = key, fill = as.factor(key), color = as.factor(key))) +
+  geom_tile(aes(y = value2/2,
+                height = value2,
+                width = -0.9),
+            color = NA) +
+  geom_text(aes(y = -300, label = key), size = 5, vjust = 0.55, hjust = 1,
+            family = "Open Sans") +
+  geom_text(aes(y = value_loc, label = format(Value_lbl, big.mark=","), hjust = 0), size = 5,
+            family = "Open Sans") +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_x_reverse() +
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(values = c("Tesla" = "#e31a1c", "Ford" = "#ff7f00", "GM" = "#ff9a36", "Honda" = "#ff9a36",
+                                "Tata" = "#ffbb78", "Toyota" = "#ff7f00", "JPMC" = "#a6cee3", "Intel" = "#1f78b4",
+                                "Netflix" = "#64b1e4"
+                                )) +
+  scale_fill_manual(values = c("Tesla" = "#e31a1c", "Ford" = "#ff7f00", "GM" = "#ff9a36", "Honda" = "#ff9a36",
+                                "Tata" = "#ffbb78", "Toyota" = "#ff7f00", "JPMC" = "#a6cee3", "Intel" = "#1f78b4",
+                                "Netflix" = "#64b1e4")) +
+  guides(color = FALSE, fill = FALSE) + 
+  theme(
+    axis.line = element_blank(),
+    axis.text.x = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    text = element_text(size = 15, color = "black", family = "Open Sans"),
+    panel.border = element_rect(color = cpal("border grey"), fill = NA, size = 0.3),
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(size = .1, color = "#ababab"),
+    panel.grid.minor.x = element_line(size = .1, color = "gray84"),
+    plot.background = element_blank(),
+    plot.margin = margin(1, 3, 1, 1.75, "cm"),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = "#222222", family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = "#222222", family = "Open Sans"),
+    panel.spacing.x = unit(5, "lines"),
+    strip.text = element_text(color = "#222222", family = "Open Sans", size = 14),
+    strip.background = element_rect(color = cpal("border grey"), fill = "white")) +
+  labs(title = 'Company market caps on {closest_state}',
+       subtitle = 'Market capitalization, $m',
+       caption = paste("Data as of ",
+                       format(as.yearmon(head(dat_long$date,1), "%b %Y")), ". Source: Koyfin, ", 
+                       "@benbakkum.",
+                       sep = "")) +
+  transition_states(date, wrap = FALSE) +
+  ease_aes('linear')
+
+anim2 <- animate(p, renderer = gifski_renderer(loop = T), nframes = 300, end_pause = 75,
+                type = "cairo")
+
+anim2
+
+
+
+```
+
+Certainly expectations for earnings growth over the longer term shape a company's value, not just what the firms' bottom line looks like most recently, but it seems silly for Tesla to trade close to the market caps of Intel, Netflix, and JPM when in the first quarter of this year it earned 0.3%, 2.3%, and 0.6% of what they did, respectively. Tesla's founder actually may not disagree with that judgement. 
+
+```{r tweet1, echo=FALSE, fig.align="center"}
+library(tweetrmd)
+include_tweet("https://twitter.com/elonmusk/status/1256239815256797184",
+              align = "center")
+
+```
+&nbsp;
+
+A short squeeze of epic proportions, which may still have legs, has helped drive the stock higher. For years Tesla has garnered the interest of short-sellers who have bet that investors' bullish optimism will prove over-wrought and that Musk has built a house of cards. When shorting the stock, these traders borrow its shares and then sell the borrowed shares in anticipation of the price falling. Were the stock to sell off, they could buy the shares back at a lower price than what they were worth when they were borrowed, pocketing the difference. If the stock instead begins to gain upside momentum, short sellers must buy the stock back to "cover" their position and prevent further losses. In this way, a rally in a heavily shorted stock can build on itself as more and more shorts cut their losses by buying the stock, in turn driving the price higher and forcing additional short covering. 
+
+Bespoke Investment Group has pointed out that Tesla is unique for its current combination of a huge market cap and a significant amount of short interest, even after many shorts have already been squeezed out. It still looks to me like there may be room for the short squeeze to continue based on this.
+
+
+```{r tweet2, echo=FALSE, fig.align="center"}
+library(tweetrmd)
+include_tweet("https://twitter.com/bespokeinvest/status/1282709228747137025",
+              align = "center")
+
+```
+&nbsp;
+
+If TSLA continues to climb, however, there will eventually be a point where there essentially won't be anyone left who wants to buy the stock. After everyone who has yet to capitulate does so in the fear of missing out on further upside, someone who wants to take profits will have a hard time finding someone else to sell to, and the price will likely adjust sharply lower to draw buyers into the market. I anticipate that this will happen and that TSLA will not remain above $1500 indefinitely, but I don't know when it will happen, and in the meantime it could be that the stock has further to go than just the moon. 
+
+
