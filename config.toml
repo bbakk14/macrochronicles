@@ -19,7 +19,7 @@ blog = "blog/:slug/"
 [params]
 dateform = "Jan 2, 2006"
 dateformfull = "Mon Jan 2 2006 15:04:05 MST"
-description = "Example blog"
+description = "Ben Bakkum"
 copyright = "Copyright © 2020 Benjamin Bakkum"
 # copyrightUrl = "https://creativecommons.org/licenses/by-sa/4.0/"
 logofile = "img/gradient3.png"
@@ -33,7 +33,7 @@ share = true
 latestpostcount = 4
 email = "benjamin.bakkum@gmail.com"
 twitter = "BenBakkum"
-social_banner = "img/banner.png"
+social_banner = "img/gradient3.png"
 usesmallsummarycard = true
 posts_navigation = true
 # issoHost = "comments.domain.tld:1234"

@@ -1,0 +1,541 @@
+---
+title: "Muddling Through"
+date: 2020-07-26T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+Since this blog's last update on COVID-19 numbers, the US has made progress in the number of tests administered daily, and the positivity rate of testing appeared to stop increasing in July. The now large number of daily tests and the positivity rate in the high single digits, however, entails a significant amount of new cases each day. States walking back plans to reopen and the publics' self-policing are moderating case growth, but the lack of a coordinated national plan to stamp out the virus means that most states will muddle through the next few months with outbreaks neither out of control nor much less prevalent.  
+
+```{r tests, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(tidyverse)
+library(xts)
+library(tibbletime)
+library(gganimate)
+library(gifski)
+library(Cairo)
+library(magick)
+library(scales)
+library(ggrepel)
+
+### https://covidtracking.com/api/v1/us/daily.csv
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222", 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\nat_daily.csv")
+
+dat <- raw_dat %>% 
+  as_data_frame() %>%
+  select(date, positiveIncrease, negativeIncrease, totalTestResultsIncrease) %>% 
+  mutate(date = as.Date(as.character(date), "%Y%m%d"),
+         percPositive = (positiveIncrease / (positiveIncrease + negativeIncrease)) * 100) %>% 
+  rename(tests = totalTestResultsIncrease) %>% 
+  select(date, percPositive, tests)
+
+ctitle_1 <- "Tests conducted per day"
+source_1 <- "The COVID Tracking Project, @benbakkum." 
+
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+chart1 <- dat %>% 
+  filter(date > "2020-03-14") %>% 
+  ggplot(aes(x = date, y = tests)) +
+  geom_bar(stat = 'identity', width = 1.05, fill ="#1f78b4") +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(labels = fmt_dcmls(0), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 17, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1,
+       caption = paste("Data as of ", format(head(dat$date,1), "%b %d, %Y"), ". ", sep = "")) +
+  transition_states(date) +
+  shadow_mark()
+
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), fps = 50, duration = 7,
+                 width = 280, height = 300, type = "cairo", end_pause = 85)  
+
+  
+ctitle_2 <- "Test positivity rate, %"
+
+chart2 <- dat %>% 
+  filter(date > "2020-03-14") %>% 
+  ggplot(aes(x = date, y = percPositive)) +
+  geom_line(size = 0.75, color ="#e31a1c", alpha = 0.65) +
+  geom_point(color ="#e31a1c", size = 2.5) +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(labels = fmt_dcmls(0), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 17, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_2,
+       caption = paste(source_1[1], sep = "")) +
+  transition_reveal(date) +
+  shadow_mark()
+
+
+anim2 <- animate(chart2, renderer = gifski_renderer(loop = T), fps = 50, duration = 7,
+                 width = 270, height = 300, type = "cairo", end_pause = 85)  
+
+
+
+a_mgif <- image_read(anim1)
+b_mgif <- image_read(anim2)
+
+new_gif <- image_append(c(a_mgif[1], b_mgif[1]))
+for(i in 2:350){
+  combined <- image_append(c(a_mgif[i], b_mgif[i]))
+  new_gif <- c(new_gif, combined)
+}
+
+####
+new_gif
+```
+
+While the virus no longer seems to be spreading at an accelerating rate in larger states including Florida, California, and Texas, the pace of case growth has settled at an elevated clip, around 10,000 cases per day in each of these states. The pace will likely be slow to ebb, as it was in Northeastern states.  
+
+
+```{r cases, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\daily.csv")
+
+dat <- raw_dat %>% 
+  as_data_frame() %>%
+  select(date, state, positive, negative, hospitalizedCumulative, death) %>% 
+  mutate(date = as.Date(as.character(date), "%Y%m%d"),
+         percPositive = (positive / (positive + negative)) * 100,
+         totalTests = positive + negative)
+  
+dat_w <- dat %>% 
+  select(date, state, positive) %>% 
+  pivot_wider(names_from = "state", values_from = "positive") %>% 
+  select(-GU, -DC, -PR, -VI, -MP, -AS) %>% 
+  arrange(date)
+
+rolling_mean <- rollify(mean, window = 7)
+  
+dat_avg <- dat_w[,-1] %>% 
+  map(.f = function (x) {x - lag(x, 1)}) %>%
+  map(.f = function (x) {rolling_mean(x)}) %>%
+  as_data_frame() %>% 
+  cbind(dat_w$date) %>% 
+  rename(date = 'dat_w$date') %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+  
+dat_l <- dat_avg %>% 
+  pivot_longer(names_to = "key", values_to = "value", -date)
+
+
+dat_flag <- dat_l %>% 
+  arrange(key, date) %>% 
+  mutate(crossover = case_when((value >= 20 & lag(value,1) < 20) | 
+                               (key != lag(key,1))~ 1,
+                               TRUE ~ 0)) %>% 
+  filter(key != "MI")
+
+
+
+dat_flag[dat_flag$date == "2020-03-19" & dat_flag$key == "MA", "crossover"] <- 1
+dat_flag[dat_flag$date == "2020-03-11" & dat_flag$key == "NY", "crossover"] <- 1
+dat_flag[dat_flag$date == "2020-07-08" & dat_flag$key == "HI", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-04-23" & dat_flag$key == "ME", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-04-25" & dat_flag$key == "ME", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-07-19" & dat_flag$key == "ME", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-06-25" & dat_flag$key == "MT", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-07-07" & dat_flag$key == "NH", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-07-12" & dat_flag$key == "NH", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-03-26" & dat_flag$key == "OR", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-05-13" & dat_flag$key == "WV", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-05-20" & dat_flag$key == "WV", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-06-14" & dat_flag$key == "WV", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-06-19" & dat_flag$key == "WY", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-06-22" & dat_flag$key == "WY", "crossover"] <- 0
+dat_flag[dat_flag$date == "2020-07-25" & dat_flag$key == "ME", "crossover"] <- 0
+
+
+
+##dat_flag %>% filter(crossover == 1) %>% view()
+
+
+dat_count <- dat_flag %>%
+  group_by(key, idx = cumsum(crossover == 1L)) %>% 
+  mutate(counter = row_number(),
+         counter = as.numeric(counter),
+         phase = case_when((idx %% 2) == 0 ~ "off",
+                           (idx %% 2) != 0 ~ "on")) %>%
+  ungroup() %>% 
+  mutate(days = case_when(phase == "off" ~ 0,
+                          phase == "on" ~ counter)) %>% 
+  select(-crossover, -idx, -counter, -phase) %>% 
+  filter(days > 0) %>% 
+  mutate(days = days - 1)
+
+##dat_count %>% view()
+
+state_reg <- read.csv("D:\\Documents\\R directory\\covid19\\state_region.csv") %>% 
+  as_tibble()
+
+dat_fin <- merge(dat_count, state_reg, by = "key")
+
+dat_c <- dat_fin 
+dat_lab <- dat_c %>% filter(key == "NY" | key == "NJ" | key == "MA" | key == "CA" | 
+                            key == "AZ" | key == "FL" | key == "WA" |
+                            key == "TX" | key == "GA" | 
+                            key == "MI")
+
+
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+ctitle_1 <- "COVID-19 daily new cases"
+unit_label <- "Daily change in cases, 7 day moving average"
+source_1 <- "Source: The COVID Tracking Project, @benbakkum." 
+
+line_cols <- c("NY" = "#1f78b4", "NJ" = "#1f78b4", "MA" = "#1f78b4", "CT" = "#CDCDCD", "PA" = "#CDCDCD",
+               "CA" = "#33a02c", "AZ" = "#33a02c", "WA" = "#33a02c",
+               "TX" = "#ff7f00", "GA" = "#ff7f00", "LA" = "#CDCDCD", "AL" = "#CDCDCD", "FL" = "#ff7f00", "TN" = "#CDCDCD",
+               "MI" = "#6a3d9a",
+               "AK" = "#CDCDCD", "CO" = "#CDCDCD", "HI" = "#CDCDCD", "ID" = "#CDCDCD", "MT" = "#CDCDCD", "NM" = "#CDCDCD",
+               "NV" = "#CDCDCD", "OR" = "#CDCDCD", "UT" = "#CDCDCD", "WY" = "#CDCDCD", "IA" = "#CDCDCD", "IL" = "#CDCDCD",
+               "IN" = "#CDCDCD", "KS" = "#CDCDCD", "MN" = "#CDCDCD", "MO" = "#CDCDCD", "ND" = "#CDCDCD", "NE" = "#CDCDCD",
+               "OH" = "#CDCDCD", "OK" = "#CDCDCD", "SD" = "#CDCDCD", "WI" = "#CDCDCD", "AR" = "#CDCDCD", "KY" = "#CDCDCD",
+               "MS" = "#CDCDCD", "NC" = "#CDCDCD", "SC" = "#CDCDCD", "VA" = "#CDCDCD", "WV" = "#CDCDCD", "DE" = "#CDCDCD",
+               "MD" = "#CDCDCD", "ME" = "#CDCDCD", "NH" = "#CDCDCD", "RI" = "#CDCDCD", "VT" = "#CDCDCD")
+               
+
+chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
+  geom_text(data = filter(dat_c, key == "WA"), aes(140, 33), color = "#808080", size = 13, alpha = .8, 
+            family = "Open Sans") +
+  geom_line(size = 1.1, alpha = 0.65) +
+  scale_y_log10(labels = fmt_dcmls(0), breaks = c(20, 50, 100, 200, 500, 1000, 2000, 5000,
+                                                  10000, 20000),
+                limits = c(20, 20000),
+                expand = c(0,0)) +
+  scale_color_manual(values = line_cols) +
+  geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
+  geom_text_repel(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
+                                show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
+  scale_x_continuous(limits = c(0, 160), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.05, 0.05, 0.05, 0.05), "cm")),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since averaging over 20 new cases a day",
+       caption = paste("Data as of ", format(tail(dat_c$date,1), "%b %d, %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)  
+
+anim1
+
+```
+
+Sadly, we're seeing hospitalizations and fatalities rise with cases on a lag. In the states that provide quality data on hospitalizations due to COVID-19, Southern and Western states have experienced a significant spike in hospitalizations during July. 
+
+
+```{r hospitalizations, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\daily.csv")
+
+dat <- raw_dat %>% 
+  as_data_frame() %>%
+  select(date, state, positive, negative, hospitalizedCumulative, death) %>% 
+  mutate(date = as.Date(as.character(date), "%Y%m%d"),
+         percPositive = (positive / (positive + negative)) * 100,
+         totalTests = positive + negative)
+  
+dat_w <- dat %>% 
+  select(date, state, hospitalizedCumulative) %>% 
+  pivot_wider(names_from = "state", values_from = "hospitalizedCumulative") %>% 
+  select(date, NY, AZ, TN, GA, FL, SC) %>% 
+  rename('New York' = NY, 'Arizona' = AZ, 'Tennessee' = TN, 
+         'Georgia' = GA, 'Florida' = FL, 'South Carolina' = SC) %>% 
+  arrange(date)
+
+rolling_mean <- rollify(mean, window = 7)
+  
+dat_avg <- dat_w[,-1] %>% 
+  map(.f = function (x) {x - lag(x, 1)}) %>%
+  map(.f = function (x) {rolling_mean(x)}) %>%
+  as_data_frame() %>% 
+  cbind(dat_w$date) %>% 
+  rename(date = 'dat_w$date') %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+  
+dat_l <- dat_avg %>% 
+  pivot_longer(names_to = "key", values_to = "value", -date)
+
+ctitle_1 <- "COVID-19 daily new hospitalizations"
+unit_label <- "Daily change in hospitalizations, 7 day moving average"
+source_1 <- "Source: The COVID Tracking Project, @benbakkum." 
+
+chart1 <- dat_l %>% 
+  filter(date > "2020-04-01") %>% 
+  ggplot(aes(x = date, y = value, color = key)) +
+  geom_line() +
+  geom_point(size = 2.2, alpha = 0.65) +
+  scale_color_manual(values = c("Arizona" = "#33a02c", "New York" = "#1f78b4", "Tennessee" = "#ff7f00",
+                                "Georgia" = "#ff7f00", "South Carolina" = "#ff7f00", "Florida" = "#ff7f00")) +
+  facet_wrap(~key, scales = "free_y") +
+   theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    strip.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans")
+  ) +
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since averaging over 20 new cases a day",
+       caption = paste("Data as of ", format(tail(dat_l$date,1), "%b %d, %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 100,
+                 width = 615, height = 500, type = "cairo", end_pause = 50)  
+
+anim1
+  
+```
+
+It has become clear that by mid-April the administration had abdicated nearly all responsibility for combatting the virus, motivated by a will to move on from the crisis and Dr. Deborah Birx's  focus on overly optimistic models of the virus' trajectory that did not account for the impact of reopenings.^[Michael D. Shear, Noah Weiland, Eric Lipton, Maggie Haberman, and David E. Sanger, ["Inside Trump's Failure: The Rush to Abandon Leadership Role on the Virus"](https://www.nytimes.com/2020/07/18/us/politics/trump-coronavirus-response-failure-leadership.html), _The New York Times_, July 25, 2020.] Amidst rising caseloads in the Sun Belt, the absence of a surge in fatalities provided partial cover by creating the sense that only less vulnerable populations were being infected and that more effective treatments had been developed. Though no state has suffered a tragedy on the scale of New York's in March and April, the number of deaths each day now continues to rise across many states, likely further increasing in the coming weeks before the slowing growth in cases becomes felt. 
+
+
+```{r deaths, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+raw_dat <- read_csv("D:\\Documents\\R directory\\covid19\\daily.csv")
+
+dat <- raw_dat %>% 
+  as_data_frame() %>%
+  select(date, state, positive, negative, hospitalizedCumulative, death) %>% 
+  mutate(date = as.Date(as.character(date), "%Y%m%d"),
+         percPositive = (positive / (positive + negative)) * 100,
+         totalTests = positive + negative)
+  
+dat_w <- dat %>% 
+  select(date, state, death) %>% 
+  pivot_wider(names_from = "state", values_from = "death") %>% 
+  select(-GU, -DC, -PR, -VI, -MP, -AS) %>% 
+  arrange(date)
+
+rolling_mean <- rollify(mean, window = 7)
+  
+dat_avg <- dat_w[,-1] %>% 
+  map(.f = function (x) {x - lag(x, 1)}) %>%
+  map(.f = function (x) {rolling_mean(x)}) %>%
+  as_data_frame() %>% 
+  cbind(dat_w$date) %>% 
+  rename(date = 'dat_w$date') %>% 
+  select(date, everything()) %>% 
+  as_data_frame()
+
+
+dat_l <- dat_avg %>% 
+  pivot_longer(names_to = "key", values_to = "value", -date)
+
+keep_cntry <- dat_l %>% 
+  na.omit() %>% 
+  group_by(key) %>% 
+  summarise(max = max(value)) %>% 
+  filter(max > 10) %>% 
+  select(-max)
+
+
+dat_flag <- dat_l %>% 
+  filter(key %in% keep_cntry$key) %>% 
+  arrange(key, date) %>% 
+  mutate(crossover = case_when((value >= 10 & lag(value,1) < 10) |
+                               (value >= 10 & is.na(lag(value,1))) | 
+                               (key != lag(key,1)) ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(key) %>% 
+  mutate(adding = cumsum(crossover == 1L),
+         cross_2 = case_when(adding <= 2 ~ crossover,
+                             adding > 2 ~ 0)) %>% 
+  ungroup()
+
+
+dat_flag[dat_flag$date == "2020-01-22" & dat_flag$key == "AL", "cross_2"] <- 0
+dat_flag[dat_flag$date == "2020-04-30" & dat_flag$key == "AL", "cross_2"] <- 0
+
+
+dat_count <- dat_flag %>%
+  group_by(key, idx = cumsum(cross_2 == 1L)) %>% 
+  mutate(counter = row_number(),
+         counter = as.numeric(counter),
+         phase = case_when((idx %% 2) == 0 ~ "off",
+                           (idx %% 2) != 0 ~ "on")) %>% 
+  ungroup() %>% 
+  mutate(days = case_when(phase == "off" ~ 0,
+                          phase == "on" ~ counter)) %>% 
+  select(-crossover, -idx, -counter, -phase, -adding, -cross_2) %>% 
+  filter(days > 0) %>% 
+  mutate(days = days - 1)
+
+state_reg <- read.csv("D:\\Documents\\R directory\\covid19\\state_region.csv") %>% 
+  as_tibble()
+
+dat_fin <- merge(dat_count, state_reg, by = "key")
+ 
+dat_c <- dat_fin %>% filter(key != "NJ")
+dat_lab <- dat_c %>% filter(key == "NY" | key == "MA" | key == "CA" | 
+                            key == "AZ" | key == "FL" | key == "WA" |
+                            key == "TX" | key == "GA" | 
+                            key == "MI")
+
+
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+ctitle_1 <- "COVID-19 daily new deaths"
+unit_label <- "Daily change in deaths, 7 day moving average"
+source_1 <- "Source: The COVID Tracking Project, @benbakkum." 
+
+line_cols <- c("NY" = "#1f78b4", "MA" = "#1f78b4", "CT" = "#CDCDCD", "PA" = "#CDCDCD",
+               "CA" = "#33a02c", "AZ" = "#33a02c", "WA" = "#33a02c",
+               "TX" = "#ff7f00", "GA" = "#ff7f00", "LA" = "#CDCDCD", "AL" = "#CDCDCD", "FL" = "#ff7f00", "TN" = "#CDCDCD",
+               "MI" = "#6a3d9a",
+               "AK" = "#CDCDCD", "CO" = "#CDCDCD", "HI" = "#CDCDCD", "ID" = "#CDCDCD", "MT" = "#CDCDCD", "NM" = "#CDCDCD",
+               "NV" = "#CDCDCD", "OR" = "#CDCDCD", "UT" = "#CDCDCD", "WY" = "#CDCDCD", "IA" = "#CDCDCD", "IL" = "#CDCDCD",
+               "IN" = "#CDCDCD", "KS" = "#CDCDCD", "MN" = "#CDCDCD", "MO" = "#CDCDCD", "ND" = "#CDCDCD", "NE" = "#CDCDCD",
+               "OH" = "#CDCDCD", "OK" = "#CDCDCD", "SD" = "#CDCDCD", "WI" = "#CDCDCD", "AR" = "#CDCDCD", "KY" = "#CDCDCD",
+               "MS" = "#CDCDCD", "NC" = "#CDCDCD", "SC" = "#CDCDCD", "VA" = "#CDCDCD", "WV" = "#CDCDCD", "DE" = "#CDCDCD",
+               "MD" = "#CDCDCD", "ME" = "#CDCDCD", "NH" = "#CDCDCD", "RI" = "#CDCDCD", "VT" = "#CDCDCD")
+               
+
+chart1 <- ggplot(data = dat_c, aes(x = days, y = value, color = key, label = format(date, '%b %d'))) +
+  geom_text(data = filter(dat_c, key == "NY"), aes(140, 8.5), color = "#808080", size = 13, alpha = .8, 
+            family = "Open Sans") +
+  geom_line(size = 1.1, alpha = 0.65) +
+  scale_y_log10(labels = fmt_dcmls(0), breaks = c(10, 20, 50, 100, 200, 500, 1000),
+                limits = c(5, 1000),
+                expand = c(0,0)) +
+  scale_color_manual(values = line_cols) +
+  geom_point(data = dat_lab, aes(x = days, y = value), size = 2.7) +
+  geom_text_repel(data = dat_lab, aes(x = days, y = value, label = key), nudge_x = 3.5, nudge_y = 0.15,
+                                show.legend = FALSE, size = 4, family = "Open Sans", fontface = "bold") +
+  scale_x_continuous(limits = c(0, 160), expand = c(0,0)) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.05, 0.05, 0.05, 0.05), "cm")),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label, x = "Number of days since averaging over 10 new deaths a day",
+       caption = paste("Data as of ", format(tail(dat_c$date,1), "%b %d, %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 475,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)  
+
+anim1
+
+```
+
+
+With around 1,000 deaths currently occurring each day in the US, the human toll mounts, and the chill blanketing the public and the economy has not lifted.  
+
+
+

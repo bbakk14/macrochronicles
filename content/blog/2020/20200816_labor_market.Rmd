@@ -1,0 +1,634 @@
+---
+title: "The Damage Done to the Labor Market"
+date: 2020-08-16T21:13:14-05:00
+---
+ 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(quantmod)
+library(tidyverse)
+library(scales)
+library(gganimate)
+library(magick)
+library(Cairo)
+library(lubridate)
+```
+&nbsp;
+&nbsp;
+
+The US unemployment rate (UR) has fallen for the last three months, fortunately snapping back from the _official_ high of 14.7% in April, declining to 10.2% in July. Even excluding everyone that has gotten their old job back or has found a new position over the last several months, however, it's still the case that more people in the US have lost their job this year than during the depths of the Global Financial Crisis. Also, the headline UR and the net change in jobs don't tell the whole story. For instance, a classification error in the BLS' monthly survey entails that the actual UR is likely around a percentage point higher than officially reported at this point, reflecting roughly a million more workers out of the job. And "core" unemployment, excluding unemployment due to temporary layoffs, is on the rise. This piece will also describe other ways in which the current crisis has taken a toll on the labor market beyond what we can see in the most frequently cited statistics.^[Jed Kolko ["Don't Cheer Too Soon. Keep an Eye on the Core Jobless Rate."](https://www.nytimes.com/2020/06/15/upshot/jobless-rate-misleading-virus.html), _The New York Times_, July 23, 2020.]
+
+```{r PAYEMS, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222", 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+raw_dat <- getSymbols('PAYEMS',src='FRED', auto.assign=F) 
+
+dat <- raw_dat %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         jobs = PAYEMS) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"))
+
+dat_ph <- dat %>% 
+  mutate(recess = case_when(date >= "1948-09-01" & date <= "1950-07-01" ~ "1948", 
+                            date >= "1953-07-01" & date <= "1955-06-01" ~ "1953",
+                            date >= "1957-04-01" & date <= "1959-04-01" ~ "1957",
+                            date >= "1960-04-01" & date <= "1961-12-01" ~ "1960",
+                            date >= "1974-10-01" & date <= "1976-02-01" ~ "1974",
+                            date >= "1980-03-01" & date <= "1981-01-01" ~ "1980",
+                            date >= "1981-07-01" & date <= "1983-11-01" ~ "1981",
+                            date >= "1990-06-01" & date <= "1993-02-01" ~ "1990",
+                            date >= "2001-02-01" & date <= "2005-02-01" ~ "2001",
+                            date >= "2008-01-01" & date <= "2014-05-01" ~ "2008",
+                            date >= "2020-02-01" ~ "2020"))
+
+dat_long <- dat_ph %>% 
+  group_by(recess) %>% 
+  mutate(perc = (jobs / first(jobs) - 1) * 100) %>% 
+  na.omit() %>% 
+  mutate(counter = row_number() - 1) %>%
+  ungroup() %>% 
+  mutate(
+         idx = ifelse(recess == "1948", counter,
+               ifelse(recess == "1953", counter + 4,
+               ifelse(recess == "1957", counter + 8,
+               ifelse(recess == "1960", counter + 12,
+               ifelse(recess == "1974", counter + 16,
+               ifelse(recess == "1980", counter + 20,
+               ifelse(recess == "1981", counter + 24,
+               ifelse(recess == "1990", counter + 28,
+               ifelse(recess == "2001", counter + 32,
+               ifelse(recess == "2008", counter + 36,
+               ifelse(recess == "2020" & date == "2020-02-01", counter + 106,
+               ifelse(recess == "2020" & date == "2020-03-01", counter + 114,
+               ifelse(recess == "2020" & date == "2020-04-01", counter + 148,
+               ifelse(recess == "2020" & date == "2020-05-01", counter + 156,
+               ifelse(recess == "2020" & date == "2020-06-01", counter + 164,
+               ifelse(recess == "2020" & date == "2020-07-01", counter + 172, NA))))))))))))))))) %>% 
+  mutate(recess = paste0(recess, " "))
+        
+
+start_date <- head(dat_long$date,1)
+end_date <- tail(dat_long$date,1)
+
+line_cols <- c("1948 " = "#b2df8a", 
+               "1953 " = "#fb9a99", 
+               "1957 " = "#fdbf6f", 
+               "1960 " = "#ff7f00", 
+               "1974 " = "#cab2d6", 
+               "1980 " = "#6a3d9a", 
+               "1981 " = "#b15928", 
+               "1990 " = "#33a02c",
+               "2001 " = "#a6cee3", 
+               "2008 " = "#1f78b4", 
+               "2020 " = "#e31a1c")
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+ctitle_1 <- "Job losses during post-war recessions"
+unit_label <- "% job losses relative to prior employment peak"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+x_lab <- "Number of months after peak employment"
+
+chart_1 <- dat_long %>%
+  ggplot(aes(x = counter, y = perc, color = recess)) +
+  geom_line(size = 1, alpha = 0.85) +
+  geom_point(size = 2.2) +
+  geom_text(data = filter(dat_long, recess == "2008 " | recess == "2020 " | recess == "2001 "), 
+            aes(x = counter, y = perc, label = recess),
+            nudge_x = 3.2, 
+            nudge_y = 0.15,
+            show.legend = FALSE, 
+            size = 4, 
+            family = "Open Sans", 
+            fontface = "bold") +
+  scale_color_manual(values = line_cols) +
+  scale_x_continuous(limits = c(0, 85), expand = c(0,0)) +
+  scale_y_continuous(limits = c(-16, 1), expand = c(0,0), labels = fmt_dcmls(0)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.3), "cm"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = 0, unit = "cm"),
+    legend.spacing.x = unit(0.2, 'cm'),
+    legend.spacing.y = unit(0.2, 'cm')) +
+  guides(color=guide_legend(nrow=2,byrow=TRUE)) +
+  labs(title = ctitle_1, 
+       subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat$date,1), "%b %Y"), ". ", source_1[1], sep = ""),
+       x = x_lab) +
+  transition_reveal(idx, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim <- animate(chart_1, renderer = gifski_renderer(loop = T), nframe = 360,
+                 width = 615, height = 505, type = "cairo", end_pause = 120)
+
+anim
+```
+
+The chart above, adapted from a regularly updated graphic on the Calculated Risk blog, shows the severity of employment downturns during US recessions spanning the last ~70 years and the time taken for the labor market to recover to pre-recession levels. It illustrates the magnitude of this crisis' job losses as noted in the previous paragraph, but it also reveals that it has taken longer for the labor market to recover from shocks over time. The total number of payrolls did not return to its prior peak until six and a half years later during the protracted recovery post-GFC. The important question now is whether the aftermath of the COVID-19 shock will continue to see jobs bounce back at the current accelerated pace or will instead enter a regime of slower job gains a la the 2010s. 
+
+An underlying dynamic that helps explain much of the relative sluggishness of recent labor market recoveries can help us get closer to an answer. Downward pressure on the labor force participation rate (LFPR) stemming from demographic shifts has played an increasingly large role in dampening employment growth. As the Boomer generation has moved into old age, the proportion of the US population outside of prime working ages has expanded, contributing to a steady outflow of retirees from the labor market and creating a large cohort for which it can be harder to find a new job in roles where employers prefer younger applicants. This trend has pushed in the other direction as the job market has tried to recover from recent recessions. 
+
+The Congressional Budget Office estimates a _potential_ LFPR, an expected percentage of the population either employed or actively searching for a job based on demographic factors. The chart below shows this potential rate alongside the actual participation rate that has oscillated around it. 
+
+
+
+```{r chart2, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+raw_dat <- getSymbols('CIVPART',src='FRED', auto.assign=F) 
+
+dat <- raw_dat %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         LFPR = CIVPART) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         text = LFPR,
+         date = ceiling_date(date, "month") - days(1)) %>% 
+  filter(date > "1969-12-31")
+
+dat[length(dat$text) - 4,]$text <- dat$text[length(dat$text)-3]
+
+#dat[nrow(dat) + 1,] <- list(tail(dat,1)$date + 1, tail(dat,1)$UR)
+
+cbo_dat <- read_csv("D:\\Documents\\R directory\\cbo_dat.csv") %>% 
+  select(date, potential_lfpr) %>% 
+  mutate(date = as.yearqtr(date, "%Yq%q"),
+         date = as.Date(date, 1))
+  
+monthly <- seq(cbo_dat$date[1] + 1, tail(cbo_dat$date,1) + 1, by = "1 month") - 1
+cbo_m <- data.frame(date = monthly, 
+                    cbo_lfpr = spline(cbo_dat, 
+                                      method = "fmm", 
+                                      xout=monthly)$y) %>% 
+  as_data_frame()
+
+dat_tot <- merge(dat, cbo_m, by ="date", all.y = TRUE) %>% 
+  filter(date > "1969-12-31",
+         date <= tail(dat$date,1))
+
+dat_mut <- dat_tot %>% 
+  mutate(
+         ind = ifelse(date == "2020-04-30", date + 3500, 
+                      ifelse(date == "2020-05-31", date + 4750, 
+                             ifelse(date == "2020-06-30", date + 6000, 
+                                    ifelse(date == "2020-07-31", date + 8000, date)))))
+
+dat_long <- dat_mut %>%
+  rename('Labor Force Participation Rate' = LFPR,
+         'CBO Potential LFPR' = cbo_lfpr) %>% 
+  select(-text) %>% 
+  gather(key, value, -date, -ind)
+
+
+
+
+
+
+
+start_date <- head(dat$date,1)
+end_date <- tail(dat$date,1)
+
+
+
+ctitle_1 <- "US Labor Force Participation Rate"
+unit_label <- "% of US population in the labor force"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+
+
+chart <- dat_long %>%
+  ggplot(aes(x = date, y = value, color = key)) +
+  geom_line(aes(linetype = key, size = key)) +
+  geom_point(size = 2.5) +
+  scale_color_manual(values = c("#33a02c", "#1f78b4")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
+  scale_size_manual(values = c(0.6, 0.7)) +
+  geom_text(data = dat_mut, aes(x = date, y = LFPR, label = format(text, nsmall = 1)), nudge_x = 850,
+            show.legend = FALSE, size = 3, family = "Open Sans", color = "#1f78b4",  fontface = "bold") +
+  geom_text(data = dat_mut, aes(x = date, y = cbo_lfpr, label = format(round(cbo_lfpr,1), nsmall = 1)), nudge_x = 850,
+            show.legend = FALSE, size = 3, family = "Open Sans", color = "#33a02c",  fontface = "bold") +
+  scale_x_date(expand = c(0,0), limits = c(start_date,end_date + 1700), 
+               date_breaks = "8 years", date_labels = "%Y") +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat$date,1), "%b %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(ind, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim <- animate(chart, renderer = gifski_renderer(loop = T), fps = 25, duration = 20,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)
+
+anim
+```
+
+The US participation rate has charted something akin to a parabolic curve over the last 50 years, with strong gains in female labor force participation and Boomers entering prime working years driving upside in the '70s and '80s before the share of the female population seeking employment leveled off and the Boomers switched from a tailwind to a headwind for the participation rate. The left-hand side chart below demonstrates just how substantial the wave of women entering the workforce was, making it a primary reason that job growth following recent recessions has not had the pace of 20th century rebounds. One effect of the pandemic has been to push the labor force participation rate far below the CBO estimate of where we would expect it to be given the country's current demographic composition. This hit to the LFPR is a hidden casualty of the crisis in the sense that the focus on the UR obscures as the UR is derived solely from the proportion of unemployed in the labor force, excluding those that have lost their job and decided to retire earlier than expected or gave up looking for a new one. While the LFPR has partially rebounded, it fell in July, unlike the UR which improved last month.^[Masao Fukui, Emi Nakamura, and Jon Steinsson, ["Women, Wealth Effects, and Slow Recoveries"](http://economics.mit.edu/files/15208), August 5, 2020.]  
+
+
+```{r chart3, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+raw_dat <- getSymbols(c('LNS11300060', 'LRAC25FEUSM156S', 'LRAC25MAUSM156S'),src='FRED') 
+
+dat <- merge(LNS11300060, LRAC25MAUSM156S, LRAC25FEUSM156S) %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         PA_LFPR = LNS11300060,
+         PAM_LFPR = LRAC25MAUSM156S,
+         PAF_LFPR = LRAC25FEUSM156S) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date > "1969-12-31")
+
+#dat[length(dat$text) - 3,]$text <- dat$text[length(dat$text)-2]
+
+#dat[nrow(dat) + 1,] <- list(tail(dat,1)$date + 1, tail(dat,1)$UR)
+
+dat_mut <- dat %>% 
+  mutate(
+         ind = ifelse(date == "2020-04-01", date + 3500, 
+                      ifelse(date == "2020-05-01", date + 4750, 
+                             ifelse(date == "2020-06-01", date + 6000, 
+                                    ifelse(date == "2020-07-01", date + 8000, date)))))
+
+dat_long <- dat_mut %>% 
+  rename('Prime-Age Male LFPR' = PAM_LFPR,
+         'Prime-Age Female LFPR' = PAF_LFPR) %>% 
+  gather(key, value, -date, -ind) %>% 
+  filter(key != "PA_LFPR")
+
+
+start_date <- head(dat$date,1)
+end_date <- tail(dat$date,1)
+
+
+
+ctitle_1 <- "Prime-age labor force participation rates"
+unit_label <- "% of gender aged 25-54 in the labor force"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+
+
+chart <- dat_long %>%
+  ggplot(aes(x = date, y = value, color = key)) +
+  geom_line(aes(linetype = key, size = key)) +
+  geom_point(size = 2.5) +
+  scale_color_manual(values = c("#1f78b4", "#ff7f00")) +
+  scale_linetype_manual(values = c("solid",  "solid")) +
+  scale_size_manual(values = c(0.7, 0.7, 0.7)) +
+  geom_text(aes(x = date, y = value, label = format(round(value,1), nsmall = 1)), nudge_x = 1450,
+            show.legend = FALSE, size = 3.5, family = "Open Sans",  fontface = "bold") +
+  scale_x_date(expand = c(0,0), limits = c(start_date,end_date + 2500), 
+               date_breaks = "10 years", date_labels = "'%y") +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    legend.position = "none",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    strip.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat$date,1), "%b %Y"), ". ", source_1[1], sep = "")) +
+  facet_wrap(~key, scales = "free_y") +
+  transition_reveal(ind, keep_last = TRUE) +
+  ease_aes('linear')
+
+anim <- animate(chart, renderer = gifski_renderer(loop = T), fps = 20, duration = 21,
+                 width = 615, height = 420, type = "cairo", end_pause = 200)
+
+anim
+```
+
+The charts above show prime-age LFPRs for females and males (please note the difference in the levels and ranges of the y-axis scales), looking at the share of each between the ages of 25 and 54 in the labor force to help adjust for the effects of changing age demographics on the overall LFPRs for females and males. The right-hand side chart displays a striking trend, that of the multi-decade secular decline in the prime-age male LFPR. This downward trajectory has served as a puzzle for economists and generated a bevy of research and scholarship that I'll save for a later time. Suffice it to say that COVID-19 has so far caused a continuation of the longer-term slump in the prime-age male LFPR, just as the low amount of slack in the labor market in recent years had started to push it higher. 
+
+Indeed, a major tragedy of the COVID-19 crisis among many is that it came when the slow post-GFC recovery had finally heated up the labor market to where it began to heal some of the economic scar tissue remaining from ‘08 and ‘09. Fed Chair Jerome Powell said in speech in July of last year that “we are hearing loud and clear that this long recovery is now benefiting low- and moderate-income communities to a greater extent than has been felt for decades. Many people who have struggled to stay in the workforce are now getting an opportunity to add new and better chapters to their life stories.” The pandemic is an exogenous shock, a diabolus ex machina, that has erased that progress, and the risk is high that it has inflicted significant scarring of its own.^[Jerome Powell, [“Monetary Policy in the Post-Crisis Era”](https://www.federalreserve.gov/newsevents/speech/powell20190716a.htm), July 16, 2019.]
+
+One way to better gauge the combined scale of falling employment and labor force participation is to look at the prime-age employment to population ratio (prime-age EPOP), the percentage of the population 25-54 years old that is employed. This metric reached its pre-GFC peak not long ago before collapsing in 2020. While it has also partially rebounded swiftly, the bounce back slowed in July and may continue to level off as the virus remains widespread. The longer the pandemic goes on, the higher the likelihood that the jobs that make up the gap between where the prime-age EPOP sits now and its level in January will be permanently lost and the path back from here looks more like the 2010s. And just recovering to prior levels does not recoup what further steady job gains the economy would have experienced had there never been a pandemic.
+
+```{r chart4, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+raw_dat <- getSymbols('LNS12300060',src='FRED', auto.assign=F) 
+
+dat <- raw_dat %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         PA_EPOP = LNS12300060) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         text = PA_EPOP) %>% 
+  filter(date > "1969-12-31")
+
+dat[length(dat$text) - 3,]$text <- dat$text[length(dat$text)-2]
+
+#dat[nrow(dat) + 1,] <- list(tail(dat,1)$date + 1, tail(dat,1)$UR)
+
+dat_mut <- dat %>% 
+  mutate(ind = ifelse(date == "2020-04-01", date + 3500, 
+                      ifelse(date == "2020-05-01", date + 5750, 
+                             ifelse(date == "2020-06-01", date + 8000, 
+                                     ifelse(date == "2020-07-01", date + 8000, date)))))
+
+dat_long <- dat_mut %>%
+  rename('Prime-Age EPOP' = PA_EPOP) %>% 
+  select(-text) %>% 
+  gather(key, value, -date, -ind) 
+
+
+
+start_date <- head(dat$date,1)
+end_date <- tail(dat$date,1)
+
+
+
+ctitle_1 <- "Prime-age employment to population ratio"
+unit_label <- "% of population 25-54 years old that is employed"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+
+chart <- dat_long %>%
+  ggplot(aes(x = date, y = value, color = key)) +
+  geom_line(aes(linetype = key, size = key)) +
+  geom_point(size = 2.5) +
+  scale_color_manual(values = c("#1f78b4")) +
+  scale_linetype_manual(values = c("solid")) +
+  scale_size_manual(values = c(0.6, 0.7)) +
+  geom_text(data = dat_mut, aes(x = date, y = PA_EPOP, label = format(text, nsmall = 1)), nudge_x = 850,
+            show.legend = FALSE, size = 3, family = "Open Sans", color = "#1f78b4",  fontface = "bold") +
+  scale_x_date(expand = c(0,0), limits = c(start_date,end_date + 1700), 
+               date_breaks = "8 years", date_labels = "%Y") +
+  scale_y_continuous(labels = fmt_dcmls(0)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    legend.position = "none",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat$date,1), "%b %Y"), ". ", source_1[1], sep = "")) +
+  transition_reveal(ind, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim <- animate(chart, renderer = gifski_renderer(loop = T), fps = 25, duration = 20,
+                 width = 615, height = 420, type = "cairo", end_pause = 120)
+
+anim
+```
+
+To go a step further, we can attempt to account for another hidden impact of the crisis on the labor market in the form of workers that still have a job but are working part-time hours when they otherwise would be working full-time were we not in an economic downturn. Economists Danny Blanchflower and Andrew Levin include a measure of this in an indicator they put together to better judge the level of slack in the labor market. 
+
+I show my own approximation of the Blanchflower-Levin employment gap in the chart below, drawing from a 2015 paper of theirs. Three metrics—the unemployment gap, the participation gap, and the underemployment gap—contribute to an overall measure of the difference in the current state of the labor market from what could be considered 'full employment,' though whether any level of un- or under-employment should be thought of as _full_ is a subject of much debate. The higher the Blanchflower-Levin employment gap, the higher the amount of labor market slack.^[David G. Blanchflower and Andrew T. Levin, ["Labor Market Slack and Monetary Policy"](https://www.nber.org/papers/w21094.pdf), _National Bureau of Economic Research_, April, 2015.]
+
+
+```{r blanchflower, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(ggforce)
+
+raw_dat <- getSymbols(c('UNRATE', 'CIVPART', 'LNS12032194', 'CLF16OV') ,src='FRED', auto.assign=T) 
+
+dat <- merge(UNRATE, CIVPART, LNS12032194, CLF16OV) %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         UR = UNRATE,
+         LFPR = CIVPART,
+         PTER = LNS12032194,
+         LF = CLF16OV) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         date = ceiling_date(date, "month") - 1)
+
+## NAIRU
+raw_nairu <- getSymbols('NROU' ,src='FRED', auto.assign=T) 
+
+dat_nairu <- NROU %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         NAIRU = NROU) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date < Sys.Date())
+
+
+mthly_nairu <- seq(dat_nairu$date[1] + 1, 
+                   tail(dat_nairu$date,1) + 1, 
+                   by = "1 month") - 1
+
+nairu_m <- data.frame(date = ceiling_date(mthly_nairu, "month") - 1, 
+                      nairu = spline(dat_nairu, 
+                                      method = "fmm", 
+                                      xout=mthly_nairu)$y) %>% 
+  as_data_frame()
+
+
+## potential LFPR
+cbo_dat <- read_csv("D:\\Documents\\R directory\\cbo_dat.csv") %>% 
+  select(date, potential_lfpr) %>% 
+  mutate(date = as.yearqtr(date, "%Yq%q"),
+         date = as.Date(date, 1))
+  
+monthly <- seq(cbo_dat$date[1] + 1, tail(cbo_dat$date,1) + 1, by = "1 month") - 1
+cbo_m <- data.frame(date = monthly, 
+                    cbo_lfpr = spline(cbo_dat, 
+                                      method = "fmm", 
+                                      xout=monthly)$y) %>% 
+  as_data_frame() %>% 
+  filter(date < Sys.Date())
+
+
+## merge and gaps calculated
+dat_tot <- dat %>% 
+  left_join(nairu_m, by = "date") %>% 
+  left_join(cbo_m, by = "date") %>% 
+  filter(date > "1979-12-31",
+         date <= tail(dat$date,1)) %>% 
+  mutate(PTER_adj = PTER * (5.48/8.08),
+         PTER_perc = PTER_adj / LF)
+
+pter_avg <- dat_tot %>% 
+  select(date, PTER_perc) %>% 
+  filter(date > "1993-12-31",
+         date <= "2007-12-31") %>% 
+  summarize(avg = mean(PTER_perc)) %>% 
+  unlist()
+
+BL <- dat_tot %>% 
+  mutate(PTER_gap = (PTER_perc - pter_avg) * 100,
+         UR_gap = UR - nairu,
+         LFPR_gap = cbo_lfpr - LFPR,
+         total = PTER_gap + UR_gap + LFPR_gap) %>% 
+  select(date, PTER_gap, UR_gap, LFPR_gap) %>%
+  rename('Underemployment gap' = PTER_gap, 'Unemployment gap' = UR_gap, 'Pariticipation gap' = LFPR_gap) %>% 
+  pivot_longer(cols = ends_with("gap"), names_to = "key", values_to = "value")
+
+dat_line <- dat_tot %>% 
+  mutate(PTER_gap = (PTER_perc - pter_avg) * 100,
+         UR_gap = UR - nairu,
+         LFPR_gap = cbo_lfpr - LFPR,
+         total = PTER_gap + UR_gap + LFPR_gap)
+
+ctitle_1 <- "Blanchflower-Levin employment gap"
+unit_label <- "%"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+start_date <- head(dat_line$date,1)
+end_date <- tail(dat$date,1)
+
+BL_chart <- BL %>% 
+  mutate(placeholder = "X") %>% 
+  ggplot() +
+  geom_bar(aes(fill = key, y = value, x = date),
+           position = "stack", 
+           stat = "identity",
+           width = 32) +
+  facet_zoom(xy = date > "2018/1/1" & date < "2020/07/01", 
+             zoom.size = .4) +
+  geom_line(data = dat_line, aes(x = date, y = total), 
+             size = 0.8, 
+             alpha = .5, 
+             linetype = "dashed") +
+  scale_fill_manual(values = c("#33a02c", "#a6cee3", "#1f78b4")) +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_date(date_labels = "%Y",
+               expand = c(0,50)) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 12, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat_line$date,1), "%b, %Y"), ". ", 
+                       source_1[1], sep = "")) +
+  transition_states(placeholder)
+
+anim <- animate(BL_chart, renderer = gifski_renderer(loop = T), fps = 1, duration = 1,
+                 width = 615, height = 420, type = "cairo")
+
+anim
+```
+
+The unemployment gap is the difference between the unemployment rate and the non-accelerating inflation rate of unemployment (NAIRU). The participation gap is the difference between the LFPR and the CBO's estimate of the potential LFPR. The underemployment gap is the difference between the number of employees working part-time for economic reasons as a percentage of the labor force, adjusted for the difference in the average number of hours worked by part-time and full-time employees, and the 1994-2007 average of this calculation. 
+
+The Blanchflower-Levin indicator lays bare that the labor market is not in the midst of a single crisis. It is in an unemployment crisis. It is in a labor force participation crisis. And it is in an underemployment crisis, not to mention the wage cuts or lost wage gains for those that remain employed full-time.
+
+The fiscal response should therefore be outsized and along the lines of what economist Claudia Sahm argues for in a recent post at the Washington Center for Equitable Growth. Sahm writes that Congress "must get money out to make up for lost paychecks and reverse cuts in hours and wages of the employed. Families must have paid [health insurance](https://www.urban.org/research/publication/almost-half-adults-families-losing-work-during-pandemic-avoided-health-care-because-costs-or-covid-19-concerns), [sick leave](https://equitablegrowth.org/paid-medical-and-caregiving-leave-during-the-coronavirus-pandemic-what-they-are-and-why-they-matter/), and [child care](https://equitablegrowth.org/child-care-is-essential-for-working-parents-but-is-the-industry-ready-and-safe-to-reopen/?mkt_tok=eyJpIjoiWXpJMk5tVTBZMlUxWkRBMiIsInQiOiI1citZTytvTUQwMitYNDM5U0puem84SE9YMHc5andqck14S2Zid2J1czZ5NGdXYjBiUitHNExTUTg2dWtQTlk2c0ZHQnY2OCsxb2d3d2dnZWlvXC9QaFlwYW04cmdBVWd1TGx2UTNMZnNkclJtTGtpaUJxY2VrcEJvUFNcL3dRM0VaIn0%3D). [Renters](https://www.urban.org/urban-wire/four-ways-keep-renters-falling-eviction-cliff) and [homeowners](https://www.consumerfinance.gov/coronavirus/mortgage-and-housing-assistance/mortgage-relief/) behind on their monthly obligations must get help. As many small businesses as possible [must avoid bankruptcy](https://www.brookings.edu/blog/the-avenue/2020/05/20/in-many-of-the-hardest-hit-states-covid-19-small-business-relief-is-lagging/). And Congress must get grants to state and local governments to [avoid laying off more teachers](https://www.edweek.org/ew/articles/2020/07/14/thousands-of-teachers-laid-off-already-due.html) and [essential workers](https://www.nga.org/news/press-releases/state-and-local-coalition-comes-together-to-appeal-for-federal-aid-as-fiscal-year-ends/). Congress must get more money out now."^[Claudia Sahm, ["Congress Must Act to Help U.S. Families Facing an Income Crisis"](https://equitablegrowth.org/congress-must-act-to-help-u-s-families-facing-an-income-crisis/), Washington Center for Equitable Growth, July 29, 2020.]  
+
+
+With the $600 a week in enhanced unemployment benefits having expired, Congress in recess, and the virus precluding jobs to exist for everyone to go back to, the risk of irreparable damage being done to household balance sheets has increased. Combined with the demographic headwinds identified earlier, this damage will likely cause the kind of economic hysteresis—the chronic weakness in aggregate demand over the long-term caused by a short-term shock—that contributed to the protracted recovery in the wake of GFC. Binyamin Appelbaum described last week in _The Times_ how all of this can also soon further deteriorate in a coming eviction crisis without the fiscal action necessary to stave it off. There exists no guarantee that the sharpness of the partial rebound in jobs and labor force participation will continue and that the next decade will not be like the last—marked by a slow, anemic climb back to a healthy labor market and economy.^[Binyamin Appelbaum, ["The Coming Eviction Crisis: 'It's Hard to Pay the Bills on Nothing'"](https://www.nytimes.com/2020/08/09/opinion/evictions-foreclosures-covid-economy.html), _The New York Times_, August 9, 2020.] 
+

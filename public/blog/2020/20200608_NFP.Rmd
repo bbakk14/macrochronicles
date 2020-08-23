@@ -55,7 +55,8 @@ dat <- raw_dat %>%
   rename(date = rowname,
          UR = UNRATE) %>% 
   mutate(date = as.Date(date, "%Y-%m-%d"),
-         text = UR)
+         text = UR) %>% 
+  filter(date <= "2020-05-01")
 
 dat[length(dat$text) - 2,]$text <- dat$text[length(dat$text)-1]
 
@@ -182,7 +183,8 @@ colnames(dat) <- c("date", key)
 
 dat_wide <- dat %>% 
   mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
-  filter(date > "2010-01-31")
+  filter(date > "2010-01-31") %>% 
+  filter(date <= "2020-05-01")
 
 dat_chg <- dat_wide[,-1] %>% 
   map_df(.f = function (x) {x - first(x)}) %>% 
@@ -262,7 +264,7 @@ p <- dat_map %>%
   ease_aes('linear')
 
 anim2 <- animate(p, renderer = gifski_renderer(loop = T),
-                 width = 615, height = 615, nframes = 325, type = "cairo", end_pause = 75)
+                 width = 615, height = 615, nframes = 330, type = "cairo", end_pause = 75)
 
 anim2
 ```
@@ -303,7 +305,8 @@ colnames(dat) <- c("date", key)
 
 dat_wide <- dat %>% 
   mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
-  filter(date > "2010-01-31")
+  filter(date > "2010-01-31") %>% 
+  filter(date <= "2020-05-01")
 
 dat_map <- dat_wide %>% 
   gather(key, value, -date) %>% 
