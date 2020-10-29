@@ -6,10 +6,19 @@
     <description>Recent content in Blog on Macro Chronicles: Economics, Markets, Dataviz</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Wed, 30 Sep 2020 21:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Thu, 29 Oct 2020 21:13:14 -0500</lastBuildDate>
     
 	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Political Detour -&gt; Which way will Florida swing?</title>
+      <link>/blog/political-detour-which-way-will-florida-swing/</link>
+      <pubDate>Thu, 29 Oct 2020 21:13:14 -0500</pubDate>
+      
+      <guid>/blog/political-detour-which-way-will-florida-swing/</guid>
+      <description>It&#39;s almost November, which often means Florida has the attention of poll watchers given the tradition of Federal elections in the state coming down to razer thin margins, typically with significant implications at the national level. This year, Florida is essentially a must-win for Trump to gain re-election. FiveThirtyEight now estimates that if Biden takes Florida, Trump has less than a 1 in 100 chance of coming out on top in electoral votes.</description>
+    </item>
     
     <item>
       <title>60 years of US population pyramids</title>

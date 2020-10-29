@@ -1,0 +1,581 @@
+---
+title: "Political Detour -> Which way will Florida swing?"
+date: 2020-10-29T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+It's almost November, which often means Florida has the attention of poll watchers given the tradition of Federal elections in the state coming down to razer thin margins, typically with significant implications at the national level. This year, Florida is essentially a must-win for Trump to gain re-election. FiveThirtyEight now estimates that if Biden takes Florida, Trump has less than a 1 in 100 chance of coming out on top in electoral votes. Biden has other paths to victory, but a win in Florida would allow losses in other swing states such as Pennsylvania and Wisconsin without at all putting the kibosh on the former VP's chances.
+
+The map below illustrates Florida's history of a relatively small number of votes separating Democrats and Republicans, with Democratic edges in high-population metropolitan areas offsetting Republicans running up their tally in more rural areas. Comparing Obama's re-election victory in 2012 to Trump's win in 2016, it's clear that Clinton roughly matched Obama's performance in many of the densest counties like Palm Beach, Broward, and Miami-Dade, even surpassing Obama's 2008 and 2012 percentages in Orange county. Trump, however, made marginal inroads almost everywhere else, including large counties outside of Tampa and Orlando like Pinellas and Brevard.
+
+```{r setup, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(tidyverse)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(gganimate)
+library(ggrepel)
+library(stringr)
+
+## tutorial https://www.5haw.com/posts/week-3-making-an-animated-map-using-maps-ggplot2-and-gganimate/
+
+windowsFonts("Open Sans" = windowsFont("Open Sans"))
+             
+
+
+dat_raw <- list()
+DEM <- list()
+REP <- list()
+year <- list()
+dat_fl <- list()
+fl_c <- list()
+cycle <- list()
+
+dat_raw[[1]] <- read.csv("D:\\Documents\\R directory\\elections\\2018_FL_US_SEN.csv")
+DEM[[1]] <- "Bill Nelson: 49.9%"
+REP[[1]] <- "Rick Scott:  50.1%"
+year[[1]] <- "2018 Senate"
+cycle[[1]] <- 10
+
+dat_raw[[2]] <- read.csv("D:\\Documents\\R directory\\elections\\2016_FL_US_PRES.csv")
+DEM[[2]] <- "Hillary Clinton: 47.8%"
+REP[[2]] <- "Donald Trump:    49.0%"
+year[[2]] <- "2016 President"
+cycle[[2]] <- 9
+
+dat_raw[[3]] <- read.csv("D:\\Documents\\R directory\\elections\\2014_FL_GOV.csv")
+DEM[[3]] <- "Charlie Crist: 47.1%"
+REP[[3]] <- "Rick Scott:    48.1%"
+year[[3]] <- "2014 Governor"
+cycle[[3]] <- 8
+
+dat_raw[[4]] <- read.csv("D:\\Documents\\R directory\\elections\\2012_FL_US_PRES.csv")
+DEM[[4]] <- "Barack Obama: 50.0%"
+REP[[4]] <- "Mitt Romney:  49.1%"
+year[[4]] <- "2012 President"
+cycle[[4]] <- 7
+
+dat_raw[[5]] <- read.csv("D:\\Documents\\R directory\\elections\\2010_FL_GOV.csv")
+DEM[[5]] <- "Alex Sink:  47.7%"
+REP[[5]] <- "Rick Scott: 48.9%"
+year[[5]] <- "2010 Governor"
+cycle[[5]] <- 6
+
+dat_raw[[6]] <- read.csv("D:\\Documents\\R directory\\elections\\2008_FL_US_PRES.csv")
+DEM[[6]] <- "Barack Obama: 51.0%"
+REP[[6]] <- "John McCain:  48.2%"
+year[[6]] <- "2008 President"
+cycle[[6]] <- 5
+
+dat_raw[[7]] <- read.csv("D:\\Documents\\R directory\\elections\\2006_FL_US_SEN.csv")
+DEM[[7]] <- "Bill Nelson:      60.3%"
+REP[[7]] <- "Katherine Harris: 38.1%"
+year[[7]] <- "2006 Senate"
+cycle[[7]] <- 4
+
+dat_raw[[8]] <- read.csv("D:\\Documents\\R directory\\elections\\2004_FL_US_PRES.csv")
+DEM[[8]] <- "John Kerry:      47.1%"
+REP[[8]] <- "George Bush:     52.1%"
+year[[8]] <- "2004 President"
+cycle[[8]] <- 3
+
+dat_raw[[9]] <- read.csv("D:\\Documents\\R directory\\elections\\2002_FL_GOV.csv")
+DEM[[9]] <- "Bill McBride:  43.2%"
+REP[[9]] <- "Jeb Bush:      56.0%"
+year[[9]] <- "2002 Governor"
+cycle[[9]] <- 2
+
+dat_raw[[10]] <- read.csv("D:\\Documents\\R directory\\elections\\2000_FL_US_PRES.csv")
+DEM[[10]] <- "Al Gore:      48.8%"
+REP[[10]] <- "George Bush:  48.8%"
+year[[10]] <- "2000 President"
+cycle[[10]] <- 1
+
+
+
+## base map
+
+fl <- map_data("state") %>% 
+  subset(region == "florida")
+
+counties <- map_data("county")
+
+fl_base <- fl %>% 
+  ggplot(mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) +
+  geom_polygon(color = "black", fill = "gray") 
+
+## county electoral data
+
+for (i in 1:length(dat_raw)) {
+dat_fl[[i]] <- dat_raw[[i]] %>% 
+  as_tibble() %>%
+  mutate(other = rowSums(dat_raw[[i]][4:ncol(dat_raw[[i]])])) %>% 
+  rename(subregion = 1, republican = 2, democrat = 3) %>% 
+  select(subregion, republican, democrat, other) %>% 
+  mutate(
+         subregion = str_to_lower(subregion),
+         subregion = replace(subregion, subregion == "st. johns", "st johns"),
+         subregion = replace(subregion, subregion == "st. lucie", "st lucie"),
+         subregion = replace(subregion, subregion == "desoto", "de soto"),
+         republican = as.numeric(gsub(",", "", republican)),
+         democrat = as.numeric(gsub(",", "", democrat)),
+         dem_perc = (democrat / (republican + democrat + other)) * 100,
+         rep_perc = (republican / (republican + democrat + other)) * 100,
+         perc_diff = dem_perc - rep_perc,
+         vote_diff = democrat - republican,
+         perc_diff = case_when(perc_diff <= -50 ~ -50,
+                               perc_diff >= 50 ~ 50,
+                               perc_diff > -50 & perc_diff < 50 ~ perc_diff),
+         year = year[[i]],
+         DEM = DEM[[i]],
+         REP = REP[[i]],
+         cycle_num = cycle[[i]])
+
+fl_c[[i]] <- subset(counties, region == "florida") %>% 
+  inner_join(dat_fl[[i]], by = "subregion")
+
+}
+
+
+fl_tot <- rbind(fl_c[[1]], fl_c[[2]], fl_c[[3]], fl_c[[4]], fl_c[[5]], 
+                fl_c[[6]], fl_c[[7]], fl_c[[8]], fl_c[[9]], fl_c[[10]]) %>% 
+  as_tibble()
+
+
+
+## plot
+
+colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
+            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
+            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ditch_the_axes <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank(),
+  plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+  plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+  plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+  text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+  legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans")
+  )
+
+
+points <- data.frame(lon = c(-80.3, -82.5, -81.2, -82.2, -81.7, -84.5), 
+                     lat = c(25.8, 27.9, 28.6, 29.7, 30.4, 30.5),
+                     name = c("Miami", "Tampa", "Orlando", "Gainesville", "Jacksonville", "Tallahassee"))
+
+ctitle_1 <- "Florida statewide election returns"
+unit_label <- "%pt margin in vote share of Democrats and Republicans"
+source_1 <- "Florida Division of Elections. @benbakkum."
+
+fl_map <- fl_base +
+  geom_polygon(data = fl_tot, aes(fill = perc_diff, group = group), color = "black") +
+  geom_polygon(color = "black", fill = NA, size = .8) +
+  geom_text(data = filter(fl_tot, subregion == "alachua"), 
+            aes(x = -85.5, 28.8, label = as.character(year)),
+            size = 9, 
+            color = cpal('light grey'),
+            family = "Open Sans",
+            inherit.aes = FALSE) +
+  geom_text(data = filter(fl_tot, subregion == "alachua"), 
+            aes(x = -85.5, 28.3, label = DEM),
+            size = 6, 
+            color = cpal('blue'),
+            family = "lucida console") +
+  geom_text(data = filter(fl_tot, subregion == "alachua"), 
+            aes(x = -85.5, 27.9, label = REP),
+            size = 6, 
+            color = cpal('red'),
+            family = "lucida console") +
+  geom_point(data = points, 
+             aes(x = lon, y = lat),
+             size = 3.5,
+             fill = alpha(c("white"), 0.75),
+             color = "black",
+             shape = 21,
+             stroke = 1.5,
+             inherit.aes = FALSE) +
+  geom_label_repel(data = points,
+                   aes(x = lon, y = lat, label = name),
+                   size = 5,
+                   vjust = -0.6,
+                   hjust = 1,
+                   inherit.aes = FALSE,
+                   segment.color = NA,
+                   family = "Open Sans",
+                   fill = alpha(c("white"), 0.75)
+                   ) +
+  scale_fill_gradient2(midpoint = 0,
+                       limits = c(-50, 50),
+                       low = cpal("red"), 
+                       mid = "white", 
+                       high = cpal("blue"),
+                       space = "Lab") +
+  theme_bw() + 
+  ditch_the_axes +
+  guides(fill = guide_legend("Dem - Rep, %pts")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of 2018. ", source_1[1], sep = "")) +
+  transition_states(cycle_num, 
+                    transition_length = 3,
+                    state_length = 3,
+                    wrap = FALSE) +
+  enter_fade() +
+  ease_aes('cubic-in-out')
+
+anim <- animate(fl_map, width = 615, height = 700, type = "cairo", fps = 20, duration = 30, end_pause = 20)
+
+anim
+
+
+# merge(select(dat_fl[[2]], subregion, dem_perc), select(dat_fl[[1]], subregion, dem_perc), by = "subregion") %>% 
+#   mutate(flag = case_when(dem_perc.y > dem_perc.x ~ 1,
+#                           dem_perc.y <= dem_perc.x ~ 0)) %>% 
+#   summarize(sum = sum(flag))
+```
+
+Bill Nelson's 2018 Senate campaign successfully improved on Clinton's performance, besting Clinton's share of the vote in 62 of Florida's 67 counties. Even still, Nelson fell short of knocking off Rick Scott by just over 10,000 votes. The answer to the question of whether Biden can further build on Nelson's incremental gains relative to 2016 could determine next week's outcome. 
+
+One thing that sometimes gets lost in standard analysis of the chances of the major parties, which naturally focuses on the urban-rural divide of the electorate and turnout in certain areas, is that geographies are non-binary. A good amount of Republican votes come from urban areas, and Democrats are able to siphon away votes in less populated regions. In 2016's presidential election, 9.2% of the total votes cast in Florida were both for Trump and came from Miami-Dade, Broward, or Palm Beach, considered Democratic strongholds. The chart below shows the percentage contribution of Florida county vote totals to the state aggregate, showing the party split for each county. 
+
+```{r bar_chart, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+fl_vote <- rbind(dat_fl[[1]], dat_fl[[2]], dat_fl[[3]], dat_fl[[4]], dat_fl[[5]], 
+                dat_fl[[6]], dat_fl[[7]], dat_fl[[8]], dat_fl[[9]], dat_fl[[10]])
+
+fl_vote_long <- fl_vote %>% 
+  mutate(total_votes = republican + democrat + other) %>% 
+  group_by(year) %>% 
+  summarize(Democrat = (democrat / sum(total_votes) * 100),
+            Republican = (republican / sum(total_votes) * 100),
+            total = (total_votes / sum(total_votes)) * 100,
+            subregion = subregion,
+            year = year,
+            DEM = DEM,
+            REP = REP
+            ) %>%
+  mutate(.r = min_rank(-total * 1),
+         grp = case_when(.r > 37 ~ as.numeric(0),
+                         .r <= 37 ~ as.numeric(.r))) %>% 
+  ungroup() %>% 
+  group_by(year, grp) %>% 
+  summarize(Democrat = sum(Democrat),
+            Republican = sum(Republican),
+            total = sum(total),
+            subregion = case_when(grp == 0 ~ "Smallest 30",
+                                  grp > 0 ~ subregion),
+            year = year,
+            DEM = DEM,
+            REP = REP) %>%
+  distinct(subregion, .keep_all = TRUE) %>% 
+  ungroup() %>% 
+  rename(county = subregion) %>% 
+  mutate(county = str_to_title(county)) %>% 
+  select(year, county, Democrat, Republican, year, DEM, REP) %>% 
+  pivot_longer(cols = Democrat:Republican, names_to = "key", values_to = "values") 
+
+totals <- fl_vote_long %>% 
+  group_by(year, county) %>% 
+  summarize(total = sum(values))
+
+
+tot_vote <- fl_vote_long %>% 
+  left_join(totals) %>% 
+  mutate(actual_yr = substr(year, 1, 4))
+
+
+
+
+ctitle_1 <- "Florida statewide votes by county"
+unit_label <- "County share of total ballots cast in {closest_state}, %pts"
+source_1 <- "Florida Division of Elections. @benbakkum."
+y_title <- "Percent"
+
+fl_bar <- tot_vote %>% 
+  group_by(year) %>% 
+  mutate(.r = min_rank(-total * 1),
+         value_lbl = paste0(" ", round(total,1))) %>% 
+  ungroup() %>% 
+  #filter(year == "2018 Senate") %>% 
+  ggplot(aes(.r, group = county, fill = key, color = key, alpha = 0.93)) +
+  geom_tile(aes(
+                y = values,
+                height = values,
+                width = -1.5),
+            color = NA,
+            position = "stack") +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_x_reverse() +
+  scale_y_continuous(limits = c(0, 11)) +
+  geom_text(aes(y = 0, label = paste(county, " ")), 
+            size = 3, 
+            vjust = 0.2, 
+            hjust = 1,
+            family = "Open Sans",
+            color = "black") +
+  geom_text(aes(y = total, label = value_lbl, hjust = 0), 
+            size = 3,
+            family = "Open Sans",
+            color = "black") +
+  geom_text(data = filter(tot_vote, county == "Broward", key == "Democrat"), 
+            aes(x = 40, 6.5, label = as.character(year)),
+            size = 9, 
+            color = cpal('light grey'),
+            family = "Open Sans",
+            inherit.aes = FALSE) +
+  geom_text(data = filter(tot_vote, county == "Broward", key == "Democrat"), 
+            aes(x = 46, 6.5, label = DEM),
+            size = 6, 
+            color = cpal('blue'),
+            family = "lucida console",
+            inherit.aes = FALSE) +
+  geom_text(data = filter(tot_vote, county == "Broward", key == "Democrat"), 
+            aes(x = 50, 6.5, label = REP),
+            size = 6, 
+            color = cpal('red'),
+            family = "lucida console",
+            inherit.aes = FALSE) +
+  scale_fill_manual(values = c("Democrat" = cpal("blue"), "Republican" = cpal("red"))) +
+  scale_alpha(guide = "none") +
+  guides() +
+  theme(
+    axis.line = element_blank(),
+    axis.text.x = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_text(size = 11, color = "black", family = "Open Sans"),
+    axis.title.y = element_blank(),
+    text = element_text(size = 15, color = "black", family = "Open Sans"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.border = element_rect(color = cpal("border grey"), fill = NA, size = 0.3),
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(size = .1, color = "gray84"),
+    panel.grid.minor.x = element_line(size = .1, color = "gray84"),
+    plot.background = element_blank(),
+    plot.margin = margin(1, 3, 1, 2.5, "cm"),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = "#222222", family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = "#222222", family = "Open Sans"),
+    panel.spacing.x = unit(5, "lines"),
+    strip.text = element_text(color = "#222222", family = "Open Sans", size = 14),
+    strip.background = element_rect(color = cpal("border grey"), fill = "white")) +
+  labs(title = ctitle_1,
+       subtitle = unit_label,
+       caption = source_1,
+       y = y_title) +
+  transition_states(actual_yr, 
+                    transition_length = 3,
+                    state_length = 3,
+                    wrap = FALSE) +
+  enter_fade() +
+  ease_aes('cubic-in-out')
+  
+anim <- animate(fl_bar, width = 615, height = 700, type = "cairo", fps = 20, duration = 30, end_pause = 20)
+
+anim
+
+# dems <- tot_vote %>%
+#   filter(county == "Miami-Dade", key == "Democrat") %>%
+#   select(year, values)
+# 
+# reps <- tot_vote %>%
+#   filter(county == "Miami-Dade", key == "Republican") %>%
+#   select(year, values)
+# 
+# merge(dems, reps, by = "year") %>%
+#   mutate(diff = values.x - values.y)
+# 
+# dems <- tot_vote %>%
+#   filter(county == "Broward", key == "Democrat") %>%
+#   select(year, values)
+# 
+# reps <- tot_vote %>%
+#   filter(county == "Broward", key == "Republican") %>%
+#   select(year, values)
+# 
+# merge(dems, reps, by = "year") %>%
+#   mutate(diff = values.x - values.y)
+# 
+# dems <- tot_vote %>%
+#   filter(county == "Palm Beach", key == "Democrat") %>%
+#   select(year, values)
+# 
+# reps <- tot_vote %>%
+#   filter(county == "Palm Beach", key == "Republican") %>%
+#   select(year, values)
+# 
+# merge(dems, reps, by = "year") %>%
+#   mutate(diff = values.x - values.y)
+```
+
+Palm Beach consistently accounts for around 10% of Florida's total vote in presidential election years. The share of Palm Beach's contribution that goes to either party plays a large part in swinging the entire state one way or the other given the often minuscule statewide margin. Likewise for the handful of other counties that individually don't have as many voters as Palm Beach but each contribute over 5% of the total votes statewide. This bodes well for Biden in the context of polling that shows suburbs, especially the women in suburbs, deserting the GOP. If Biden can outdo recent Democratic campaigns in the suburbs of Palm Beach and other major counties, he'll likely edge out Trump in Florida and the electoral college.
+
+Amendment Four's passage in 2018, which lifted the lifetime ban from voting for most felons, has the potential to also buoy Biden this year relative to Nelson's and Clinton's campaigns. The voting prohibition for felons disenfranchised one out of every five Black adults in the state as recently as 2016. Florida's Republican legislature, however, almost immediately set out to undercut Amendment Four, forcing through a requirement that felons must pay back all fines, restitution, and fees related to their sentencing before regaining the right to vote. A Federal judge ruled against the Republican legislation by identifying it as a "pay-to-vote system" and noting that the Constitution prohibits poll taxes. Yet Governor DeSantis appealed, and the conservative Eleventh Court of Appeals overturned the previous ruling.^[Dexter Filkins, ["Who Gets to Vote in Florida?"](https://www.newyorker.com/magazine/2020/09/07/who-gets-to-vote-in-florida), _The New Yorker_, August 31, 2020.]
+
+Republican leadership and the courts have brought about a maelstrom of confusion, with felons likely unsure of what they may owe and whether they would be prosecuted for voting this cycle, and state officials testifying that they have no way of knowing how much felons owe or whether they've already paid. The impact of Amendment Four will surely be stunted. 
+
+Republicans will have a harder time using voter suppression to counteract the basic demographic shifts underway in Florida. A recent piece in the _Times_ reviewed data of swing state populations broken down by race and educational attainment, finding that Florida has seen a 1,579,000 increase in the "Biden coalition" voting-age population of minority voters and white voters with college degrees, while the "Trump coalition" has shrunk by 359,000 between 2016 and 2020. Separately, state voter registration data released after the registration deadline shows a 2.7%pt decline in White voters as a share of the total, but the party affiliation of registered voters has actually edged slightly towards the GOP. This may be more than offset, however, by the pool of registered voters with no party affiliation likely containing more of the demographics that tend to vote Democratic relative to 2016.^[Ford Fessenden and Lazaro Gamio, ["The Relentless Shrinking of Trump's Base"](https://www.nytimes.com/interactive/2020/10/22/us/politics/trump-voters-demographics.html), _The New York Times_, October 22, 2020.] 
+
+```{r metrics, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+pdit_raw <- read.csv("D:\\Documents\\R directory\\elections\\FL_predictit.csv")
+rcp_raw <- read.csv("D:\\Documents\\R directory\\elections\\FL_RCP_avgs.csv") #http://www.graphreader.com/
+five_raw <- read.csv("D:\\Documents\\R directory\\elections\\presidential_state_toplines_2020.csv") #https://data.fivethirtyeight.com/ "2020 Election Forecast""
+
+pdit <- pdit_raw %>% 
+  as_tibble() %>% 
+  select(ContractName, Date, CloseSharePrice) %>% 
+  rename(candidate = ContractName,
+         date = Date,
+         value = CloseSharePrice) %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y"),
+         value = str_sub(value, 2, 5),
+         value = as.numeric(value),
+         value = value * 100,
+         type = "PredictIt Contract Price, ¢",
+         candidate = case_when(candidate == "Republican" ~ "Trump",
+                               candidate == "Democratic" ~ "Biden"))
+
+
+rcp <- rcp_raw %>% 
+  as_tibble() %>% 
+  rename(date = X) %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>% 
+  pivot_longer(cols = Trump:Biden, values_to = "value") %>% 
+  rename(candidate = name) %>% 
+  mutate(type = "RCP Poll Average, %",
+         value = round(value,0))
+
+
+five <- five_raw %>% 
+  as_tibble() %>% 
+  select(modeldate, state, winstate_inc, winstate_chal) %>%
+  filter(state == "Florida") %>% 
+  select(-state) %>% 
+  rename(date = modeldate,
+         Trump = winstate_inc,
+         Biden = winstate_chal) %>% 
+  pivot_longer(cols = Trump:Biden, values_to = "value") %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y"),
+         type = "538 Win Probability, %",
+         value = as.numeric(sprintf("%.2f", round(value, 2))),
+         value = value * 100,
+         value = round(value,2)) %>% 
+  rename(candidate = name)
+
+# extra <- data.frame("candidate" = c("Biden", "Trump"),
+#                "date" = c(as.Date("2020-10-21"), as.Date("2020-10-21")),
+#                "value" = c(70, 30),
+#                "type" = c("538 Win Probability, %", "538 Win Probability, %")) %>% 
+#   as_tibble()
+
+tot <- rbind(pdit, rcp, five) %>% 
+  filter(date >= "2020-07-31") %>% ## NEED TO UPDATE THIS DATE
+  arrange(type, date)
+
+
+## chart 
+
+colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
+            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
+            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "Florida presidential race metrics"
+unit_label <- "Value, 0 to 100"
+source_1 <- "Data as of Oct 28, 2020. Source: FiveThirtyEight, RealClearPolitics, PredictIt. @benbakkum."
+
+chart1 <- tot %>% 
+  ggplot(aes(x = date, 
+             y = value, 
+             color = candidate, 
+             linetype = type)) +
+  geom_line(size = 1.1, 
+            alpha = 0.75) +
+  geom_point(aes(x = date, 
+                 y = value),
+             size = 2.7) +
+  geom_text(aes(x = date, 
+                y = value, 
+                label = value), 
+                  nudge_x = 3.5, 
+                  nudge_y = 0.01,
+                  show.legend = FALSE, 
+                  size = 4, 
+                  family = "Open Sans", 
+                  fontface = "bold") +
+  scale_x_date(expand = c(0,0), 
+               limits = c(min(tot$date), max(tot$date) + 6),
+               date_breaks = "2 week",
+               date_labels = "%b %d") +
+  scale_color_manual(values = c(cpal("blue"), cpal("red"))) +
+  scale_linetype_manual(values = c("dashed", "dotted", "solid")) +
+  theme(
+    axis.line = element_blank(),
+    axis.text.x = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    text = element_text(size = 15, color = "black", family = "Open Sans"),
+    legend.position = "bottom",
+    legend.title = element_text(size = 15, color = "black", family = "Open Sans"),
+    panel.border = element_rect(color = cpal("border grey"), fill = NA, size = 0.3),
+    panel.background = element_blank(),
+    panel.grid.major = element_line(size = .1, color = "gray84"),
+    panel.grid.minor = element_line(size = .1, color = "gray84"),
+    panel.grid.major.x = element_line(size = .1, color = "gray84"),
+    panel.grid.minor.x = element_line(size = .1, color = "gray84"),
+    plot.background = element_blank(),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = "#222222", family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = "#222222", family = "Open Sans"),
+    panel.spacing.x = unit(5, "lines"),
+    strip.text = element_text(color = "#222222", family = "Open Sans", size = 14),
+    strip.background = element_rect(color = cpal("border grey"), fill = "white"),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")) +
+  labs(title = ctitle_1,
+       subtitle = unit_label,
+       caption = source_1,
+       color = "Candidate",
+       linetype = "Metric") +
+  guides(color = guide_legend(ncol = 1, bycol=TRUE, title.position = "top"),
+         linetype = guide_legend(ncol = 1, bycol = TRUE, title.position = "top")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 300,
+                 width = 615, height = 520, type = "cairo", end_pause = 200)  
+
+anim1
+  
+```
+
+How all of these dynamics will shake out and collectively influence who will win the state is hard to parse. The unpredictable nature of how the pandemic will affect voting further complicates the picture. Polling now shows an extremely tight race, as illustrated in the chart above that includes the currently tied RealClearPolitics polling averages. While betting markets currently favor Trump in Florida, FiveThirtyEight gives Biden the upper-hand in its calculations of the candidates' chances of winning. If I had to pick, I would go with Biden coming out on top in Florida, attributable to white suburban women switching over from voting Republican and white voters overall now making up proportionally less of the voting-age population.  
