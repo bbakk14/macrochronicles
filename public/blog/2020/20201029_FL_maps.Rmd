@@ -249,7 +249,7 @@ anim
 #   summarize(sum = sum(flag))
 ```
 
-Bill Nelson's 2018 Senate campaign successfully improved on Clinton's performance, besting Clinton's share of the vote in 62 of Florida's 67 counties. Even still, Nelson fell short of knocking off Rick Scott by just over 10,000 votes. The answer to the question of whether Biden can further build on Nelson's incremental gains relative to 2016 could determine next week's outcome. 
+Bill Nelson's 2018 Senate campaign successfully improved on Clinton's performance, besting Clinton's share of the vote in 62 of Florida's 67 counties. Even still, Nelson fell short of knocking off Rick Scott by just over 10,000 votes. The answer to the question of whether Biden can further build on Nelson's incremental gains relative to 2016 will determine next week's outcome. 
 
 One thing that sometimes gets lost in standard analysis of the chances of the major parties, which naturally focuses on the urban-rural divide of the electorate and turnout in certain areas, is that geographies are non-binary. A good amount of Republican votes come from urban areas, and Democrats are able to siphon away votes in less populated regions. In 2016's presidential election, 9.2% of the total votes cast in Florida were both for Trump and came from Miami-Dade, Broward, or Palm Beach, considered Democratic strongholds. The chart below shows the percentage contribution of Florida county vote totals to the state aggregate, showing the party split for each county. 
 
@@ -426,7 +426,7 @@ anim
 #   mutate(diff = values.x - values.y)
 ```
 
-Palm Beach consistently accounts for around 10% of Florida's total vote in presidential election years. The share of Palm Beach's contribution that goes to either party plays a large part in swinging the entire state one way or the other given the often minuscule statewide margin. Likewise for the handful of other counties that individually don't have as many voters as Palm Beach but each contribute over 5% of the total votes statewide. This bodes well for Biden in the context of polling that shows suburbs, especially the women in suburbs, deserting the GOP. If Biden can outdo recent Democratic campaigns in the suburbs of Palm Beach and other major counties, he'll likely edge out Trump in Florida and the electoral college.
+Miami-Dade consistently accounts for around 10% of Florida's total vote in presidential election years. The share of Miami-Dade's contribution that goes to either party plays a large part in swinging the entire state one way or the other given the often minuscule statewide margin. Likewise for the handful of other counties that individually don't have as many voters as Miami-Dade but each contribute over 5% of the total votes statewide. This bodes well for Biden in the context of polling that shows suburbs, especially the women in suburbs, deserting the GOP. If Biden can outdo recent Democratic campaigns in the suburbs of Miami-Dade and other major counties, he'll likely edge out Trump in Florida and the electoral college.
 
 Amendment Four's passage in 2018, which lifted the lifetime ban from voting for most felons, has the potential to also buoy Biden this year relative to Nelson's and Clinton's campaigns. The voting prohibition for felons disenfranchised one out of every five Black adults in the state as recently as 2016. Florida's Republican legislature, however, almost immediately set out to undercut Amendment Four, forcing through a requirement that felons must pay back all fines, restitution, and fees related to their sentencing before regaining the right to vote. A Federal judge ruled against the Republican legislation by identifying it as a "pay-to-vote system" and noting that the Constitution prohibits poll taxes. Yet Governor DeSantis appealed, and the conservative Eleventh Court of Appeals overturned the previous ruling.^[Dexter Filkins, ["Who Gets to Vote in Florida?"](https://www.newyorker.com/magazine/2020/09/07/who-gets-to-vote-in-florida), _The New Yorker_, August 31, 2020.]
 
@@ -449,7 +449,7 @@ pdit <- pdit_raw %>%
          value = str_sub(value, 2, 5),
          value = as.numeric(value),
          value = value * 100,
-         type = "PredictIt Contract Price, ¢",
+         type = "PredictIt Contract Price, cents",
          candidate = case_when(candidate == "Republican" ~ "Trump",
                                candidate == "Democratic" ~ "Biden"))
 
