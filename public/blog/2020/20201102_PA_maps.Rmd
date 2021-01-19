@@ -1,0 +1,604 @@
+---
+title: "Political Detour -> Which way will Pennsylvania swing?"
+date: 2020-11-02T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+After mapping Florida's electoral history and looking at the outlook there for this cycle [last week](https://www.macrochronicles.com/blog/political-detour-which-way-will-florida-swing/), I was curious what the equivalent charts for Pennsylvania would show. Pennsylvania was one of the three Rust Belt states that flipped in 2016, eroding the Blue Wall in the North that previously seemed unlikely gains for Republicans. Trump very narrowly carried Pennsylvania, Michigan, and Wisconsin, with less than 45,000 votes in each state differentiating the candidates and ultimately determining which way the electoral college swung. 
+
+This time around, Biden holds a more comfortable lead in polls in Michigan and Wisconsin than Clinton did, yet Pennsylvania and its relatively larger electoral vote count appear en route to another outcome defined by the slimmest of margins. Jackson Bryman notes on Twitter that the discrepancy in polling can likely be attributed to "1) rural Michigan and Wisconsin are not Appalachian; those areas (WI/MI) are much less culturally conservative." and "2) 'Rural' Appalachian Central PA is actually quite populous."
+
+```{r setup, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(tidyverse)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(gganimate)
+library(ggrepel)
+library(stringr)
+
+## tutorial https://www.5haw.com/posts/week-3-making-an-animated-map-using-maps-ggplot2-and-gganimate/
+
+windowsFonts("Open Sans" = windowsFont("Open Sans"))
+             
+
+
+dat_raw <- list()
+dat_rawish <- list()
+DEM <- list()
+REP <- list()
+year <- list()
+dat_pa <- list()
+pa_c <- list()
+cycle <- list()
+
+dat_raw[[1]] <- read.csv("D:\\Documents\\R directory\\elections\\20181106__pa__general__county.csv") %>% filter(office == "U.S. Senate")
+DEM[[1]] <- "Bob Casey Jr:  55.7%"
+REP[[1]] <- "Lou Barletta:  42.6%"
+year[[1]] <- "2018 Senate"
+cycle[[1]] <- 10
+
+dat_raw[[2]] <- read.csv("D:\\Documents\\R directory\\elections\\20161108__pa__general_county.csv") %>% filter(office == "President")
+DEM[[2]] <- "Hillary Clinton: 47.5%"
+REP[[2]] <- "Donald Trump:    48.2%"
+year[[2]] <- "2016 President"
+cycle[[2]] <- 9
+
+dat_raw[[3]] <- read.csv("D:\\Documents\\R directory\\elections\\20141104__pa__general__county.csv") %>% filter(office == "Governor")
+DEM[[3]] <- "Tom Wolf:       54.9%"
+REP[[3]] <- "Tom Corbett:    45.1%"
+year[[3]] <- "2014 Governor"
+cycle[[3]] <- 8
+
+dat_raw[[4]] <- read.csv("D:\\Documents\\R directory\\elections\\20121102__pa__general__county.csv") %>% filter(office == "President")
+DEM[[4]] <- "Barack Obama: 52.0%"
+REP[[4]] <- "Mitt Romney:  46.6%"
+year[[4]] <- "2012 President"
+cycle[[4]] <- 7
+
+dat_raw[[5]] <- read.csv("D:\\Documents\\R directory\\elections\\20101102__pa__general__county.csv") %>% filter(office == "U.S. Senate")
+DEM[[5]] <- "Joe Sestak: 49.0%"
+REP[[5]] <- "Pat Toomey: 51.0%"
+year[[5]] <- "2010 Governor"
+cycle[[5]] <- 6
+
+dat_raw[[6]] <- read.csv("D:\\Documents\\R directory\\elections\\20081104__pa__general__county.csv") %>% filter(office == "President")
+DEM[[6]] <- "Barack Obama: 54.5%"
+REP[[6]] <- "John McCain:  44.2%"
+year[[6]] <- "2008 President"
+cycle[[6]] <- 5
+
+dat_raw[[7]] <- read.csv("D:\\Documents\\R directory\\elections\\20061107__pa__general__county.csv") %>% filter(office == "U.S. Senate")
+DEM[[7]] <- "Bob Casey Jr:      58.6%"
+REP[[7]] <- "Rick Santorum:     41.3%"
+year[[7]] <- "2006 Senate"
+cycle[[7]] <- 4
+
+dat_raw[[8]] <- read.csv("D:\\Documents\\R directory\\elections\\20041102__pa__general__county.csv") %>% filter(office == "President")
+DEM[[8]] <- "John Kerry:      50.9%"
+REP[[8]] <- "George Bush:     48.4%"
+year[[8]] <- "2004 President"
+cycle[[8]] <- 3
+
+dat_raw[[9]] <- read.csv("D:\\Documents\\R directory\\elections\\20021105__pa__general__county.csv") %>% filter(office == "Governor")
+DEM[[9]] <- "Ed Rendell:  53.4%"
+REP[[9]] <- "Mike Fisher: 44.4%"
+year[[9]] <- "2002 Governor"
+cycle[[9]] <- 2
+
+dat_raw[[10]] <- read.csv("D:\\Documents\\R directory\\elections\\20001107__pa__general__county.csv") %>% filter(office == "President")
+DEM[[10]] <- "Al Gore:      50.6%"
+REP[[10]] <- "George Bush:  46.4%"
+year[[10]] <- "2000 President"
+cycle[[10]] <- 1
+
+
+
+## base map
+
+pa <- map_data("state") %>% 
+  subset(region == "pennsylvania")
+
+counties <- map_data("county")
+
+pa_base <- pa %>% 
+  ggplot(mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) +
+  geom_polygon(color = "black", fill = "gray") 
+
+## county electoral data
+
+for (i in 1:length(dat_raw)) {
+dat_rawish[[i]] <- dat_raw[[i]] %>% 
+  as_tibble() %>%
+  arrange(county, factor(party, levels = c("REP", "DEM"))) %>%
+  select(-district, -office, -party) %>% 
+  pivot_wider(names_from = "candidate", values_from = "votes")
+
+if (ncol(dat_rawish[[i]]) < 4) {
+  dat_pa[[i]] <- dat_rawish[[i]] %>% 
+    rename(subregion = 1, republican = 2, democrat = 3) %>% 
+    select(subregion, republican, democrat) %>% 
+    mutate(
+           subregion = str_to_lower(subregion),
+           republican = as.numeric(gsub(",", "", republican)),
+           democrat = as.numeric(gsub(",", "", democrat)),
+           dem_perc = (democrat / (republican + democrat)) * 100,
+           rep_perc = (republican / (republican + democrat)) * 100,
+           perc_diff = dem_perc - rep_perc,
+           vote_diff = democrat - republican,
+           perc_diff = case_when(perc_diff <= -50 ~ -50,
+                                 perc_diff >= 50 ~ 50,
+                                 perc_diff > -50 & perc_diff < 50 ~ perc_diff),
+           year = year[[i]],
+           DEM = DEM[[i]],
+           REP = REP[[i]],
+           cycle_num = cycle[[i]])
+} else {
+  dat_pa[[i]] <- dat_rawish[[i]] %>% 
+    mutate(other = rowSums(dat_rawish[[i]][4:ncol(dat_rawish[[i]])])) %>% 
+    rename(subregion = 1, republican = 2, democrat = 3) %>% 
+    select(subregion, republican, democrat, other) %>% 
+    mutate(
+           subregion = str_to_lower(subregion),
+           republican = as.numeric(gsub(",", "", republican)),
+           democrat = as.numeric(gsub(",", "", democrat)),
+           dem_perc = (democrat / (republican + democrat + other)) * 100,
+           rep_perc = (republican / (republican + democrat + other)) * 100,
+           perc_diff = dem_perc - rep_perc,
+           vote_diff = democrat - republican,
+           perc_diff = case_when(perc_diff <= -50 ~ -50,
+                                 perc_diff >= 50 ~ 50,
+                                 perc_diff > -50 & perc_diff < 50 ~ perc_diff),
+           year = year[[i]],
+           DEM = DEM[[i]],
+           REP = REP[[i]],
+           cycle_num = cycle[[i]])
+}
+
+if (ncol(dat_rawish[[i]]) < 4) {
+pa_c[[i]] <- subset(counties, region == "pennsylvania") %>% 
+  inner_join(dat_pa[[i]], by = "subregion")
+
+dat_pa[[i]] <- dat_pa[[i]] %>% 
+  mutate(other = 0)
+} else {
+pa_c[[i]] <- subset(counties, region == "pennsylvania") %>% 
+  inner_join(dat_pa[[i]], by = "subregion") %>% 
+  select(-other)
+
+}
+}
+
+pa_tot <- rbind(pa_c[[1]], pa_c[[2]], pa_c[[3]], pa_c[[4]], pa_c[[5]], 
+                pa_c[[6]], pa_c[[7]], pa_c[[8]], pa_c[[9]], pa_c[[10]]) %>% 
+  as_tibble()
+
+
+
+## plot
+
+colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
+            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
+            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ditch_the_axes <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank(),
+  plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+  plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+  plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+  text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+  legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans")
+  )
+
+
+points <- data.frame(lon = c(-75.15, -75.67, -76.89, -76.77, -80), 
+                     lat = c(39.95, 41.43, 40.33, 40, 40.5),
+                     name = c("Philadelphia", "Scranton", "Harrisburg", "York", "Pittsburgh"))
+
+ctitle_1 <- "Pennsylvania statewide election returns"
+unit_label <- "%pt margin in vote share of Democrats and Republicans"
+source_1 <- "Source: The OpenElections Project. @benbakkum."
+
+pa_map <- pa_base +
+  geom_polygon(data = pa_tot, aes(fill = perc_diff, group = group), color = "black") +
+  geom_polygon(color = "black", fill = NA, size = .8) +
+  geom_text(data = filter(pa_tot, subregion == "adams"), 
+            aes(x = -77.6, 39.5, label = as.character(year)),
+            size = 9, 
+            color = cpal('light grey'),
+            family = "Open Sans",
+            inherit.aes = FALSE) +
+  geom_text(data = filter(pa_tot, subregion == "adams"), 
+            aes(x = -77.6, 39.2, label = DEM),
+            size = 6, 
+            color = cpal('blue'),
+            family = "lucida console") +
+  geom_text(data = filter(pa_tot, subregion == "adams"), 
+            aes(x = -77.6, 38.9, label = REP),
+            size = 6, 
+            color = cpal('red'),
+            family = "lucida console") +
+  geom_point(data = points, 
+             aes(x = lon, y = lat),
+             size = 3.5,
+             fill = alpha(c("white"), 0.75),
+             color = "black",
+             shape = 21,
+             stroke = 1.5,
+             inherit.aes = FALSE) +
+  geom_label_repel(data = points,
+                   aes(x = lon, y = lat, label = name),
+                   size = 5,
+                   vjust = -0.6,
+                   hjust = 1,
+                   inherit.aes = FALSE,
+                   segment.color = NA,
+                   family = "Open Sans",
+                   fill = alpha(c("white"), 0.75)
+                   ) +
+  scale_fill_gradient2(midpoint = 0,
+                       limits = c(-50, 50),
+                       low = cpal("red"), 
+                       mid = "white", 
+                       high = cpal("blue"),
+                       space = "Lab") +
+  theme_bw() + 
+  ditch_the_axes +
+  guides(fill = guide_legend("Dem - Rep, %pts")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of 2018. ", source_1[1], sep = "")) +
+  transition_states(cycle_num, 
+                    transition_length = 3,
+                    state_length = 3,
+                    wrap = FALSE) +
+  enter_fade() +
+  ease_aes('cubic-in-out')
+
+anim <- animate(pa_map, width = 615, height = 600, type = "cairo", fps = 20, duration = 30, end_pause = 20)
+
+anim
+
+
+# merge(select(dat_fl[[2]], subregion, dem_perc), select(dat_fl[[1]], subregion, dem_perc), by = "subregion") %>% 
+#   mutate(flag = case_when(dem_perc.y > dem_perc.x ~ 1,
+#                           dem_perc.y <= dem_perc.x ~ 0)) %>% 
+#   summarize(sum = sum(flag))
+```
+
+Trump flipped only three Pennsylvania counties in 2016, driving many parts of the state more deeply red than they already were. Biden looks to shore up the Dem 2018 midterm gains in the Philadelphia suburbs (Chester, Montgomery, and Bucks counties) while taking back counties like Erie from Trump, the bellwether that was one of the three to switch from blue to red in 2016.^[Keith Collins, Trip Gabriel, and Stephanie Saul, ["The Battlegrounds Within Battlegrounds"](https://www.nytimes.com/interactive/2020/us/politics/battleground-states-trump-biden.html), _The New York Times_, October 31, 2020.] 
+
+```{r bar_chart, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+pa_vote <- rbind(dat_pa[[1]], dat_pa[[2]], dat_pa[[3]], dat_pa[[4]], dat_pa[[5]], 
+                dat_pa[[6]], dat_pa[[7]], dat_pa[[8]], dat_pa[[9]], dat_pa[[10]])
+
+pa_vote_long <- pa_vote %>% 
+  mutate(total_votes = republican + democrat + other) %>% 
+  group_by(year) %>% 
+  summarize(Democrat = (democrat / sum(total_votes) * 100),
+            Republican = (republican / sum(total_votes) * 100),
+            total = (total_votes / sum(total_votes)) * 100,
+            subregion = subregion,
+            year = year,
+            DEM = DEM,
+            REP = REP
+            ) %>%
+  mutate(.r = min_rank(-total * 1),
+         grp = case_when(.r > 37 ~ as.numeric(0),
+                         .r <= 37 ~ as.numeric(.r))) %>% 
+  ungroup() %>% 
+  group_by(year, grp) %>% 
+  summarize(Democrat = sum(Democrat),
+            Republican = sum(Republican),
+            total = sum(total),
+            subregion = case_when(grp == 0 ~ "Smallest 30",
+                                  grp > 0 ~ subregion),
+            year = year,
+            DEM = DEM,
+            REP = REP) %>%
+  distinct(subregion, .keep_all = TRUE) %>% 
+  ungroup() %>% 
+  rename(county = subregion) %>% 
+  mutate(county = str_to_title(county)) %>% 
+  select(year, county, Democrat, Republican, year, DEM, REP) %>% 
+  pivot_longer(cols = Democrat:Republican, names_to = "key", values_to = "values") 
+
+totals <- pa_vote_long %>% 
+  group_by(year, county) %>% 
+  summarize(total = sum(values))
+
+
+tot_vote <- pa_vote_long %>% 
+  left_join(totals) %>% 
+  mutate(actual_yr = substr(year, 1, 4))
+
+
+
+
+ctitle_1 <- "Pennsylvania statewide votes by county"
+unit_label <- "County share of total ballots cast in {closest_state}, %pts"
+source_1 <- "Pennsylvania Division of Elections. @benbakkum."
+y_title <- "Percent"
+
+pa_bar <- tot_vote %>% 
+  group_by(year) %>% 
+  mutate(.r = min_rank(-total * 1),
+         value_lbl = paste0(" ", round(total,1))) %>% 
+  ungroup() %>% 
+  #filter(year == "2018 Senate") %>% 
+  ggplot(aes(.r, group = county, fill = key, color = key, alpha = 0.93)) +
+  geom_tile(aes(
+                y = values,
+                height = values,
+                width = -1.5),
+            color = NA,
+            position = "stack") +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_x_reverse() +
+  scale_y_continuous(limits = c(0, 12)) +
+  geom_text(aes(y = 0, label = paste(county, " ")), 
+            size = 3, 
+            vjust = 0.2, 
+            hjust = 1,
+            family = "Open Sans",
+            color = "black") +
+  geom_text(aes(y = total, label = value_lbl, hjust = 0), 
+            size = 3,
+            family = "Open Sans",
+            color = "black") +
+  geom_text(data = filter(tot_vote, county == "Lancaster", key == "Democrat"), 
+            aes(x = 40, 6.5, label = as.character(year)),
+            size = 9, 
+            color = cpal('light grey'),
+            family = "Open Sans",
+            inherit.aes = FALSE) +
+  geom_text(data = filter(tot_vote, county == "Lancaster", key == "Democrat"), 
+            aes(x = 46, 6.5, label = DEM),
+            size = 6, 
+            color = cpal('blue'),
+            family = "lucida console",
+            inherit.aes = FALSE) +
+  geom_text(data = filter(tot_vote, county == "Lancaster", key == "Democrat"), 
+            aes(x = 50, 6.5, label = REP),
+            size = 6, 
+            color = cpal('red'),
+            family = "lucida console",
+            inherit.aes = FALSE) +
+  scale_fill_manual(values = c("Democrat" = cpal("blue"), "Republican" = cpal("red"))) +
+  scale_alpha(guide = "none") +
+  guides() +
+  theme(
+    axis.line = element_blank(),
+    axis.text.x = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_text(size = 11, color = "black", family = "Open Sans"),
+    axis.title.y = element_blank(),
+    text = element_text(size = 15, color = "black", family = "Open Sans"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.border = element_rect(color = cpal("border grey"), fill = NA, size = 0.3),
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(size = .1, color = "gray84"),
+    panel.grid.minor.x = element_line(size = .1, color = "gray84"),
+    plot.background = element_blank(),
+    plot.margin = margin(1, 3, 1, 2.5, "cm"),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = "#222222", family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = "#222222", family = "Open Sans"),
+    panel.spacing.x = unit(5, "lines"),
+    strip.text = element_text(color = "#222222", family = "Open Sans", size = 14),
+    strip.background = element_rect(color = cpal("border grey"), fill = "white")) +
+  labs(title = ctitle_1,
+       subtitle = unit_label,
+       caption = source_1,
+       y = y_title) +
+  transition_states(actual_yr, 
+                    transition_length = 3,
+                    state_length = 3,
+                    wrap = FALSE) +
+  enter_fade() +
+  ease_aes('cubic-in-out')
+  
+anim <- animate(pa_bar, width = 615, height = 700, type = "cairo", fps = 20, duration = 30, end_pause = 20)
+
+anim
+
+# dems <- tot_vote %>%
+#   filter(county == "Miami-Dade", key == "Democrat") %>%
+#   select(year, values)
+# 
+# reps <- tot_vote %>%
+#   filter(county == "Miami-Dade", key == "Republican") %>%
+#   select(year, values)
+# 
+# merge(dems, reps, by = "year") %>%
+#   mutate(diff = values.x - values.y)
+# 
+# dems <- tot_vote %>%
+#   filter(county == "Broward", key == "Democrat") %>%
+#   select(year, values)
+# 
+# reps <- tot_vote %>%
+#   filter(county == "Broward", key == "Republican") %>%
+#   select(year, values)
+# 
+# merge(dems, reps, by = "year") %>%
+#   mutate(diff = values.x - values.y)
+# 
+# dems <- tot_vote %>%
+#   filter(county == "Palm Beach", key == "Democrat") %>%
+#   select(year, values)
+# 
+# reps <- tot_vote %>%
+#   filter(county == "Palm Beach", key == "Republican") %>%
+#   select(year, values)
+# 
+# merge(dems, reps, by = "year") %>%
+#   mutate(diff = values.x - values.y)
+```
+
+
+In the homestretch of the cycle, the RealClearPolitics poll average has shown a considerable amount of tightening, with Trump closing much of the polling gap that has existed for months. The 538 polling average, however, has Trump gaining less ground, and the 538 win probabilities for either candidate have held steady since mid-October. Betting markets seem to be more closely tracking the RCP average and likely have involve seekers looking for another upset a la 2016.
+
+```{r metrics, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+pdit_raw <- read.csv("D:\\Documents\\R directory\\elections\\PA_predictit.csv")
+rcp_raw <- read.csv("D:\\Documents\\R directory\\elections\\PA_RCP_avgs.csv") #http://www.graphreader.com/ - grab 3M chart from RCP
+five_raw <- read.csv("D:\\Documents\\R directory\\elections\\presidential_state_toplines_2020.csv") #https://data.fivethirtyeight.com/ "2020 Election Forecast""
+
+pdit <- pdit_raw %>% 
+  as_tibble() %>% 
+  select(ContractName, Date, CloseSharePrice) %>% 
+  rename(candidate = ContractName,
+         date = Date,
+         value = CloseSharePrice) %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y"),
+         value = str_sub(value, 2, 5),
+         value = as.numeric(value),
+         value = value * 100,
+         type = "PredictIt Contract Price, cents",
+         candidate = case_when(candidate == "Republican" ~ "Trump",
+                               candidate == "Democratic" ~ "Biden"))
+
+
+rcp <- rcp_raw %>% 
+  as_tibble() %>% 
+  rename(date = X) %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>% 
+  pivot_longer(cols = Trump:Biden, values_to = "value") %>% 
+  rename(candidate = name) %>% 
+  mutate(type = "RCP Poll Average, %",
+         value = round(value,0))
+
+
+five <- five_raw %>% 
+  as_tibble() %>% 
+  select(modeldate, state, winstate_inc, winstate_chal) %>%
+  filter(state == "Pennsylvania") %>%  #change to right state
+  select(-state) %>% 
+  rename(date = modeldate,
+         Trump = winstate_inc,
+         Biden = winstate_chal) %>% 
+  pivot_longer(cols = Trump:Biden, values_to = "value") %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y"),
+         type = "538 Win Probability, %",
+         value = as.numeric(sprintf("%.2f", round(value, 2))),
+         value = value * 100,
+         value = round(value,2)) %>% 
+  rename(candidate = name)
+
+# extra <- data.frame("candidate" = c("Biden", "Trump"),
+#                "date" = c(as.Date("2020-10-21"), as.Date("2020-10-21")),
+#                "value" = c(70, 30),
+#                "type" = c("538 Win Probability, %", "538 Win Probability, %")) %>% 
+#   as_tibble()
+
+tot <- rbind(pdit, rcp, five) %>% 
+  filter(date >= "2020-08-04") %>% ## NEED TO UPDATE THIS DATE
+  arrange(type, date)
+
+
+## chart 
+
+colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
+            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
+            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+ctitle_1 <- "Pennsylvania presidential race metrics"
+unit_label <- "Value, 0 to 100"
+source_1 <- "Data as of Oct 28, 2020. Source: FiveThirtyEight, RealClearPolitics, PredictIt. @benbakkum."
+
+chart1 <- tot %>% 
+  ggplot(aes(x = date, 
+             y = value, 
+             color = candidate, 
+             linetype = type)) +
+  geom_line(size = 1.1, 
+            alpha = 0.75) +
+  geom_point(aes(x = date, 
+                 y = value),
+             size = 2.7) +
+  geom_text(aes(x = date, 
+                y = value, 
+                label = value), 
+                  nudge_x = 3.5, 
+                  nudge_y = 0.01,
+                  show.legend = FALSE, 
+                  size = 4, 
+                  family = "Open Sans", 
+                  fontface = "bold") +
+  scale_x_date(expand = c(0,0), 
+               limits = c(min(tot$date), max(tot$date) + 6),
+               date_breaks = "2 week",
+               date_labels = "%b %d") +
+  scale_color_manual(values = c(cpal("blue"), cpal("red"))) +
+  scale_linetype_manual(values = c("dashed", "dotted", "solid")) +
+  theme(
+    axis.line = element_blank(),
+    axis.text.x = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(color = "#222222", family = "Open Sans", size = 14,
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    text = element_text(size = 15, color = "black", family = "Open Sans"),
+    legend.position = "bottom",
+    legend.title = element_text(size = 15, color = "black", family = "Open Sans"),
+    panel.border = element_rect(color = cpal("border grey"), fill = NA, size = 0.3),
+    panel.background = element_blank(),
+    panel.grid.major = element_line(size = .1, color = "gray84"),
+    panel.grid.minor = element_line(size = .1, color = "gray84"),
+    panel.grid.major.x = element_line(size = .1, color = "gray84"),
+    panel.grid.minor.x = element_line(size = .1, color = "gray84"),
+    plot.background = element_blank(),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = "#222222", family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = "#222222", family = "Open Sans"),
+    panel.spacing.x = unit(5, "lines"),
+    strip.text = element_text(color = "#222222", family = "Open Sans", size = 14),
+    strip.background = element_rect(color = cpal("border grey"), fill = "white"),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")) +
+  labs(title = ctitle_1,
+       subtitle = unit_label,
+       caption = source_1,
+       color = "Candidate",
+       linetype = "Metric") +
+  guides(color = guide_legend(ncol = 1, bycol=TRUE, title.position = "top"),
+         linetype = guide_legend(ncol = 1, bycol = TRUE, title.position = "top")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 300,
+                 width = 615, height = 520, type = "cairo", end_pause = 200)  
+
+anim1
+  
+```
