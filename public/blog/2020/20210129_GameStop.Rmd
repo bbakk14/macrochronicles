@@ -1,0 +1,402 @@
+---
+title: "GameStop and the memestock discourse"
+date: 2021-01-29T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+Everyone and their aunt's goldendoodle have penned a substack piece or tweetstorm on the happenings in the market this week, so there's hardly any original thoughts on the topic left to have, but it does feel as though 15 years from now we'll all still sometimes pause to muse on the Great GameStop Short Squeeze of '21. I can't, in that case, help but take down a few notes on some of the memorable bits born out of current market conditions.  
+
+I wrote last June on the [rise of retail trading](https://www.macrochronicles.com/blog/on-trading-and-the-poster-boy-of-retail-bros/) during the pandemic and how Robinhood traders and large money managers alike place bets on an uncertain future. At that point, it had become clear that a combination of working from home and a bull market fueled by fiscal and monetary stimulus had drawn a cohort of new speculators into the market. Early 2020 marked a regime change in the public's interest in opening up trading accounts, using leverage, and diving into option strategies. According to Google search data, that interest began to wane towards the end of last year but has surged again in 2021. 
+
+```{r setup, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(tidyverse)
+library(quantmod)
+library(gganimate)
+library(scales)
+library(magick)
+library(tidyquant)
+library(tiktokrmd)
+
+colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
+            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
+            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+```
+
+
+```{r gtrends, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(gtrendsR)
+library(tibbletime)
+
+raw <- list()
+raw[[1]] <- gtrends(keyword = "Call option", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[2]] <- gtrends(keyword = "Margin account", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[3]] <- gtrends(keyword = "Etrade", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[4]] <- gtrends(keyword = "Robinhood", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+raw[[5]] <- gtrends(keyword = "thinkorswim", geo = "US", time = "today+5-y", onlyInterest = TRUE)
+
+
+list_dat <- list()
+for (i in 1:length(raw)) {
+  list_dat[[i]] <- raw[[i]]$interest_over_time %>% 
+        as_data_frame() %>% 
+        select(date, hits, keyword) %>% 
+        mutate(date = as.Date(date, "%Y-%b-%d"))
+  }
+
+roll_mean_3 <- rollify(mean, window = 3)
+
+all_dat <- do.call(rbind.data.frame, list_dat) %>% 
+  rename(value = hits,
+         key = keyword) %>% 
+  pivot_wider(names_from = "key", values_from = "value")
+  
+all_dat[,-1] %>% 
+  map(.f = roll_mean_3) %>%
+  as_data_frame() %>% 
+  cbind(all_dat$date) %>% 
+  rename(date = 'all_dat$date') %>% 
+  pivot_longer(c(everything(), -date), names_to = "key", values_to = "value") %>% 
+  mutate(value = as.numeric(value),
+         key = paste(key, "  ")) -> dat_avg
+
+
+ctitle_1 <- "Retail trading Google search term popularity"
+unit_label <- "Interest over time of keyword relative to itself, 0 to 100, 3dma"
+source_1 <- "Source: Google Trends, @benbakkum."
+
+
+chart <- dat_avg %>% 
+  ggplot(aes(x = date, y = value, color = key)) +
+  geom_line(aes(linetype = key)) +
+  geom_point(size = 2.5) +
+  scale_color_manual(values = c("#a6cee3", "#1f78b4", "#33a02c", 
+                                "#fb9a99", "#6a3d9a")) +
+  scale_linetype_manual(values = c("dashed", "solid", "longdash", "solid", "solid")) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,100)) +
+  scale_x_date(expand = c(0,0), limits = c(as.Date("2016-07-12"), as.Date("2021-02-28"))) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(all_dat$date,1), "%b, %Y"), ". ", 
+                       source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear')
+
+  
+anim1 <- animate(chart, renderer = gifski_renderer(loop = T), nframe = 300,
+                 width = 615, height = 420, end_pause = 200, type = "cairo")
+
+anim1
+```
+
+The bull market that started last spring has chugged along, creating the type of market where it feels much, much harder to lose money than make it. If you bought anything over the last few months, the likelihood you watched it take off over the following days is decently high. My favorite example of the magnet this kind of market rally can be for speculation comes in the form of a TikTok couple's now infamous recent clip, as linked below. 
+
+```{r tweet1, echo=FALSE, fig.align="center"}
+library(tweetrmd)
+include_tweet("https://twitter.com/TikTokInvestors/status/1350854473598558213",
+              align = "center")
+
+```
+&nbsp;
+
+There's just something remarkable about this guy's gesticulations while revealing his criteria for buying, and the eyebrow twitch at the description of determining when to sell, which together smack of a genuine incredulity that the world hasn't woken up to just how straightforward it is to day trade your way to your dream lifestyle. The seemingly innocent glossing over of the possibility that the kind of 2,900% returns during certain months may indicate a level of risk taking that can result in 90% drawdowns adds to the effect. That this approach may not be a suitable replacement for all of the traditional income streams of the couple's ~120,000 followers need not be disclosed.  
+
+The clip below gives us another candidate for the finance TikTok hall of fame and a glimpse into how deep stocks have seeped into internet culture. Astrology applied to trading is nothing new, but this is the kind of investing due diligence heretofore unavailable to the masses.
+
+```{r tweet2, echo=FALSE, fig.align="center"}
+include_tweet("https://twitter.com/TikTokInvestors/status/1354480163581534216",
+              align = "center")
+
+```
+&nbsp;
+
+I should say that it's possible to come across graphical gymnastics performed in the style of a jumble of lines on a price chart, all in the name of technical analysis, that likely have as much forecasting ability as the zodiac. (That's not to dismiss any and all applications of TA.) 
+
+GameStop feels like the culmination of almost a year of social media running with this bull market in the streets of an online Pamplona, a meme forged in the fires of a society driven to the internet during a pandemic, pining the next crypto asset or smallcap stock to bring digital riches. For as long as we thought Tesla and Bitcoin were the storylines to capture this moment, GameStop has kindly asked Elon and Satoshi to hold its beer. 
+
+```{r prices, echo=FALSE, fig.align="center", warning=FALSE, message = FALSE, tidy=FALSE}
+
+prices  <- tq_get(c("BTC-USD", "ETH-USD", "TSLA", "BB", "GME"), get = "stock.prices", from = "2020-01-31")
+
+
+dat <- prices %>% 
+  select(symbol, date, close) %>% 
+  mutate(symbol = case_when(symbol == "BTC-USD" ~ "Bitcoin",
+                            symbol == "ETH-USD" ~ "Ethereum",
+                            symbol == "BB" ~ "BlackBerry",
+                            symbol == "GME" ~"GameStop",
+                            symbol == "TSLA" ~ "Tesla"
+                        ))
+
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-20", "close"] <- 35497
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-21", "close"] <- 30854
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-22", "close"] <- 32983
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-23", "close"] <- 32114
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-24", "close"] <- 32288
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-25", "close"] <- 32277
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-28", "close"] <- 33889
+dat[dat$symbol == "Bitcoin" & dat$date == "2021-01-29", "close"] <- 34130
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-20", "close"] <- 1387
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-21", "close"] <- 1116
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-22", "close"] <- 1233
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-23", "close"] <- 1234
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-24", "close"] <- 1393
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-25", "close"] <- 1318
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-28", "close"] <- 1347
+dat[dat$symbol == "Ethereum" & dat$date == "2021-01-29", "close"] <- 1372
+
+
+add<- data.frame(symbol = c("Tesla", "GameStop", "BlackBerry"),
+                 date = c(as.Date("2021-01-29"), as.Date("2021-01-29"), as.Date("2021-01-29")),
+                 close = c(793, 325, 14.1))
+
+comp_dat <- rbind(dat, add) %>% 
+  pivot_wider(names_from = symbol, values_from = close) %>% 
+  na.omit() 
+
+ind_dat <- comp_dat %>% 
+  mutate(Tesla = Tesla / comp_dat$Tesla[1],
+         GameStop = GameStop / comp_dat$GameStop[1],
+         BlackBerry = BlackBerry / comp_dat$BlackBerry[1],
+         Bitcoin = Bitcoin / comp_dat$Bitcoin[1],
+         Ethereum = Ethereum / comp_dat$Ethereum[1]) %>% 
+  pivot_longer(names_to = "key", values_to = "value", -date) %>% 
+  mutate(label = paste0(round(value, 1),"x"))
+
+
+tbl_i <- ind_dat %>%
+  filter(key == "BlackBerry" |
+         key == "Bitcoin")
+
+tbl_ii <- ind_dat %>%
+  filter(key == "Ethereum" |
+         key == "Tesla") %>% 
+  mutate(date2 = date)
+
+
+tbl_iii <- ind_dat %>%
+  filter(key == "GameStop") %>% 
+  mutate(date3 = date)
+
+tbl_iv <- ind_dat %>%
+  filter(key == "Ethereum" |
+         key == "Tesla" |
+         key == "BlackBerry" |
+         key == "Bitcoin") %>% 
+  mutate(date4 = date)
+  
+start_date <- head(tbl_i$date,1)
+end_date <- tail(tbl_i$date,1)
+ctitle_1 <- "Bitcoin and BlackBerry having a great 12 months"
+ctitle_2 <- "Tesla and Ethereum a bit better"
+ctitle_3 <- "GameStop absolutely launched into the stratosphere"
+unit_label <- "Index, 1/31/2020 = 1"
+source_1 <- "Yahoo Finance. @benbakkum."
+
+```
+
+```{r prices2, echo=FALSE, fig.align="center", warning=FALSE, message = FALSE, tidy=FALSE}
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(round(x, decimals))
+}
+
+str_pad_custom <- function(labels) {
+  new_labels <- stringr::str_pad(labels, 10, "right")
+  return(new_labels)
+}
+
+
+chart1 <- ggplot(data = tbl_i, aes(x = date, y = value, color = key, linetype = key)) +
+  geom_line() +
+  geom_point(size = 2.5) +
+  geom_text(data = tbl_i, aes(x = date, y = value, label = label), nudge_x = 16,
+            show.legend = FALSE, size = 4.5, family = "Open Sans") +
+  scale_linetype_manual(values = c("solid", "solid")) +
+  scale_color_manual(values = c(cpal("blue"), cpal("orange"))) +
+  scale_x_date(limits = c(start_date, end_date + 30), expand = c(0,0),
+               date_breaks = "3 months", date_labels = "%b '%y") +
+  scale_y_continuous(labels = fmt_dcmls(1)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.3), "cm"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(tbl_i$date,1), "%b %d, %Y"), ". Source: ", source_1[1], sep = "")) +
+  transition_reveal(date, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T),
+                 width = 615, height = 420, type = "cairo")
+
+##### chart 2 ######
+
+chart2 <- ggplot(data = tbl_ii, aes(x = date2, y = value, color = key, linetype = key)) +
+  geom_line() +
+  geom_line(data = tbl_i, aes(x = date, y = value, color = key, linetype = key)) +
+  geom_point(size = 2.5) +
+  geom_text(data = tbl_ii, aes(x = date, y = value, label = label), nudge_x = 16,
+            show.legend = FALSE, size = 4.5, family = "Open Sans") +
+  scale_linetype_manual(values = c("solid", "solid", "dashed", "dashed")) +
+  scale_color_manual(values = c(cpal("blue"), cpal("orange"), cpal("green"), cpal("purple"))) +
+  scale_x_date(limits = c(start_date, end_date + 30), expand = c(0,0),
+               date_breaks = "3 months", date_labels = "%b '%y") +
+  scale_y_continuous(labels = fmt_dcmls(1)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.3), "cm"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_2, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(tbl_i$date,1), "%b %d, %Y"), ". Source: ", source_1[1], sep = "")) +
+  transition_reveal(date2, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+
+anim2 <- animate(chart2, renderer = gifski_renderer(loop = T),
+                 width = 615, height = 420, type = "cairo")
+
+###### chart 3 ######
+
+chart3 <- ggplot(data = tbl_iii, aes(x = date3, y = value, color = key, linetype = key)) +
+  geom_line() +
+  geom_line(data = tbl_iv, aes(x = date, y = value, color = key, linetype = key)) +
+  geom_point(size = 2.5) +
+  geom_text(data = tbl_iii, aes(x = date, y = value, label = label), nudge_x = 16,
+            show.legend = FALSE, size = 4.5, family = "Open Sans") +
+  scale_linetype_manual(values = c("solid", "solid", "dashed", "solid", "dashed")) +
+  scale_color_manual(values = c(cpal("blue"), cpal("orange"), 
+                                cpal("green"), cpal("red"), cpal("purple")
+                                )) +
+  scale_x_date(limits = c(start_date, end_date + 30), expand = c(0,0),
+               date_breaks = "3 months", date_labels = "%b '%y") +
+  scale_y_continuous(labels = fmt_dcmls(1)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.3), "cm"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm")) +
+  labs(title = ctitle_3, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(tbl_i$date,1), "%b %d, %Y"), ". Source: ", source_1[1], sep = "")) +
+  transition_reveal(date3, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim3 <- animate(chart3, renderer = gifski_renderer(loop = T),
+                 width = 615, height = 420, type = "cairo")
+
+gif1 <- image_read(anim1)
+gif2 <- image_read(anim2)
+gif3 <- image_read(anim3)
+
+gif_final <- c(gif1, gif2, gif3, rep(gif3[100], 85))
+gif_final
+```
+
+My personal view is that the **original** draw of WallStreetBets (WSB) for those that first piled into the GameStop trade was its potential to score a quick buck, not necessarily a vendetta to exact revenge for the bailouts during the Global Financial Crisis. Whoever lined up on the other side of the subreddit's trade would have been goaded and made fun of in an avalanche of memes, not just the hedge funds, as the subreddit spares no one, including itself. I'm doubtful Robinhood and Interactive Brokers colluded with Citadel and engaged in a conspiracy to swindle retail traders given their strong incentive not to rake their brands over the coals by placing restrictions on trading. I think they saw things snowballing in a way that could have amounted to crippling losses for themselves. There's been less reporting on the clearing and settlement dynamics of US equity and option trades that likely put them in that position than there has been explanations of short and gamma squeezes.
+
+That being said, I think there are still connections to be drawn and points to be made about what this saga means. Where the David v Goliath framing definitely rings true is in the financial commentariat seeming to question the legality of retail traders banding together at all. Wall Street big wigs constantly talk up their own book with the hope of favorably influencing prices, and they do so in private dinners and on TV with impunity, so to harangue WSB for sharing ideas publicly creates an absurd double standard. Completely false information spread for the purposes of pump and dump schemes is and should be illegal, but the vast majority of WSB is essentially an Ira Sohn conference with rocket ship emojis. 
+
+Also, I believe there's credibility to the angle on this week that focuses on the impact of a game changing technology like Robinhood evaporating friction and democratizing involvement in the market. Combine that with the already pervasive use of social media platforms, and it's not hard to see parallels between internet phenomena affecting our politics and theories cultivated on message boards about companies and the market driving share prices. 
+
+I'm on board with Joe Weisenthal's take that this environment may lead to "upcrashes" with increasing frequency, where memestocks experience the same kind of sudden upside moves as occur to the downside when a firm declares bankruptcy. Aswath Damodaran's term "crowd squeeze" seems an apt way to distinguish between what's going on with GameStop and the many short squeezes we've seen before. I'm also sympathetic to Scott Galloway's view, though ham-handedly expressed, that quarantine boredom and the discouraging economic prospects for millennials and zoomers added to the cocktail of factors in play this week. 
+
+Separately, say what you will about CNBC, but it seems to periodically provide clips that end up oddly iconic and reflect something notable about the zeitgeist at the time. [Cramer screaming](https://youtu.be/TaKnDMv6ceg) about Bernanke and Bill Poole in '07, while Erin Burnett likely pondered the shameful double standard of what would happen to her career if she similarly blew a gasket, and [Rick Santelli bloviating](https://youtu.be/zp-Jw-5Kx8k) about how Americans in the process of losing their homes deserve it, oft-cited as the inception of the Tea Party movement, come to mind. Scott Wapner's more [measured interview](https://youtu.be/DYZHtF-tV0k) with Chamath Palihapitiya this week may end up joining their ranks as a footnote in historical accounts. 
+
+Their discussion ended up lasting almost 30 minutes, vaulting Chamath close to the standing of Keith Gill (aka DFV, aka Roaring Kitty) in terms of the heroes of WSB as he argued for the legitimacy of the subreddit. I think generally that they talked past each other for much of the segment, though it was still great TV. Chamath primarily argued that (1) it's ridiculous that hedge funds can be short a stock up to their eyeballs and they should be more heavily regulated, as well as (2) financial media doesn't give WSB enough credit for the quality of its analysis. Wapner seemed to misconstrue Chamath as arguing that GameStop's earnings justify its current valuation, while also worrying that many investors could be financially ruined by crowding into a bubble. 
+
+I see both sides. There's likely a lot that can be done to mitigate advantages hedge funds have over retail, promote greater transparency, and foster a market prioritizing productive investment relative to rent seeking. Alexis Ohanian also made that point well on AOC's Twitch stream last night. It's also true that a good amount of the due diligence on WSB is sophisticated and well reasoned. At the same time, to Wapner's point, many that are now jumping on the GME train are likely not so sophisticated, creating the risk with an investment as speculative as GameStop that during a rush to the exits, heavily exposed individuals and families are tragically left with some combination of a missing shirt and a bag in hand. 
