@@ -180,13 +180,14 @@ dat[dat$symbol == "Ethereum" & dat$date == "2021-01-28", "close"] <- 1347
 dat[dat$symbol == "Ethereum" & dat$date == "2021-01-29", "close"] <- 1372
 
 
-add<- data.frame(symbol = c("Tesla", "GameStop", "BlackBerry"),
-                 date = c(as.Date("2021-01-29"), as.Date("2021-01-29"), as.Date("2021-01-29")),
-                 close = c(793, 325, 14.1))
+# add<- data.frame(symbol = c("Tesla", "GameStop", "BlackBerry"),
+#                  date = c(as.Date("2021-01-29"), as.Date("2021-01-29"), as.Date("2021-01-29")),
+#                  close = c(793, 325, 14.1))
 
-comp_dat <- rbind(dat, add) %>% 
-  pivot_wider(names_from = symbol, values_from = close) %>% 
-  na.omit() 
+comp_dat <- dat %>%
+  pivot_wider(names_from = symbol, values_from = close) %>%
+  na.omit()
+
 
 ind_dat <- comp_dat %>% 
   mutate(Tesla = Tesla / comp_dat$Tesla[1],
@@ -386,6 +387,7 @@ gif3 <- image_read(anim3)
 gif_final <- c(gif1, gif2, gif3, rep(gif3[100], 85))
 gif_final
 ```
+The global notoriety of the events of this week have spawned a bevy of galaxy brained takes on the causes, relevance, and implications. I concur with much of [George Pearkes' argument](https://www.businessinsider.com/stop-with-stupid-gamestop-reddit-wallstreetbets-stock-market-punditry-2021-1) that GameStop reflects the results of the processes of a short squeeze and gamma squeeze, with narratives being applied after the fact by journalists and the Twitterati for the purposes of compelling content and virality on the back of originality. Also, it feels as though anything popular enough to be trending will be politicized and used as a cudgel in the Culture Wars of the First Republic.
 
 My personal view is that the **original** draw of WallStreetBets (WSB) for those that first piled into the GameStop trade was its potential to score a quick buck, not necessarily a vendetta to exact revenge for the bailouts during the Global Financial Crisis. Whoever lined up on the other side of the subreddit's trade would have been goaded and made fun of in an avalanche of memes, not just the hedge funds, as the subreddit spares no one, including itself. I'm doubtful Robinhood and Interactive Brokers colluded with Citadel and engaged in a conspiracy to swindle retail traders given their strong incentive not to rake their brands over the coals by placing restrictions on trading. I think they saw things snowballing in a way that could have amounted to crippling losses for themselves. There's been less reporting on the clearing and settlement dynamics of US equity and option trades that likely put them in that position than there has been explanations of short and gamma squeezes.
 
