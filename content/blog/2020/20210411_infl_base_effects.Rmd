@@ -1,0 +1,331 @@
+---
+title: "Prices -> Here come the base effects"
+date: 2021-04-11T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+Mike Konczal, J.W. Mason, and Lauren Melodia at the Roosevelt Institute and Jay Shambaugh at The Hamilton Project recently published two great pieces on the outlook for inflation in the US, including how prices will appear to be leaping higher in the coming months but not because of any significant acceleration in 2021. You can find the articles [here](https://rooseveltinstitute.org/2021/04/08/the-illusion-of-inflation-why-this-springs-numbers-will-look-artificially-high/) and [here](https://www.hamiltonproject.org/blog/dont_overreact_to_inflation_data_this_spring). They make a somewhat basic but important point that base effects will have an outsized impact on many year-over-year measures of inflation over the next couple months, with CPI numbers for March coming out on Tuesday. Regardless of the durability of the causes behind the coming upticks in year-over-year inflation, news headlines, pundits, and policy hawks will likely key off of the reported numbers with little regard for the underlying dynamics, taking the opportunity to fearmonger about runaway inflation stoked by the policy response to the pandemic.
+
+Year-over-year figures for CPI and the PCE price index, the two most closely watched inflation metrics in the US, are calculated by comparing the change in the index level in a given month from its level twelve months prior. As a result, the increase or decrease in the index level during a month one year earlier can influence the year-over-year figure just as much as the change in the index level during the most recent month, typically with the index's path during the intervening year contributing the most to the overall year-over-year number. Due to the COVID shock, prices around a year ago very atypically fell, meaning the "base" month for year-over-year comparisons being reported in the first half of 2021 will be relatively lower than they otherwise would have been.
+
+With a few assumptions, I've put together my own rough estimates of what these base effects will contribute to the year-over-year figures over the course of the spring. First, I assumed that CPI and core CPI, which excludes energy and food prices, will continue to rise over the coming months at the same rate as they have averaged over the last 24 months. Then, I adjusted the CPI and core CPI levels a year before a given month to have increased by the average rate over the 24 months preceding that base month. I calculated year-over year rates for these extrapolated index levels in the future and the adjusted base index levels in the past. I then took the difference of these adjusted year-over-year numbers from year-over year numbers derived from the extrapolated index levels and base levels that *were not adjusted*. This provides a very rough approximation of how much the year-over-year levels will be different in the future because the months a year prior did not experience average inflation. 
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(blscrapeR)
+library(tibbletime)
+library(lubridate)
+library(quantmod)
+library(gganimate)
+library(purrr)
+library(Cairo)
+library(magick)
+library(gifski)
+library(scales)
+
+windowsFonts("Open Sans" = windowsFont("Open Sans"))
+windowsFonts("Open Sans Light" = windowsFont("Open Sans Light"))
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222", 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+my_theme <- theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  )
+
+knitr::opts_chunk$set(dev.args = list(png = list(type = "cairo")))
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+dat <- bls_api(c("CUSR0000SA0", "CUSR0000SA0L1E"), 
+              startyear = 2006, 
+              endyear = 2021, 
+              Sys.getenv("BLS_KEY"))
+
+data.frame(name = c("headline_cpi", "core_cpi"),
+           code = c("CUSR0000SA0", "CUSR0000SA0L1E")) -> key
+
+
+
+rolling_mean <- rollify(mean, window = 24)
+
+dat %>% 
+  mutate(date = paste0(periodName, " ", year, " 01"),
+         date = as.Date(date, "%B %Y %d")) %>% 
+  rename(code = seriesID) %>% 
+  left_join(key, by = "code") %>% 
+  select(value, date, name) %>% 
+  pivot_wider(names_from = "name", values_from = "value") %>%
+  arrange(date) %>% 
+  mutate(headline_mm      =  (headline_cpi / lag(headline_cpi, 1) - 1) * 100,
+         core_mm          =  (core_cpi / lag(core_cpi, 1) - 1) * 100,
+         headline_mm_avg  =   rolling_mean(headline_mm),
+         core_mm_avg      =   rolling_mean(core_mm),
+         headline_dev     = -(headline_mm - headline_mm_avg),
+         core_dev         = -(core_mm - core_mm_avg),
+         headline_proj    =   headline_cpi,
+         core_proj        =   core_cpi) -> df
+
+
+x <- nrow(df)
+for (i in 1:18) {
+  df[x + i,] <- NA
+  
+  df[x + i,1] <- ymd(pull(df[x + i -1,1])) %m+% months(1)
+  
+  df$headline_proj[x + i] <- (1 + df$headline_mm_avg[x]/100) * df$headline_proj[x + i - 1]
+  
+  df$core_proj[x + i] <- (1 + df$core_mm_avg[x]/100) * df$core_proj[x + i - 1]
+  
+  df$headline_mm_avg[x + i] <- df$headline_mm_avg[x]
+  
+  df$core_mm_avg[x + i] <- df$core_mm_avg[x]
+}
+
+next_month <- ymd(pull(df[x,1])) %m+% months(1)
+
+df %>% 
+  mutate(headline_dev_lag =   lag(headline_dev,12),
+         core_def_lag     =   lag(core_dev,12),
+         headline_adj     =   (1 + lag(headline_mm_avg,1)/100) * lag(headline_proj,1),
+         core_adj         =   (1 + lag(core_mm_avg,1)/100) * lag(core_proj,1),
+         headline_yy      =   ((headline_proj / lag(headline_proj,12) - 1) * 100),
+         core_yy          =   ((core_proj / lag(core_proj,12) - 1) * 100),
+         headline_yy_adj  =   ((headline_proj / lag(headline_adj,12) - 1) * 100),
+         core_yy_adj      =   ((core_proj / lag(core_adj,12) - 1) * 100),
+         headline_be      =   headline_yy - headline_yy_adj,
+         core_be          =   core_yy - core_yy_adj,
+         headline_yy_ex   =   case_when(date < ymd(next_month) ~ NA_real_,
+                                        date >= ymd(next_month) ~ headline_yy),
+         core_yy_ex       =   case_when(date < ymd(next_month) ~ NA_real_,
+                                        date >= ymd(next_month) ~ core_yy),
+         headline_yy_act  =   case_when(date >= ymd(next_month) ~ NA_real_,
+                                        date < ymd(next_month) ~ headline_yy),
+         core_yy_act      =   case_when(date >= ymd(next_month) ~ NA_real_,
+                                        date < ymd(next_month) ~ core_yy)) -> df_all 
+
+eight_mths_ago <- ymd(pull(df[x,1])) %m+% months(-8)
+five_mths_later <- ymd(pull(df[x,1])) %m+% months(5)
+curr_mth <- ymd(pull(df[x,1])) + days(14)
+
+ctitle_1 <- "Year-over-year headline and core CPI estimated base effects"
+unit_label <- "%pts"
+source_1 <- "Source: BLS, @benbakkum."
+
+df_all %>% 
+  select(date, headline_be, core_be) %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>% 
+  mutate(key = case_when(key == "headline_be" ~ "Headline CPI base effect",
+                         key == "core_be" ~ "Core CPI base effect"),
+         placeholder = "x") %>% 
+  filter(date > eight_mths_ago & date < five_mths_later) %>% 
+  ggplot(aes(date, values, fill = key)) +
+  geom_col(position = "dodge", stat = "identity") +
+  geom_vline(xintercept = curr_mth, linetype = "dashed", color = cpal("dark grey"), size = 1) +
+  geom_hline(yintercept = 0, color = cpal("dark grey"), size = 0.85) +
+  scale_fill_manual(values = c(cpal("deep blue"), cpal("green"))) +
+  scale_x_date(date_labels = "%b '%y", date_breaks = "2 month", expand = c(0,0)) +
+  scale_y_continuous(breaks = seq(-0.5, 1, 0.25)) +
+  my_theme +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  transition_manual(placeholder) -> p
+
+anim1 <- animate(p, renderer = gifski_renderer(loop = T), nframe = 1,
+                 width = 615, height = 420, type = "cairo")
+
+anim1
+
+```
+
+Based on this, it becomes clear how impactful base effects will be over the next three months to both core and headline CPI. When the BLS releases numbers for March this week, headline CPI will likely be around half of a percentage point higher than it otherwise would have been due to base effects, with core CPI around a quarter percentage point higher. Then when figures for April come out next month, headline CPI will be almost a whole percentage point (!!) higher and core over half a percentage point higher as a result of base effects. These specific numbers should be viewed with suspicion as they're based on lots of assumptions, but I think in terms of directionality and magnitude they have value.
+
+Extrapolating headline and core CPI over the next year based on the average monthly inflation rate over the last 24 months, and then plotting the year-over-year measures against the actual index levels from the past year provides another way to look at this.
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+twenty_mths_ago <- ymd(pull(df[x,1])) %m+% months(-20)
+sixteen_mths_later <- ymd(pull(df[x,1])) %m+% months(16)
+
+
+
+df_all %>% 
+  select(date, headline_yy_ex, core_yy_ex) %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>%
+  mutate(key = case_when(key == "core_yy_ex" ~ "Extrapolated core CPI",
+                         key == "headline_yy_ex" ~ "Extrapolated headline CPI"),
+         placeholder = "X") %>% 
+  filter(date > twenty_mths_ago & date < sixteen_mths_later) -> ex_cht_dat
+
+df_all %>% 
+  select(date, headline_yy_act, core_yy_act) %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>%
+  mutate(key = case_when(key == "core_yy_act" ~ "Core CPI",
+                         key == "headline_yy_act" ~ "Headline CPI"),
+         placeholder = "X") %>% 
+  filter(date > twenty_mths_ago & date < sixteen_mths_later) -> act_cht_dat
+
+ex_cht_dat$key <- factor(ex_cht_dat$key, c("Extrapolated core CPI", "Extrapolated headline CPI"))
+act_cht_dat$key <- factor(act_cht_dat$key, c("Core CPI", "Headline CPI"))
+        
+ctitle_1 <- "Year-over-year CPI extrapolated w/ avg monthly change"
+unit_label <- "%, y/y"
+source_1 <- "Source: BLS, @benbakkum."
+
+
+ggplot() +
+  geom_step(data = ex_cht_dat, aes(date, values, color = key, linetype = key), size = 1) +
+  geom_step(data = act_cht_dat, aes(date, values, color = key, linetype = key), size = 1) +
+  scale_color_manual(values = c(cpal("deep blue"), cpal("deep blue"), cpal("green"), cpal("green"))) +
+  scale_linetype_manual(values = c("solid", "dashed", "dashed", "solid")) +
+  scale_y_continuous(breaks = seq(0,3, by = 0.5)) +
+  scale_x_date(expand = c(0,0), date_breaks = "6 months", date_labels = "%b '%y") +
+  geom_vline(xintercept = ymd(curr_mth), linetype = "dashed", color = cpal("dark grey"), size = 1) +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  my_theme +
+  guides(color = guide_legend(ncol = 2, byrow = T,
+                              override.aes = list(linetype = c("solid", "twodash", "twodash", "solid")))
+         ) +
+  transition_manual(placeholder) -> p
+
+
+anim1 <- animate(p, renderer = gifski_renderer(loop = T), nframe = 1,
+                 width = 615, height = 420, type = "cairo")
+
+anim1
+```
+
+Headline CPI reaching well over 3% year-over-year before June, and core CPI jumping above 2%, appears likelier than not, before the base effects wear off and both slide lower. Fed Chair Powell has consistently hammered the point that he expects the updraft in inflation to be "transitory" because of this dynamic.
+
+The authors I referenced above also make a significant argument related to the bigger picture: that even if inflation truly accelerates substantially this year, we shouldn't freak out about it because we've experienced anemic inflation for well over a decade. Were CPIs and PCE price indices to pick up the pace, in a major sense they would just be starting to reach levels we would have expected them to already be at had inflation historically been running at the Fed's 2% target.
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+raw_dat <- getSymbols('PCEPILFE',src='FRED', auto.assign=F) 
+
+mult_factor <- (1.02)^(1/12)
+
+
+raw_dat %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         core_pce = PCEPILFE) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date > "2005-12-31") %>% 
+  mutate(since_07 = case_when(date == ymd("2008-01-01") ~ core_pce,
+                              date != ymd("2008-01-01") ~ NA_real_),
+         since_13 = case_when(date == ymd("2014-01-01") ~ core_pce,
+                              date != ymd("2014-01-01") ~ NA_real_),
+         since_17 = case_when(date == ymd("2018-01-01") ~ core_pce,
+                              date != ymd("2018-01-01") ~ NA_real_),
+         since_19 = case_when(date == ymd("2020-01-01") ~ core_pce,
+                              date != ymd("2020-01-01") ~ NA_real_)) -> dat
+
+row_start_08 <- which(grepl(ymd("2008-01-01"), dat$date))
+row_start_14 <- which(grepl(ymd("2014-01-01"), dat$date))
+row_start_18 <- which(grepl(ymd("2018-01-01"), dat$date))
+row_start_20 <- which(grepl(ymd("2020-01-01"), dat$date))
+
+dat %>% 
+  mutate(since_07 = case_when(date < ymd("2008-01-01") ~ core_pce,
+                              date >= ymd("2008-01-01") ~ pull(dat[row_start_08,"since_07"]) * 
+                                                          (mult_factor ^ (row_number() - row_start_08))),
+         since_13 = case_when(date < ymd("2014-01-01") ~ core_pce,
+                              date >= ymd("2014-01-01") ~ pull(dat[row_start_14,"since_13"]) * 
+                                                          (mult_factor ^ (row_number() - row_start_14))),
+         since_17 = case_when(date < ymd("2018-01-01") ~ core_pce,
+                              date >= ymd("2018-01-01") ~ pull(dat[row_start_18,"since_17"]) * 
+                                                          (mult_factor ^ (row_number() - row_start_18))),
+         since_19 = case_when(date < ymd("2020-01-01") ~ core_pce,
+                              date >= ymd("2020-01-01") ~ pull(dat[row_start_20,"since_19"]) * 
+                                                          (mult_factor ^ (row_number() - row_start_20)))) -> df_final
+
+ctitle_1 <- "Core PCE price index w/ 2% target increases"
+unit_label <- "2012 = 100, seasonally adjusted"
+source_1 <- "Source: BEA, FRED, @benbakkum."
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+df_final %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>% 
+  filter(key != "since_19") %>% 
+  mutate(key = case_when(key == "core_pce" ~ "Actual core PCE",
+                         key == "since_07" ~ "Core PCE w/ 2% inflation since '07",
+                         key == "since_13" ~ "Core PCE w/ 2% inflation since '13",
+                         key == "since_17" ~ "Core PCE w/ 2% inflation since '17")) -> df_long
+
+df_long$key <- factor(df_long$key, c("Core PCE w/ 2% inflation since '07",
+                                     "Core PCE w/ 2% inflation since '13",
+                                     "Core PCE w/ 2% inflation since '17",
+                                     "Actual core PCE"))
+                                     
+                                     
+
+df_long %>% 
+  ggplot(aes(date, values, color = key, linetype = key, size = key)) +
+  geom_line() +
+  geom_point(size = 2.5) +
+  scale_linetype_manual(values = c("dashed", "dashed", "dashed", "solid")) +
+  scale_color_manual(values = c(cpal("red"), cpal("orange"), cpal("green"), cpal("deep blue"))) +
+  scale_size_manual(values = c(0.8, 0.8, 0.8, 1)) +
+  scale_x_date(expand = c(0,0),
+               limits = c(ymd("2006-01-01"), ymd("2021-06-30")),
+               date_labels = "'%y",
+               date_breaks = "2 year") +
+  scale_y_continuous(limits = c(90, 125), expand = c(.02,.02), labels = fmt_dcmls(0),
+                     breaks = seq(90, 120, 5)) +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  my_theme +
+  guides(color=guide_legend(ncol=1),
+         linetype=guide_legend(ncol=1)) +
+  theme(legend.key.height = unit(0.7, "cm")) +
+  transition_reveal(date, keep_last = TRUE) +
+  view_follow(fixed_x = TRUE, fixed_y = c(90, NA)) -> chart1
+
+
+
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 300,
+                 width = 615, height = 500, type = "cairo", end_pause = 200)
+
+anim1
+```
+
+Even before the Fed announced its target in 2012, core PCE prices (the Fed's preferred measure) had fallen off of that pace, and prices have failed to ever consistently maintain as high as a 2% inflation rate since then. The Fed has acknowledged as much and shifted to their new Average Inflation Targeting (AIT) framework, explicitly condoning inflation running above 2% so that it may eventually average out around the target, in attempt to address the undershooting. Despite this guidance and the history of tepid inflation, undoubtedly many will essentially freak out about the higher levels of inflation coming down the pike. As Powell himself expressed in the most recent FOMC meeting presser in reference to inflation running above 2% for some period of time, "we're going to wait to see actual data, and I think it will take people time to adjust to that."
