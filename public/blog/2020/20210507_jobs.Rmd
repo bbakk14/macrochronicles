@@ -1,0 +1,677 @@
+---
+title: "Jobs -> Shouldn't be surprised to be surprised"
+date: 2021-05-11T21:13:14-05:00
+draft: false
+---
+&nbsp;
+&nbsp;
+
+Last Friday gave us a head scratcher of a jobs report for April with gains way below expectations. Often, however, the lesson to learn from surprising monthly NFP numbers is that monthly NFP numbers can often be surprising (to adapt a Kahneman quip) and that we shouldn't put too much weight on any given month. In my view, May gains could easily end up the barn burner people were expecting in April.
+
+Today, the Job Opening and Labor Turnover Survey (JOLTS) release showed a record high number of job openings in March, going back to when the series started in 2001. There too, I would somewhat discount the significance of this stat for now as lower survey response rates during COVID and the increasing ease of throwing a job posting online may be distorting the comparison of numbers today to years in the past. It will be interesting to watch over the remainder of the year. 
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(blscrapeR)
+library(janitor)
+library(kableExtra)
+library(formattable)
+library(gganimate)
+library(quantmod)
+library(scales)
+library(magick)
+library(Cairo)
+
+windowsFonts("Open Sans" = windowsFont("Open Sans"))
+
+colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
+            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
+            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
+            'text' = "#222222", 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+dat <- bls_api(c("LNS14000000", "LNS14000060", "LNS11300000", "LNS11300060", "LNS12300000", "LNS12300060", "LNS13327709",
+                "LNS12032194", "LNS12000000", "LNS13008636", "LNS11000000", "CES0500000003", "CES0000000001"), 
+              startyear = 2018, 
+              endyear = 2021, 
+              Sys.getenv("BLS_KEY"))
+
+data.frame(name = c("UR", "Prime_age_UR", "LFPR", "Prime_age_LFPR", "EPOP", "Prime_age_EPOP", "U6", 
+                    "PTER", "Employment", "Long_term_unemployed", "LF", "AHE", "PAYEMS"),
+           code = c("LNS14000000", "LNS14000060", "LNS11300000", "LNS11300060", "LNS12300000", "LNS12300060", "LNS13327709",
+                "LNS12032194", "LNS12000000", "LNS13008636", "LNS11000000", "CES0500000003", "CES0000000001")) -> key
+```
+
+```{r table, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE, results='asis'}
+dat %>% 
+  mutate(date = paste0(periodName, " ", year, " 01"),
+         date = as.Date(date, "%B %Y %d")) %>% 
+  rename(code = seriesID) %>% 
+  left_join(key, by = "code") %>% 
+  select(value, date, name) %>% 
+  pivot_wider(names_from = "name", values_from = "value") %>% 
+  mutate(PTER_emp = round((PTER / Employment) * 100, 1),
+         Long_term_UR = round((Long_term_unemployed / LF) * 100, 1),
+         AHE_mm = round((AHE / lead(AHE, 1) - 1) * 100, 1),
+         AHE_yy = round((AHE / lead(AHE, 12) - 1) * 100, 1),
+         nfp_chg = PAYEMS - lead(PAYEMS, 1),
+         ) %>% 
+  select(date, nfp_chg, UR, Prime_age_UR, U6, LFPR, Prime_age_LFPR, EPOP, Prime_age_EPOP, 
+         PTER_emp, Long_term_UR, AHE_mm, AHE_yy) %>% 
+  head(11) %>% 
+  arrange(date) %>% 
+  mutate(date = format(date, "%b-%y")) %>% 
+  t() %>% 
+  as_tibble(rownames = "rowname") %>% 
+  row_to_names(row_number = 1) -> df_tbl
+
+df_tbl[,-1] %>% 
+  mutate_if(is.character, as.numeric) %>% 
+  bind_cols(df_tbl$date) %>% 
+  rename(date = ...12) %>% 
+  select(date, everything()) %>% 
+  mutate(m1_chg = .[[3]] - .[[2]],
+         m2_chg = .[[4]] - .[[3]],
+         m3_chg = .[[5]] - .[[4]],
+         m4_chg = .[[6]] - .[[5]],
+         m5_chg = .[[7]] - .[[6]],
+         m6_chg = .[[8]] - .[[7]],
+         m7_chg = .[[9]] - .[[8]],
+         m8_chg = .[[10]] - .[[9]],
+         m9_chg = .[[11]] - .[[10]],
+         m10_chg = .[[12]] - .[[11]]) -> df_chgs
+
+df_chgs[,c(1,3,13,4,14,5,15,6,16,7,17,8,18,9,19,10,20,11,21,12,22)] %>% 
+  rename(" " = date) %>% 
+  as.data.frame() -> df_tbl
+
+## row names
+df_tbl[1,1] <- "NFP growth, k"
+df_tbl[2,1] <- "UR, %"
+df_tbl[3,1] <- "Prime-age UR, %"
+df_tbl[4,1] <- "U6, %"
+df_tbl[5,1] <- "LFPR, %"
+df_tbl[6,1] <- "Prime-age LFPR, %"
+df_tbl[7,1] <- "EPOP, %"
+df_tbl[8,1] <- "Prime-age EPOP, %"
+df_tbl[9,1] <- "PTER, % of payrolls"
+df_tbl[10,1] <- "Long-term UR, %"
+df_tbl[11,1] <- "AHE, % m/m"
+df_tbl[12,1] <- "AHE, % y/y"
+
+df_spk <- df_tbl[,c(1, seq(2,ncol(df_tbl), 2))]
+
+
+## top row
+fmt_dcmls <- function(x) {
+   format(round(as.numeric(x), 0), nsmall=0, big.mark=",")
+}
+
+for (i in seq(2,(ncol(df_tbl)-1),2)) {
+  df_tbl[1,i] <- fmt_dcmls(df_tbl[1,i])
+}
+
+hlight <- function(x) {
+  y <- as.numeric(gsub(",", "", x))
+
+  case_when(y > 500              ~ color_tile("#75e86d", "#75e86d")(x),
+            y < 500 & y > 0      ~ color_tile("#cfffcc", "#cfffcc")(x),
+            y < 0   & y > -500   ~ color_tile("#ffd6d6", "#ffd6d6")(x),
+            y < -500             ~ color_tile("#f59393", "#f59393")(x))
+}
+
+for (i in seq(2,(ncol(df_tbl)-1),2)) {
+  df_tbl[1,i] <- hlight(df_tbl[1,i])
+}
+
+
+## all rows
+fmt_1dcml <- function(x) {
+  y <- format(round(as.numeric(x), 1), nsmall=1)
+  x <- as.character(y)
+  z <- as.numeric(str_sub(x, 1, 4))
+  z
+}
+
+for (j in 3:nrow(df_tbl)) {
+  for (i in 2:ncol(df_tbl)) {
+    df_tbl[j,i] <- fmt_1dcml(df_tbl[j,i])
+  }
+}
+
+## decline is good
+dec_is_good <- function(i, j) {
+  y <- as.numeric(df_tbl[j,i+1])
+
+  case_when(y <  -0.1              ~ color_tile("#75e86d", "#75e86d")(df_tbl[j,i]),
+            (y >= -0.1) & (y < 0)      ~ color_tile("#cfffcc", "#cfffcc")(df_tbl[j,i]),
+            y ==    0              ~ df_tbl[j,i],
+            (y <=  0.1) & (y > 0)      ~ color_tile("#ffd6d6", "#ffd6d6")(df_tbl[j,i]),
+            y >   0.1              ~ color_tile("#f59393", "#f59393")(df_tbl[j,i]))
+}
+
+for (j in c(2, 3, 4, 9, 10)) {
+  for (i in seq(2,(ncol(df_tbl)-1),2)) {
+    df_tbl[j,i] <- dec_is_good(i, j)
+  }
+}
+
+
+## increase is good
+inc_is_good <- function(i, j) {
+  y <- as.numeric(df_tbl[j,i+1])
+
+  # case_when(y >    0.1              ~ color_tile("#75e86d", "#75e86d")(df_tbl[j,i]),
+  #           (y <=   0.1) & (y > 0)      ~ color_tile("#cfffcc", "#cfffcc")(df_tbl[j,i]),
+  #           y ==     0              ~ df_tbl[j,i],
+  #           (y >=  -0.1) & (y < 0)      ~ color_tile("#ffd6d6", "#ffd6d6")(df_tbl[j,i]),
+  #           y <   -0.1              ~ color_tile("#f59393", "#f59393")(df_tbl[j,i]))
+  
+    ifelse(y >    0.1,              color_tile("#75e86d", "#75e86d")(df_tbl[j,i]),
+    ifelse((y <=   0.1) & (y > 0),  color_tile("#cfffcc", "#cfffcc")(df_tbl[j,i]),
+    ifelse(y ==     0,             df_tbl[j,i],
+    ifelse((y >=  -0.1) & (y < 0),  color_tile("#ffd6d6", "#ffd6d6")(df_tbl[j,i]),
+            color_tile("#f59393", "#f59393")(df_tbl[j,i])))))
+}
+
+for (j in c(5, 6, 7, 8, 11, 12)) {
+  for (i in seq(2,(ncol(df_tbl)-1),2)) {
+    df_tbl[j,i] <- inc_is_good(i, j)
+  }
+}
+
+
+## https://github.com/haozhu233/kableExtra/issues/217
+
+df_tbl %>% 
+  kable(escape = F,
+        align = c('l', rep('r', 19))) %>% 
+  kable_paper("hover", full_width = F, html_font = "Open Sans") %>% 
+  remove_column(3) %>% 
+  remove_column(4) %>% 
+  remove_column(5) %>% 
+  remove_column(6) %>% 
+  remove_column(7) %>% 
+  remove_column(8) %>% 
+  remove_column(9) %>% 
+  remove_column(10) %>% 
+  remove_column(11) %>% 
+  remove_column(12) %>% 
+  remove_column(2) %>% 
+  remove_column(2) %>% 
+  remove_column(2) %>% 
+  add_footnote("Source: BLS, @benbakkum.", notation = "none") -> table
+
+table
+
+```
+&nbsp;
+
+The degree to which the amount of job additions in April missed most estimates generated all manner of takes on whether UI benefits may be holding back labor supply. Again, I don't think drawing conclusions from a single month of data in a report that's notoriously volatile over short time frames even outside of pandemics gives much support for arguments one way or the other. Also, supply right now likely incorporates a range of headwinds, including lingering virus fears, childcare issues, and early retirements during the pandemic, as Greg Daco at Oxford Economics has noted. 
+
+Under the hood, the participation rate and the percentage of the labor force working part time for economic reasons actually improved a decent amount. I view the continued rebound in the LFPR in the face of demographic headwinds as a sign that the pressures holding down labor supply likely are not as impactful as many are thinking. All throughout the last cycle, commentators frequently worried that the labor market had begun to outstrip supply, yet the more things improved, the more labor showed up. 
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+dat %>% 
+  mutate(date = paste0(periodName, " ", year, " 01"),
+         date = as.Date(date, "%B %Y %d")) %>% 
+  rename(code = seriesID) %>% 
+  left_join(key, by = "code") %>% 
+  select(value, date, name) %>% 
+  pivot_wider(names_from = "name", values_from = "value") %>% 
+  mutate(PTER_emp = round((PTER / Employment) * 100, 1),
+         Long_term_UR = round((Long_term_unemployed / LF) * 100, 1),
+         AHE_mm = round((AHE / lead(AHE, 1) - 1) * 100, 1),
+         AHE_yy = round((AHE / lead(AHE, 12) - 1) * 100, 1),
+         nfp_chg = PAYEMS - lead(PAYEMS, 1),
+         ) %>% 
+  select(date, nfp_chg, UR, Prime_age_UR, U6, LFPR, Prime_age_LFPR, EPOP, Prime_age_EPOP, 
+         PTER_emp, Long_term_UR, AHE_mm, AHE_yy) -> chrt_dat
+
+
+chrt_dat %>% 
+  pivot_longer(!date, names_to = "key", values_to = "values") %>% 
+  filter(date >= as.Date("2018-12-31")) %>% 
+  mutate(key = case_when(key == "nfp_chg"         ~ "NFP growth, k",
+                         key == "UR"              ~ "UR, %",
+                         key == "Prime_age_UR"    ~ "Prime-age UR, %",
+                         key == "U6"              ~ "U6, %",
+                         key == "LFPR"            ~ "LFPR, %",
+                         key == "Prime_age_LFPR"  ~ "Prime-age LFPR, %",
+                         key == "EPOP"            ~ "EPOP, %",
+                         key == "Prime_age_EPOP"  ~ "Prime-age EPOP, %",
+                         key == "PTER_emp"        ~ "PTER, % of payrolls",
+                         key == "Long_term_UR"    ~ "Long-term UR, %",
+                         key == "AHE_mm"          ~ "AHE, % m/m",
+                         key == "AHE_yy"          ~ "AHE, % y/y")) -> chrt_dat_lng
+
+chrt_dat_lng$key <- factor(chrt_dat_lng$key, 
+                           levels = c("NFP growth, k",
+                         "UR, %",
+                         "Prime-age UR, %",
+                         "U6, %",
+                         "LFPR, %",
+                         "Prime-age LFPR, %",
+                         "EPOP, %",
+                         "Prime-age EPOP, %",
+                         "PTER, % of payrolls",
+                         "Long-term UR, %",
+                         "AHE, % m/m",
+                         "AHE, % y/y"))      
+
+
+source_1 <- "Source: BLS, @benbakkum."
+
+chart1 <- chrt_dat_lng %>% 
+  ggplot(aes(date, values)) +
+  geom_step(color = cpal("deep blue")) +
+  scale_x_date(breaks = c(as.Date("2019-01-01"), as.Date("2020-01-01"), as.Date("2021-01-01")),
+               date_labels = "%Y") +
+  facet_wrap(~key, scales = "free_y", ncol = 4) +
+  theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    strip.text.x = element_text(size = 12, color = cpal("text"), family = "Open Sans")
+  ) +
+  labs(caption = source_1) +
+  transition_reveal(date)
+  
+  
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 225,
+                 width = 615, height = 500, type = "cairo", end_pause = 200)  
+
+anim1
+
+
+                         
+                         
+                         
+                         
+                  
+```
+If we are to hone in on the latest report, Paul Krugman and Skanda Amarnath pointed out that low-wage industries, where you would expect UI to have the biggest impact, did no worse in terms of their change in payrolls than higher wage industries did. It's possible that UI's affecting the supply in these industries while other factors push in the other direction, but it's worth knowing claims of UI limiting supply based purely off of a weak headline number don't seem to be confirmed by a glance at underlying sectoral data. 
+
+```{r industries, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+codes <- c("USCONS", "MANEMP", "USMINE", "USWTRADE", "USTRADE", "CES4300000001", "CES4422000001", "CES6054000001",
+           "USINFO", "USFIRE", "CES6056000001", "CES6561000001", "CES6562000001", "USLAH", "USSERV")
+key <- c("Construction", "Manufacturing", "Mining & Logging", "Wholesale Trade", "Retail Trade",
+           "Transport & Warehouse", "Utilities", "Professional Svcs", "Information", "Financial",
+           "Admin & Waste Svcs", "Educational Svcs", "Health Care",
+           "Leisure & Hospitality", "Other Services")
+cat <- c("Goods-producing", "Goods-producing", "Goods-producing", "Service-providing", "Service-providing",
+         "Service-providing", "Service-providing", "Service-providing", "Service-providing", "Service-providing",
+         "Service-providing", "Service-providing", "Service-providing", "Service-providing", "Service-providing")
+cat_map <- data.frame(key, cat)
+
+raw_dat <- getSymbols(codes,src='FRED') 
+
+dat <- merge(USCONS, MANEMP, USMINE, USWTRADE, USTRADE, CES4300000001, CES4422000001, CES6054000001,
+           USINFO, USFIRE, CES6056000001, CES6561000001, CES6562000001, USLAH, USSERV)  %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() 
+
+colnames(dat) <- c("date", key)
+
+
+chart1 <- dat %>% 
+  filter(date > "2018-12-31") %>% 
+  pivot_longer(!date) %>% 
+  filter(!name %in% c("Other Services", "Utilities", "Wholesale Trade")) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         name = fct_reorder(name, value, function(.) min(.) / max(.))) %>% 
+  ggplot(aes(date, value)) +
+  geom_step(color = cpal("deep blue")) +
+  scale_x_date(breaks = c(as.Date("2019-01-01"), as.Date("2020-01-01"), as.Date("2021-01-01")),
+               date_labels = "%Y") +
+  facet_wrap(~ name, scales = "free_y") +
+   theme(
+    legend.position = "none",
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm"),
+    strip.text.x = element_text(size = 11, color = cpal("text"), family = "Open Sans")
+  ) +
+  labs(caption = source_1) +
+  transition_reveal(date)
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 225,
+                 width = 615, height = 500, type = "cairo", end_pause = 200)  
+
+anim1
+
+```
+
+In terms of the percentage of jobs lost relative to the cycle peak, naturally this recovery's recent inflection higher appears to be losing steam when the April numbers are included. I expect the recovery will continue to encounter air pockets and chart a bumpy course over the rest of 2021.
+
+```{r PAYEMS, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+
+raw_dat <- getSymbols('PAYEMS',src='FRED', auto.assign=F) 
+
+dat <- raw_dat %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         jobs = PAYEMS) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"))
+
+dat_ph <- dat %>% 
+  mutate(recess = case_when(date >= "1948-09-01" & date <= "1950-07-01" ~ "1948", 
+                            date >= "1953-07-01" & date <= "1955-06-01" ~ "1953",
+                            date >= "1957-04-01" & date <= "1959-04-01" ~ "1957",
+                            date >= "1960-04-01" & date <= "1961-12-01" ~ "1960",
+                            date >= "1974-10-01" & date <= "1976-02-01" ~ "1974",
+                            date >= "1980-03-01" & date <= "1981-01-01" ~ "1980",
+                            date >= "1981-07-01" & date <= "1983-11-01" ~ "1981",
+                            date >= "1990-06-01" & date <= "1993-02-01" ~ "1990",
+                            date >= "2001-02-01" & date <= "2005-02-01" ~ "2001",
+                            date >= "2008-01-01" & date <= "2014-05-01" ~ "2008",
+                            date >= "2020-02-01" ~ "2020"))
+
+dat_long <- dat_ph %>% 
+  group_by(recess) %>% 
+  mutate(perc = (jobs / first(jobs) - 1) * 100) %>% 
+  na.omit() %>% 
+  mutate(counter = row_number() - 1) %>%
+  ungroup() %>% 
+  mutate(idx = ifelse(recess == "1948", counter, #update date here
+               ifelse(recess == "1953", counter + 4,
+               ifelse(recess == "1957", counter + 8,
+               ifelse(recess == "1960", counter + 12,
+               ifelse(recess == "1974", counter + 16,
+               ifelse(recess == "1980", counter + 20,
+               ifelse(recess == "1981", counter + 24,
+               ifelse(recess == "1990", counter + 28,
+               ifelse(recess == "2001", counter + 32,
+               ifelse(recess == "2008", counter + 36,
+               ifelse(recess == "2020" & date == "2020-02-01", counter + 106,
+               ifelse(recess == "2020" & date == "2020-03-01", counter + 110,
+               ifelse(recess == "2020" & date == "2020-04-01", counter + 130,
+               ifelse(recess == "2020" & date == "2020-05-01", counter + 134,
+               ifelse(recess == "2020" & date == "2020-06-01", counter + 138,
+               ifelse(recess == "2020" & date == "2020-07-01", counter + 142, 
+               ifelse(recess == "2020" & date == "2020-08-01", counter + 146, 
+               ifelse(recess == "2020" & date == "2020-09-01", counter + 150, 
+               ifelse(recess == "2020" & date == "2020-10-01", counter + 154, 
+               ifelse(recess == "2020" & date == "2020-11-01", counter + 160, 
+               ifelse(recess == "2020" & date == "2020-12-01", counter + 164, 
+               ifelse(recess == "2020" & date == "2021-01-01", counter + 168, 
+               ifelse(recess == "2020" & date == "2021-02-01", counter + 172,
+               ifelse(recess == "2020" & date == "2021-03-01", counter + 176,
+               ifelse(recess == "2020" & date == "2021-04-01", counter + 180,NA)))))))))))))))))))))))))) %>% 
+  mutate(recess = paste0(recess, " "))
+        
+
+start_date <- head(dat_long$date,1)
+end_date <- tail(dat_long$date,1)
+
+line_cols <- c("1948 " = "#b2df8a", 
+               "1953 " = "#fb9a99", 
+               "1957 " = "#fdbf6f", 
+               "1960 " = "#ff7f00", 
+               "1974 " = "#cab2d6", 
+               "1980 " = "#6a3d9a", 
+               "1981 " = "#b15928", 
+               "1990 " = "#33a02c",
+               "2001 " = "#a6cee3", 
+               "2008 " = "#1f78b4", 
+               "2020 " = "#e31a1c")
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+ctitle_1 <- "Job losses during US post-war recessions"
+unit_label <- "% difference from cycle's peak total number of jobs"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+x_lab <- "Number of months after peak employment"
+
+chart_1 <- dat_long %>%
+  ggplot(aes(x = counter, y = perc, color = recess)) +
+  geom_line(size = 1, alpha = 0.85) +
+  geom_point(size = 2.2) +
+  geom_text(data = filter(dat_long, recess == "2008 " | recess == "2020 " | recess == "2001 "), 
+            aes(x = counter, y = perc, label = recess),
+            nudge_x = 3.2, 
+            nudge_y = 0.15,
+            show.legend = FALSE, 
+            size = 4, 
+            family = "Open Sans", 
+            fontface = "bold") +
+  scale_color_manual(values = line_cols) +
+  scale_x_continuous(limits = c(0, 85), expand = c(0,0)) +
+  scale_y_continuous(limits = c(-16, 1), expand = c(0,0), labels = fmt_dcmls(0)) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.3), "cm"),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = 0, unit = "cm"),
+    legend.spacing.x = unit(0.2, 'cm'),
+    legend.spacing.y = unit(0.2, 'cm')) +
+  guides(color=guide_legend(nrow=2,byrow=TRUE)) +
+  labs(title = ctitle_1, 
+       subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat$date,1), "%b %Y"), ". ", source_1[1], sep = ""),
+       x = x_lab) +
+  transition_reveal(idx, keep_last = TRUE) +
+  ease_aes('linear') +
+  view_follow(fixed_x = TRUE)
+
+anim <- animate(chart_1, renderer = gifski_renderer(loop = T), nframe = 360,
+                 width = 615, height = 505, type = "cairo", end_pause = 120)
+
+anim
+```
+
+
+An aggregate measure of labor market conditions, the Blanchflower-Levin employment gap, seems to be maintaining a smoother path lower. Underemployment continues to fall and the aforementioned gains in labor force participations makes up for slowing in actual job gains. Again, as the Fed continues to explicitly state that it cares about more than just the unemployment rate, the degree to which the participation gap shown below in green closes into next year will likely have significant implications for shifts in forward guidance and policy.
+
+
+```{r blanchflower, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+library(ggforce)
+library(lubridate)
+
+raw_dat <- getSymbols(c('UNRATE', 'CIVPART', 'LNS12032194', 'CLF16OV') ,src='FRED', auto.assign=T) 
+
+dat <- merge(UNRATE, CIVPART, LNS12032194, CLF16OV) %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         UR = UNRATE,
+         LFPR = CIVPART,
+         PTER = LNS12032194,
+         LF = CLF16OV) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         date = ceiling_date(date, "month") - 1)
+
+## NAIRU
+raw_nairu <- getSymbols('NROU' ,src='FRED', auto.assign=T) 
+
+dat_nairu <- NROU %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(date = rowname,
+         NAIRU = NROU) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date < Sys.Date())
+
+
+mthly_nairu <- seq(dat_nairu$date[1] + 1, 
+                   tail(dat_nairu$date,1) + 1, 
+                   by = "1 month") - 1
+
+nairu_m <- data.frame(date = ceiling_date(mthly_nairu, "month") - 1, 
+                      nairu = spline(dat_nairu, 
+                                      method = "fmm", 
+                                      xout=mthly_nairu)$y) %>% 
+  as_data_frame()
+
+
+## potential LFPR
+cbo_dat <- read_csv("D:\\Documents\\R directory\\cbo_dat.csv") %>% 
+  select(date, potential_lfpr) %>% 
+  mutate(date = as.yearqtr(date, "%Yq%q"),
+         date = as.Date(date, 1))
+  
+monthly <- seq(cbo_dat$date[1] + 1, tail(cbo_dat$date,1) + 1, by = "1 month") - 1
+cbo_m <- data.frame(date = monthly, 
+                    cbo_lfpr = spline(cbo_dat, 
+                                      method = "fmm", 
+                                      xout=monthly)$y) %>% 
+  as_data_frame() %>% 
+  filter(date < Sys.Date())
+
+
+## merge and gaps calculated
+dat_tot <- dat %>% 
+  left_join(nairu_m, by = "date") %>% 
+  left_join(cbo_m, by = "date") %>% 
+  filter(date > "1979-12-31",
+         date <= tail(dat$date,1)) %>% 
+  mutate(PTER_adj = PTER * (5.48/8.08),
+         PTER_perc = PTER_adj / LF)
+
+pter_avg <- dat_tot %>% 
+  select(date, PTER_perc) %>% 
+  filter(date > "1993-12-31",
+         date <= "2007-12-31") %>% 
+  summarize(avg = mean(PTER_perc)) %>% 
+  unlist()
+
+BL <- dat_tot %>% 
+  mutate(PTER_gap = (PTER_perc - pter_avg) * 100,
+         UR_gap = UR - nairu,
+         LFPR_gap = cbo_lfpr - LFPR,
+         total = PTER_gap + UR_gap + LFPR_gap) %>% 
+  select(date, PTER_gap, UR_gap, LFPR_gap) %>%
+  rename('Underemployment gap' = PTER_gap, 'Unemployment gap' = UR_gap, 'Pariticipation gap' = LFPR_gap) %>% 
+  pivot_longer(cols = ends_with("gap"), names_to = "key", values_to = "value")
+
+dat_line <- dat_tot %>% 
+  mutate(PTER_gap = (PTER_perc - pter_avg) * 100,
+         UR_gap = UR - nairu,
+         LFPR_gap = cbo_lfpr - LFPR,
+         total = PTER_gap + UR_gap + LFPR_gap)
+
+ctitle_1 <- "Blanchflower-Levin employment gap"
+unit_label <- "%"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+start_date <- head(dat_line$date,1)
+end_date <- tail(dat$date,1)
+
+BL_chart <- BL %>% 
+  mutate(placeholder = "X") %>% 
+  ggplot() +
+  geom_bar(aes(fill = key, y = value, x = date),
+           position = "stack", 
+           stat = "identity",
+           width = 32) +
+  facet_zoom(xy = date > "2018/8/1" & date < "2021/05/01", #edit this
+             zoom.size = .4) +
+  geom_line(data = dat_line, aes(x = date, y = total), 
+             size = 0.8, 
+             alpha = .5, 
+             linetype = "dashed") +
+  scale_fill_manual(values = c("#33a02c", "#a6cee3", "#1f78b4")) +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_date(date_labels = "%Y",
+               expand = c(0,50)) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 12, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  ) + 
+  labs(title = ctitle_1, subtitle = unit_label,
+       caption = paste("Data as of ", format(tail(dat_line$date,1), "%b, %Y"), ". ", 
+                       source_1[1], sep = "")) +
+  transition_states(placeholder)
+
+anim <- animate(BL_chart, renderer = gifski_renderer(loop = T), fps = 1, duration = 1,
+                 width = 615, height = 420, type = "cairo")
+
+anim
+```
+
+Note: the unemployment gap is the difference between the unemployment rate and the non-accelerating inflation rate of unemployment (NAIRU). The participation gap is the difference between the labor force participation rate (LFPR) and the CBO’s estimate of the potential LFPR. The underemployment gap is the difference between the number of employees working part-time for economic reasons as a percentage of the labor force, adjusted for the difference in the average number of hours worked by part-time and full-time employees, and the 1994-2007 average of this calculation.
