@@ -1,0 +1,1147 @@
+---
+title: "Prices -> A look under the index's hood"
+date: 2021-11-02T21:13:14-05:00
+draft: false
+editor_options:
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<p> 
+ </p>
+<p>Inflation has reached levels not seen in decades, and it would be an understatement to say that the world’s noticed. There’s a camp that calls inflation’s current clip “Transitory.” There’s a faction pointing to any and all price charts still with an upward trajectory that identifies inflation as “Persistent,” and there’s folks with a slightly more nuanced view that belong to “Team Transitorily Elevated in Pandemic-Affected Categories Followed by a Moderate Broadening Out That’s Unfortunate but Still Much Better than the Alternative That We Experienced after the Last Recession,” as Michael Redmond notes. My goal in this piece is to take a sober look at what the data shows and may be telling us, though I’m likely in large part blind to the extent my biases.</p>
+<p>Most analysis of inflation data searches for a central tendency, “a signal in the noise,” that points to the future path of prices in the economy. Because of the volatility of food and energy prices, they often get stripped from overall price (headline) price indices, leaving a “core” index of the rest of the basket of prices to give a more consistent measure. Both headline and core inflation have shot up in 2021. Even other approaches to ferreting out the central tendency of price indices have climbed higher in recent months. Trimmed mean and median metrics for the Consumer Price Index (CPI), based on the inflation of components towards the middle of the distribution of all components’ rates of inflation, have inflected higher.</p>
+<p><img src="/blog/2020/20211102_prices_under_the_hood_files/figure-html/unnamed-chunk-1-1.gif" /><!-- --></p>
+<p>These series of the year-over-year rates of inflation can also be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 has well surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last year and a half.</p>
+<p><img src="/blog/2020/20211102_prices_under_the_hood_files/figure-html/unnamed-chunk-2-1.gif" /><!-- --></p>
+<p>I also like looking at the distributions of components within CPI because it’s fun to watch, but also because it gives an idea of the level of dispersion between inflation for things as varied as men’s sweaters and medical services. In the chart below, I take 180 non-overlapping components of CPI and show the distribution of their year-over-year changes over time. Dispersion clearly increased with the onset of the pandemic and then amidst reopening, and since the summer the distribution has shifted to the right. Goods prices, which traditionally often decline over time, have strayed from deflationary territory and made up a large part of that shift, though services prices have also become increasingly skewed to the right.</p>
+<p><img src="/blog/2020/20211102_prices_under_the_hood_files/figure-html/unnamed-chunk-3-1.gif" /><!-- --></p>
+<p>Looking at their contributions to the overall rate of year-over-year inflation provides a cleaner look at the relative trends of goods and services prices. Based on this perspective, core goods appear mostly responsible for the updraft in inflation that everyone’s talking about, while core services have maintained their longer-term trend.</p>
+<p><img src="/blog/2020/20211102_prices_under_the_hood_files/figure-html/unnamed-chunk-4-1.gif" /><!-- --></p>
+<p>I have a hunch that core goods will resume their longer-term trend as well. As can be seen in the chart below, the current jump in core goods prices flies in the face of decades of flatlining prices in the category. Structural forces of productivity growth, competition from abroad, and other factors have surely kept a lid on core goods prices this century, and I expect once the pandemic’s disruptions abate that those forces will reassert themselves.</p>
+<p><img src="/blog/2020/20211102_prices_under_the_hood_files/figure-html/unnamed-chunk-5-1.gif" /><!-- --></p>
+<p>Another way to breakdown the year-over-year series of core CPI involves ascribing the overall change in its current level from the level 12 months ago to different periods in-between. In recent months, a deceleration can be seen in the declining contribution of the period of the trailing three months. The bulk of what has pushed the year-over-year inflation so high, however, came in the last six months, so this increase won’t roll off for another half of a year even if inflation continues to moderate.</p>
+<p><img src="/blog/2020/20211102_prices_under_the_hood_files/figure-html/unnamed-chunk-6-1.gif" /><!-- --></p>
+<p>Assuming inflation doesn’t reaccelerate substantially from here, which I hold as my base case — though I’m cognizant of upside risks, especially in the form of housing prices — I would expect core CPI to slide back to around 2.5% by the middle of next year. The chart below extrapolates year-over-year inflation with the following months each exhibiting the average monthly rate of inflation of the last five years. Note that the Fed prefers to base its policy on the PCE price index, which would likely be even lower based on the smaller weight of housing in that index.</p>
+<p><img src="/blog/2020/20211102_prices_under_the_hood_files/figure-html/unnamed-chunk-7-1.gif" /><!-- --></p>
+<p>For reference, various rates of inflation for important components of CPI can be found in the table below.</p>
+<table class=" lightable-paper lightable-hover" style="font-family: Open Sans; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Mar-21
+</th>
+<th style="text-align:right;">
+Apr-21
+</th>
+<th style="text-align:right;">
+May-21
+</th>
+<th style="text-align:right;">
+Jun-21
+</th>
+<th style="text-align:right;">
+Jul-21
+</th>
+<th style="text-align:right;">
+Aug-21
+</th>
+<th style="text-align:right;">
+Sep-21
+</th>
+</tr>
+</thead>
+<tbody>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Headline CPI</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+0.6
+</td>
+<td style="text-align:right;">
+0.8
+</td>
+<td style="text-align:right;">
+0.6
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">0.5</span>
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">7.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">8.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">9.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">8.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">6.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">4.7</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">4.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">4.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">5.3</span>
+</td>
+<td style="text-align:right;">
+5.3
+</td>
+<td style="text-align:right;">
+5.2
+</td>
+<td style="text-align:right;">
+5.4
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Core CPI (~79)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.9</span>
+</td>
+<td style="text-align:right;">
+0.7
+</td>
+<td style="text-align:right;">
+0.9
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">0.3</span>
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">1.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">5.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">8.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">10.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">8.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">5.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">2.7</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">1.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">3.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">4.5</span>
+</td>
+<td style="text-align:right;">
+4.2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Food (~14)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.4</span>
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.8</span>
+</td>
+<td style="text-align:right;">
+0.7
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.9</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">1.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">2.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">3.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">6.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">7.8</span>
+</td>
+<td style="text-align:right;">
+7.6
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">8.1</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+3.4
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">2.3</span>
+</td>
+<td style="text-align:right;">
+2.1
+</td>
+<td style="text-align:right;">
+2.4
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">3.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">3.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">4.5</span>
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Energy (~7)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-0.1</span>
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">1.5</span>
+</td>
+<td style="text-align:right;">
+1.6
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">1.3</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">62.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">40.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">21</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">5.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">13</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">22.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">21.4</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">13.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">25</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">27.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">24.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">23.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">24.9</span>
+</td>
+<td style="text-align:right;">
+24.8
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Core goods (~21)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">2</span>
+</td>
+<td style="text-align:right;">
+1.8
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">0.5</span>
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">7.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">16.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">26.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">19.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">12.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">4.3</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">1.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">4.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">6.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">8.6</span>
+</td>
+<td style="text-align:right;">
+8.4
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">7.6</span>
+</td>
+<td style="text-align:right;">
+7.3
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Core services (~58)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">2.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">4.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">5.4</span>
+</td>
+<td style="text-align:right;">
+5.5
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">4.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">2.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">2</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">1.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.9</span>
+</td>
+<td style="text-align:right;">
+3.1
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">2.8</span>
+</td>
+<td style="text-align:right;">
+2.7
+</td>
+<td style="text-align:right;">
+2.9
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Apparel (~3)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">-0.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">1.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">0.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">0</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-1.1</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">4.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-2.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">5.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">9.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">8.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">4.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-2.8</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">-2.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">1.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">5.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">4.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">4.2</span>
+</td>
+<td style="text-align:right;">
+4.2
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">3.4</span>
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Used cars and trucks (~3)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">0.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">10</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">7.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">10.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">0.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-1.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">-0.7</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">-4.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">44.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">98.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">189.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">99.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">41.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-7.8</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+9.4
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">21</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">29.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">45.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">41.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">31.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">24.4</span>
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Airline fares (~1)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">0.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">10.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">2.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-0.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-9.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">-6.4</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">-27.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">21.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">96.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">114.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">45</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-24.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-48</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">-15.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">9.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">24.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">24.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">19</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">6.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">0.8</span>
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Shelter (~33)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">3.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">4.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">4.8</span>
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">4.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">4</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+1.7
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.1</span>
+</td>
+<td style="text-align:right;">
+2.2
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.6</span>
+</td>
+<td style="text-align:right;">
+2.8
+</td>
+<td style="text-align:right;">
+2.8
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">3.2</span>
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Medical care services (~7%)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">0.1</span>
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-0.1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">-0.1</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">4.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">2.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">0.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">-0.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">0.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">2.3</span>
+</td>
+<td style="text-align:right;">
+2.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+2.7
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">2.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">1.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">1</span>
+</td>
+<td style="text-align:right;">
+0.8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.9
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Education (~3%)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">-0.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.2</span>
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.4</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">0.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">0.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">1.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">3.3</span>
+</td>
+<td style="text-align:right;">
+3.2
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">1.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2.5</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">0.8</span>
+</td>
+<td style="text-align:right;">
+0.8
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.2
+</td>
+<td style="text-align:right;">
+1.2
+</td>
+<td style="text-align:right;">
+1.4
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #ffd6d6">2</span>
+</td>
+</tr>
+<tr grouplength="3">
+<td colspan="8" style="border-bottom: 1px solid;">
+<strong>Transportation services (~5%)</strong>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+m/m, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">1.8</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">2.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">1.5</span>
+</td>
+<td style="text-align:right;">
+1.5
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-1.1</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-2.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">-0.5</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+3m ann, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">5.5</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">19.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">27.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">26.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">7.9</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-7.4</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">-14.4</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;padding-left: 2em;" indentlevel="1">
+y/y, %
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">-1.6</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">5.7</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #f59393">11.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #d1ecff">10.3</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">6.2</span>
+</td>
+<td style="text-align:right;">
+<span style="display: block; padding: 0 4px; border-radius: 4px; background-color: #90d1fc">4.5</span>
+</td>
+<td style="text-align:right;">
+4.4
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup></sup> Number next to component name represents its weight in the overall index. <br />Coloring represents the degree of change in the rate of inflation from the <br />month before. Source: BLS, <span class="citation">@benbakkum</span>.
+</td>
+</tr>
+</tfoot>
+</table>
