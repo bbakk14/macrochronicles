@@ -1,12 +1,14 @@
 ---
-title: "Jobs -> A look at the 2021 trend"
-date: 2021-06-05T21:13:14-05:00
+title: "Jobs -> Payrolls miss expectations but broader measures improve"
+date: 2021-12-03T21:13:14-05:00
 draft: false
 ---
 &nbsp;
 &nbsp;
 
-Job gains in May came in closer to analyst expectations relative to the big miss in April, with over half a million jobs added during the month. The chart below shows how the nonfarm payroll numbers have developed over the last nine months, including revisions that have been released for previous reports. 
+
+
+Job gains in November came in below expectations. A more holistic view of the data, however, shows that the recovery in the labor market remains on track. The mixed signals appear in large part to stem from varying strengths of conditions in household survey and establishment survey data.
 
 ```{r setup, include=FALSE}
 
@@ -65,33 +67,20 @@ my_theme <- theme(
 
 
 ```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
-colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
-            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
-            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
-            'text' = "#222222" , 'light grey' = "#CDCDCD")
 
-cpal <- function(...) {
-  cols <- c(...)
-  if (is.null(cols))
-    return(colors)
-  colors[[cols]]
-}
-
-
-  
 ctitle_1 <- "Estimates of monthly change in nonfarm payrolls"
 unit_label <- "Payrolls, thousands, seasonally adjusted"
 source_1 <- "Source: BLS, @benbakkum."
 
-
-
+## https://www.fxstreet.com/macroeconomics/economic-indicator/nfp
+## https://www.bls.gov/web/empsit/cesnaicsrev.htm
 
 read_csv("D:\\Documents\\R directory\\labor market\\nfp_revisions.csv") %>% 
   mutate(month = paste0(gsub("\\.", "",Month)," ", Year),
          month = as.yearmon(month, "%b %Y"),
          month = as.Date(month)) %>% 
   select(-Month, -Year) %>% 
-  pivot_longer(-month, values_to = "values", names_to = "estimate") %>% 
+  pivot_longer(-month, values_to = "values", names_to = "estimate") %>%  ## edit this
   mutate(date_released = case_when(estimate == "1st" ~ month,
                                    estimate == "2nd" ~ month %m+% months(1),
                                    estimate == "3rd" ~ month %m+% months(2),
@@ -99,10 +88,10 @@ read_csv("D:\\Documents\\R directory\\labor market\\nfp_revisions.csv") %>%
          released = format(date_released, "%b '%y"),
          estimate = ifelse(estimate == "3rd", "Final", estimate),
          index = as.numeric(month) - 18500,
-         rank_index = dense_rank(index) - 8,
+         rank_index = dense_rank(index) - 15, ## need to edit this number
          txt_labels = paste0(values, "k")) %>%
+  filter(month > "2021-03-31") %>%
   rename(Estimate = estimate) %>% 
-  filter(month > "2020-08-01") %>% 
   drop_na() -> df
 
 df$Estimate <- factor(df$Estimate, levels = c("Consensus", "1st", "2nd", "Final"))
@@ -111,7 +100,7 @@ df$Estimate <- factor(df$Estimate, levels = c("Consensus", "1st", "2nd", "Final"
 df %>% 
   ggplot(aes(rank_index, values, color = Estimate, shape = Estimate)) +
   geom_point(size = 6, alpha = 0.6) +
-  geom_text(data = df %>% filter(Estimate == "1st"), aes(2.2, -150, label = released), 
+  geom_text(data = df %>% filter(Estimate == "1st"), aes(2.2, -95, label = released), 
             color = "#808080", size = 13, alpha = .8, 
             family = "Open Sans") +
   geom_text(data = df, aes(rank_index, values, label = txt_labels, color = Estimate),
@@ -119,9 +108,10 @@ df %>%
   geom_hline(yintercept = 0, linetype = "dashed", color = cpal("border grey")) +
   scale_color_manual(values = c(cpal("border grey"), cpal("blue"), cpal("orange"), cpal("green"))) +
   scale_shape_manual(values = c(18, 16, 17, 15)) +
-  scale_x_continuous(breaks = seq(1,9), 
+  scale_x_continuous(breaks = seq(1,8), 
                      labels = unique(df$released)) +
-  scale_y_continuous(breaks = c(-200, 0, 200, 400, 600, 800, 1000)) +
+  scale_y_continuous(breaks = c(-200, 0, 200, 400, 600, 800, 1000),
+                     limits = c(-200, 1100)) +
   theme(legend.position = "bottom",
     legend.key = element_blank(),
     legend.key.size = unit(0.37, "cm"),
@@ -156,9 +146,8 @@ anim
   
 ```
 
-Despite the deceleration in April, the last four months have strung together a fairly consistent trend, with seasonally adjusted job adds averaging around 500,000 and non-seasonally adjusted gains averaging just above 1 million. As Michael Redmond has noted, potentially a "speed limit" exists on just how many jobs can be created in any given month, and these type of averages may be what we should expect going forward for this recovery. While this kind of rebound in the labor market is likely not as strong as many would have hoped, on the bright side the current trend is still much better than the average job growth of the previous cycle. 
 
-The chart below compares the seasonally adjusted and non-seasonally adjusted payroll figures, along with what the given month averaged during the last cycle and what the most recent four months have averaged for each. 
+On a non-seasonally adjusted basis, the net number of payrolls added in November was higher than the average of all the Novembers of the 10 years preceding covid. If the recovery can maintain its average pace over the last four months on a seasonally adjusted basis, it won't be very long until (likely sometime in mid-2022) when the Fed believes the labor market has returned to something like full employment.
 
 ```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 dat <- bls_api(c("CEU0000000001", "CES0000000001"), 
@@ -180,7 +169,7 @@ dat %>%
   mutate(nfp_chg_sa = PAYEMS - lead(PAYEMS, 1),
          nfp_chg_nsa = PAYNSA - lead(PAYNSA, 1)) -> dat_chg
 
-dat_chg[1:4,] %>% 
+dat_chg[1:4,] %>% ## edit length of avg here
   select(nfp_chg_nsa, nfp_chg_sa) %>% 
   summarize(avg_sa = mean(nfp_chg_sa),
             avg_nsa = mean(nfp_chg_nsa)) -> avgs_curr_yr
@@ -199,9 +188,9 @@ dat_chg %>%
   pivot_longer(-date, names_to = "key", values_to = "values") %>% 
   mutate(month = month(date)) %>% 
   left_join(avgs_10_yr, by = c("month", "key")) %>% 
-  mutate(avg_curr_yr = case_when(key == "nfp_chg_sa" & date > "2021-01-31" ~ avgs_curr_yr$avg_sa,
-                                 key == "nfp_chg_nsa" & date > "2021-01-31" ~ avgs_curr_yr$avg_nsa)) %>% 
-  filter(date > "2020-08-31") -> dat_chg_avg
+  mutate(avg_curr_yr = case_when(key == "nfp_chg_sa" & date > "2021-07-30" ~ avgs_curr_yr$avg_sa, # edit date
+                                 key == "nfp_chg_nsa" & date > "2021-07-30" ~ avgs_curr_yr$avg_nsa)) %>% # edit date
+  filter(date > "2021-03-31") -> dat_chg_avg ## edit date
 
 dat_chg_avg %>% 
   select(date, key, values) %>% 
@@ -297,26 +286,13 @@ anim1 <- animate(p, renderer = gifski_renderer(loop = T), nframe = 1,
                  width = 615, height = 475, type = "cairo")
 
 anim1
-
-
-  
   
 ```
 
-Overall, there was not much to dislike in this specific report, apart from the tick down in participation. Prime-age employment and therefore prime-age EPOP were strong. Prime-age participation was flat, but it was also flat when the overall participation rate rose last month.
+
+Despite the lower than expected net number of job gains, the unemployment rate, labor force participation rates, and employment-to-population ratios all improved in a way that made it look like a month of strong labor market conditions.
 
 ```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
-colors <- c('aqua' = "#45BCC9", 'green' = "#648C2E", 'deep blue' = "#00567D",
-            'espresso' = "#310008", 'sand' = "#E1D1A7", 'orange' = "#F38B00",
-            'red' = "#A51D31", 'dark grey' = "8E8279", 'border grey' = "#808080",
-            'text' = "#222222", 'light grey' = "#CDCDCD")
-
-cpal <- function(...) {
-  cols <- c(...)
-  if (is.null(cols))
-    return(colors)
-  colors[[cols]]
-}
 
 
 dat <- bls_api(c("LNS14000000", "LNS14000060", "LNS11300000", "LNS11300060", "LNS12300000", "LNS12300060", "LNS13327709",
@@ -332,6 +308,18 @@ data.frame(name = c("UR", "Prime_age_UR", "LFPR", "Prime_age_LFPR", "EPOP", "Pri
 ```
 
 ```{r table, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE, results='asis'}
+
+dat <- bls_api(c("LNS14000000", "LNS14000060", "LNS11300000", "LNS11300060", "LNS12300000", "LNS12300060", "LNS13327709",
+                "LNS12032194", "LNS12000000", "LNS13008636", "LNS11000000", "CES0500000003", "CES0000000001"), 
+              startyear = 2018, 
+              endyear = 2021, 
+              Sys.getenv("BLS_KEY"))
+
+data.frame(name = c("UR", "Prime_age_UR", "LFPR", "Prime_age_LFPR", "EPOP", "Prime_age_EPOP", "U6", 
+                    "PTER", "Employment", "Long_term_unemployed", "LF", "AHE", "PAYEMS"),
+           code = c("LNS14000000", "LNS14000060", "LNS11300000", "LNS11300060", "LNS12300000", "LNS12300060", "LNS13327709",
+                "LNS12032194", "LNS12000000", "LNS13008636", "LNS11000000", "CES0500000003", "CES0000000001")) -> key
+
 dat %>% 
   mutate(date = paste0(periodName, " ", year, " 01"),
          date = as.Date(date, "%B %Y %d")) %>% 
@@ -497,7 +485,6 @@ table
 &nbsp;
 
 
-The decrease in the long-term unemployment rate stands out on the charts of these series.
 
 ```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 dat %>% 
@@ -552,9 +539,9 @@ source_1 <- "Source: BLS, @benbakkum."
 
 chart1 <- chrt_dat_lng %>% 
   ggplot(aes(date, values)) +
-  geom_step(color = cpal("deep blue")) +
+  geom_step(color = cpal("blue")) +
   scale_x_date(breaks = c(as.Date("2019-01-01"), as.Date("2020-01-01"), as.Date("2021-01-01")),
-               date_labels = "%Y") +
+               date_labels = "'%y") +
   facet_wrap(~key, scales = "free_y", ncol = 4) +
   theme(
     legend.position = "none",
@@ -587,7 +574,7 @@ anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 225,
 anim1
 ```
 
-Leisure & hospitality now stringing together a nice trend of job gains over the last few months. Looks like the number of professional service jobs in the economy has now actually surpassed the pre-pandemic peak.
+Transportation and warehousing as well as professional service jobs continue to stand out as industries where employment is growing at a strong pace, even though they're already well above pre-pandemic levels of employment. Leisure and hospitality job gains have slowed, likely reflecting the ongoing effects of the pandemic. 
 
 ```{r industries, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 codes <- c("USCONS", "MANEMP", "USMINE", "USWTRADE", "USTRADE", "CES4300000001", "CES4422000001", "CES6054000001",
@@ -618,9 +605,9 @@ chart1 <- dat %>%
   mutate(date = as.Date(date, "%Y-%m-%d"),
          name = fct_reorder(name, value, function(.) min(.) / max(.))) %>% 
   ggplot(aes(date, value)) +
-  geom_step(color = cpal("deep blue")) +
+  geom_step(color = cpal("blue")) +
   scale_x_date(breaks = c(as.Date("2019-01-01"), as.Date("2020-01-01"), as.Date("2021-01-01")),
-               date_labels = "%Y") +
+               date_labels = "'%y") +
   facet_wrap(~ name, scales = "free_y") +
    theme(
     legend.position = "none",
@@ -652,7 +639,8 @@ anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 225,
 anim1
 
 ```
-The recovery in the percentage of jobs lost is reaching the same level of losses as the Global Financial Crisis this far in time from peak employment, when at that point during the previous recession, the labor market was still on the way down.
+
+The chart below shows the strong pace of this recovery relative to other recessions.
 
 ```{r PAYEMS, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 
@@ -698,19 +686,25 @@ dat_long <- dat_ph %>%
                ifelse(recess == "2020" & date == "2020-02-01", counter + 106,
                ifelse(recess == "2020" & date == "2020-03-01", counter + 110,
                ifelse(recess == "2020" & date == "2020-04-01", counter + 130,
-               ifelse(recess == "2020" & date == "2020-05-01", counter + 134,
-               ifelse(recess == "2020" & date == "2020-06-01", counter + 138,
-               ifelse(recess == "2020" & date == "2020-07-01", counter + 142, 
-               ifelse(recess == "2020" & date == "2020-08-01", counter + 146, 
-               ifelse(recess == "2020" & date == "2020-09-01", counter + 150, 
-               ifelse(recess == "2020" & date == "2020-10-01", counter + 154, 
-               ifelse(recess == "2020" & date == "2020-11-01", counter + 160, 
-               ifelse(recess == "2020" & date == "2020-12-01", counter + 164, 
-               ifelse(recess == "2020" & date == "2021-01-01", counter + 168, 
-               ifelse(recess == "2020" & date == "2021-02-01", counter + 172,
-               ifelse(recess == "2020" & date == "2021-03-01", counter + 176,
-               ifelse(recess == "2020" & date == "2021-04-01", counter + 180,
-               ifelse(recess == "2020" & date == "2021-05-01", counter + 184,NA))))))))))))))))))))))))))) %>% 
+               ifelse(recess == "2020" & date == "2020-05-01", counter + 132,
+               ifelse(recess == "2020" & date == "2020-06-01", counter + 134,
+               ifelse(recess == "2020" & date == "2020-07-01", counter + 138, 
+               ifelse(recess == "2020" & date == "2020-08-01", counter + 142, 
+               ifelse(recess == "2020" & date == "2020-09-01", counter + 144, 
+               ifelse(recess == "2020" & date == "2020-10-01", counter + 146, 
+               ifelse(recess == "2020" & date == "2020-11-01", counter + 148, 
+               ifelse(recess == "2020" & date == "2020-12-01", counter + 150, 
+               ifelse(recess == "2020" & date == "2021-01-01", counter + 152, 
+               ifelse(recess == "2020" & date == "2021-02-01", counter + 154,
+               ifelse(recess == "2020" & date == "2021-03-01", counter + 156,
+               ifelse(recess == "2020" & date == "2021-04-01", counter + 158,
+               ifelse(recess == "2020" & date == "2021-05-01", counter + 160,
+               ifelse(recess == "2020" & date == "2021-06-01", counter + 162, 
+               ifelse(recess == "2020" & date == "2021-07-01", counter + 164,
+               ifelse(recess == "2020" & date == "2021-08-01", counter + 166, 
+               ifelse(recess == "2020" & date == "2021-09-01", counter + 168, 
+               ifelse(recess == "2020" & date == "2021-10-01", counter + 170, 
+               ifelse(recess == "2020" & date == "2021-11-01", counter + 172, NA))))))))))))))))))))))))))))))))) %>% 
   mutate(recess = paste0(recess, " "))
         
 
@@ -794,21 +788,9 @@ anim <- animate(chart_1, renderer = gifski_renderer(loop = T), nframe = 360,
 anim
 ```
 
-If the average job growth of the last four months discussed above continues indefinitely, the labor market would fully recover to where it would have likely ended up had the pandemic not occurred by the end of 2023.
+If the average job growth of the last three months continues at the same pace, the total number of jobs would fully recover to where it would have likely ended up had the pandemic not occurred around the end of 2024. In many ways that would be an even tighter labor market than before the pandemic as the population has aged and a large number of workers have retired in the intervening period.
 
 ```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
-colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
-            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
-            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
-            'text' = "#222222" , 'light grey' = "#CDCDCD")
-
-cpal <- function(...) {
-  cols <- c(...)
-  if (is.null(cols))
-    return(colors)
-  colors[[cols]]
-}
-
 
 raw_dat <- bls_api(c("CEU0000000001", "CES0000000001"), 
               startyear = 2005, 
@@ -830,8 +812,8 @@ raw_dat %>%
   arrange(date) %>% 
   mutate(since_feb20 = case_when(date == ymd("2020-02-01") ~ PAYEMS,
                                  date != ymd("2020-02-01") ~ NA_real_),
-         since_now =   case_when(date == ymd("2021-05-01") ~ PAYEMS, #edit this
-                                 date != ymd("2021-05-01") ~ NA_real_)) -> dat #edit this
+         since_now =   case_when(date == ymd("2021-11-01") ~ PAYEMS, #edit this
+                                 date != ymd("2021-11-01") ~ NA_real_)) -> dat #edit this
 
 
 data.frame(date = month_dates <- seq(last(dat$date,1) %m+% months(1), last(dat$date,1) %m+% months(48), by = "month"),
@@ -843,7 +825,7 @@ dat %>%
   rbind(future) -> dat_fut
 
 row_start_feb20 <- which(grepl(ymd("2020-02-01"), dat_fut$date))
-row_start_now <- which(grepl(ymd("2021-05-01"), dat_fut$date)) #edit this
+row_start_now <- which(grepl(ymd("2021-11-01"), dat_fut$date)) #edit this
 
 
 dat_chg[which(dat_chg$date == "2020-02-01"):(which(dat_chg$date == "2020-02-01")+120),] %>% 
@@ -852,7 +834,7 @@ dat_chg[which(dat_chg$date == "2020-02-01"):(which(dat_chg$date == "2020-02-01")
   unlist() -> pre_covid_10y_avg
 
 
-dat_chg[1:4,] %>% 
+dat_chg[1:3,] %>% 
   select(nfp_chg_sa) %>% 
   summarize(avg_sa = mean(nfp_chg_sa)) %>% 
   unlist() -> last_mths_avg
@@ -862,8 +844,8 @@ dat_fut %>%
   mutate(since_feb20 = case_when(date < ymd("2020-02-01") ~ PAYEMS,
                                  date >= ymd("2020-02-01") ~ pull(dat[row_start_feb20,"since_feb20"]) + 
                                                           (pre_covid_10y_avg * (row_number() - row_start_feb20))),
-         since_now = case_when(date < ymd("2021-05-01") ~ PAYEMS,
-                              date >= ymd("2021-05-01") ~ pull(dat[row_start_now,"since_now"]) +
+         since_now = case_when(date < ymd("2021-11-01") ~ PAYEMS, #edit this
+                              date >= ymd("2021-11-01") ~ pull(dat[row_start_now,"since_now"]) + #edit this
                                                           (last_mths_avg * (row_number() - row_start_now)))) -> df_final
 
 
@@ -880,17 +862,17 @@ df_final %>%
   pivot_longer(-date, names_to = "key", values_to = "values") %>% 
   mutate(key = case_when(key == "PAYEMS" ~ "Actual total jobs",
                          key == "since_feb20" ~ "Pre-pandemic trend",
-                         key == "since_now" ~ "Last four months trend")) -> df_long #edit this
+                         key == "since_now" ~ "Last three months trend")) -> df_long #edit this
 
 df_long$key <- factor(df_long$key, c("Pre-pandemic trend",
-                                     "Last four months trend",
+                                     "Last three months trend",
                                      "Actual total jobs"
                                      ))
                                      
                                      
 
 df_long %>% 
-  filter(date > "2017-12-01" & date < "2024-01-01") %>% 
+  filter(date > "2017-12-01" & date < "2024-12-01") %>% 
   ggplot(aes(date, values, color = key, linetype = key, size = key)) +
   geom_line() +
   geom_point(size = 2.5) +
@@ -898,7 +880,7 @@ df_long %>%
   scale_color_manual(values = c(cpal("green"), cpal("orange"), cpal("blue"))) +
   scale_size_manual(values = c(1, 1, 1.2)) +
   scale_x_date(expand = c(0,0),
-               limits = c(ymd("2019-01-01"), ymd("2024-01-01")),
+               limits = c(ymd("2019-01-01"), ymd("2024-12-01")),
                date_labels = "'%y",
                date_breaks = "1 year") +
   scale_y_continuous(labels = fmt_dcmls(0)) +
@@ -919,7 +901,8 @@ anim1
 ```
 
 
-An aggregate measure of labor market conditions, the Blanchflower-Levin employment gap, shows that a good amount of slack certainly still exists despite the headlines you may see about shortages, but it also indicates that steady progress continues to be made.
+An aggregate measure of labor market conditions, the Blanchflower-Levin employment gap, shows that slack continues to decline, with underemployment (a major source of slack during the last cycle) and unemployment slack having already disappeared according to this measure. My interest continues to be in how long the participation gap will linger during this cycle.
+
 
 ```{r blanchflower, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 library(ggforce)
@@ -1023,7 +1006,7 @@ BL_chart <- BL %>%
            position = "stack", 
            stat = "identity",
            width = 32) +
-  facet_zoom(xy = date > "2018/8/1" & date < "2021/06/01", #edit this
+  facet_zoom(xy = date > "2018/8/1" & date < "2021/12/01", #edit this
              zoom.size = .4) +
   geom_line(data = dat_line, aes(x = date, y = total), 
              size = 0.8, 
