@@ -1,0 +1,828 @@
+---
+title: "Prices -> Hotter than expected but slowing year-over-year"
+date: 2022-05-11T21:13:14-05:00
+draft: false
+editor_options:
+  chunk_output_type: console
+---
+&nbsp;
+&nbsp;
+
+The US Consumer Price Index numbers for last month were hotter than expected but still showed slowing year-over-year inflation. Headline and core CPI came in at 8.3% and 6.2% year-over-year, respectively. Used cars and truck prices continued to decline in April, but airfare inflation increased sharply on the back of rising costs for airlines.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(blscrapeR)
+library(tibbletime)
+library(lubridate)
+library(quantmod)
+library(gganimate)
+library(ggrepel)
+library(purrr)
+library(Cairo)
+library(magick)
+library(gifski)
+library(scales)
+library(matrixStats)
+library(kableExtra)
+library(formattable)
+
+windowsFonts("Open Sans" = windowsFont("Open Sans"))
+windowsFonts("Open Sans Light" = windowsFont("Open Sans Light"))
+
+colors <- c('paleblue' = "#a6cee3", 'blue' = "#1f78b4", 'green' = "#33a02c", 'palegreen' = "#b2df8a",
+            'red' = "#e31a1c", 'palered' = "#fb9a99", 'orange' = "#ff7f00", 'paleorange' = "#fdbf6f",
+            'purple' = "#6a3d9a", 'palepurple' = "#cab2d6", 'border grey' = "#808080", 'brown' = '#b15928',
+            'text' = "#222222" , 'light grey' = "#CDCDCD")
+
+cpal <- function(...) {
+  cols <- c(...)
+  if (is.null(cols))
+    return(colors)
+  colors[[cols]]
+}
+
+
+my_theme <- theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.key = element_blank(),
+    legend.key.size = unit(0.37, "cm"),
+    legend.background = element_blank(),
+    legend.margin = margin(t = -0.5, unit = "cm"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = cpal("light grey"), size = 0.21),
+    panel.border = element_rect(fill = NA, color = cpal("border grey"), size = 0.3),
+    plot.title = element_text(size = 21, color = "black", family = "Open Sans Light"),
+    plot.subtitle = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    plot.caption = element_text(size = 12.5, color = cpal("text"), family = "Open Sans"),
+    text = element_text(size = 15, color = cpal("text"), family = "Open Sans"),
+    legend.text = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+    axis.text.x = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.text.y = element_text(size = 14, color = cpal("text"), family = "Open Sans",
+                               margin = unit(c(0.35, 0.25, 0.25, 0.25), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(-0.15, "cm"),
+    axis.ticks = element_line(color = cpal("border grey"), size = 0.3),
+    plot.margin = unit(c(0.3, 0.5, 0.3, 0.05), "cm")
+  )
+
+knitr::opts_chunk$set(echo = TRUE)
+Sys.setenv("BLS_KEY"="98fef94d26f54498a6dd76b7bc193081")
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+raw_dat <- getSymbols(c("TRMMEANCPIM159SFRBCLE", "CPILFESL", "MEDCPIM159SFRBCLE"),src='FRED', auto.assign=T) 
+
+key <- c("Trimmed mean", "Core", "Median")
+
+
+merge(TRMMEANCPIM159SFRBCLE, CPILFESL, MEDCPIM159SFRBCLE)  %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("date", key) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         Core = (Core / lag(Core, 12) - 1) * 100) %>% 
+  filter(date > "2011-12-31") %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") -> dat
+
+
+
+ctitle_1 <- "Measures of CPI central tendency"
+unit_label <- "%, year-over-year"
+source_1 <- "Source: Cleveland Fed, BLS, FRED, @benbakkum."
+
+
+dat %>% 
+  mutate(placeholder = "x") %>% 
+  ggplot(aes(date, values, color = key, linetype = key)) +
+  geom_line(size = 1.2, show.legend = F) +
+  scale_x_date(expand = c(0,0), 
+                     limits = c(as.Date("2012-01-01"), as.Date(tail(dat,1)$date %m+% months(12)))) +
+  scale_color_manual(values = c(cpal("blue"), cpal("green"), cpal("orange"))) +
+  geom_point(data = tail(dat,3),
+             aes(date, values),
+             size = 3) +
+  geom_text(data = tail(dat,3),
+            aes(date, values, label = format(round(values,1), digits = 2)),
+            hjust = -.5,
+            size = 6,
+            fontface = "bold",
+            show.legend = F) +
+  my_theme +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  guides(colour = guide_legend(override.aes = list(size=7))) +
+  transition_manual(placeholder) -> p
+
+anim1 <- animate(p, renderer = gifski_renderer(loop = T), nframe = 1,
+                 width = 615, height = 420, type = "cairo")
+```
+
+Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a "base effect" boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 and into 2022 far surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last two years.
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+raw_dat <- getSymbols(c("CPIAUCSL", "CPILFESL"),src='FRED', auto.assign=T) 
+
+key <- c("Headline", "Core")
+
+
+merge(CPIAUCSL, CPILFESL)  %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("date", key) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date > "2015-12-31") %>% 
+  mutate(Headline = Headline / head(Headline,1) * 100,
+         Core = Core / head(Core,1) * 100) %>% 
+  mutate(headline_since_19 = case_when(date == ymd("2020-01-01") ~ Headline,
+                              date != ymd("2020-01-01") ~ NA_real_),
+         core_since_19 = case_when(date == ymd("2020-01-01") ~ Core,
+                              date != ymd("2020-01-01") ~ NA_real_)) -> dat
+    
+
+mult_factor <- (1.02)^(1/12)
+
+row_start_20 <- which(grepl(ymd("2020-01-01"), dat$date))
+
+dat %>% 
+  mutate(headline_since_19 = case_when(date < ymd("2020-01-01") ~ Headline,
+                              date >= ymd("2020-01-01") ~ pull(dat[row_start_20,"headline_since_19"]) * 
+                                                          (mult_factor ^ (row_number() - row_start_20))),
+         core_since_19 = case_when(date < ymd("2020-01-01") ~ Core,
+                              date >= ymd("2020-01-01") ~ pull(dat[row_start_20,"core_since_19"]) * 
+                                                          (mult_factor ^ (row_number() - row_start_20)))) -> dat_final
+
+ctitle_1 <- "Headline and Core CPI w/ 2% target increases"
+unit_label <- "1/1/2016 = 100, seasonally adjusted"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+fmt_dcmls <- function(decimals = 0) {
+  function(x) as.character(format(round(as.numeric(x), 0), nsmall=0, big.mark=","))
+}
+
+
+dat_final %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>% 
+  mutate(type = case_when(key == "Core" | key == "core_since_19" ~ "Core",
+                          key == "Headline" | key == "headline_since_19" ~ "Headline"),
+         key = case_when(key == "Core" ~ "Actual Core",
+                         key == "Headline" ~ "Actual Headline",
+                         key == "headline_since_19" ~ "Headline w/ 2% inflation since '19",
+                         key == "core_since_19" ~ "Core w/ 2% inflation since '19")) -> df_long
+
+df_long$key <- factor(df_long$key, c("Headline w/ 2% inflation since '19",
+                                     "Actual Headline",
+                                     "Core w/ 2% inflation since '19",
+                                     "Actual Core"))
+
+df_long$type <- factor(df_long$type, c("Headline", "Core"))
+
+df_long %>% 
+  ggplot(aes(date, values, color = key, linetype = key, size = key)) +
+  geom_line(show.legend = F) +
+  geom_point(size = 2.5) +
+  scale_linetype_manual(values = c("dashed", "solid", "dashed", "solid")) +
+  scale_color_manual(values = c(cpal("palegreen"), cpal("green"), cpal("paleblue"), cpal("blue"))) +
+  scale_size_manual(values = c(0.9, 1.2, 0.9, 1.2)) +
+  scale_x_date(expand = c(0,0),
+               limits = c(ymd("2016-01-01"), ymd("2022-06-30")),
+               date_labels = "'%y",
+               date_breaks = "1 year") +
+  scale_y_continuous(limits = c(98, 125), expand = c(.02,.02), labels = fmt_dcmls(0),
+                     breaks = seq(90, 120, 5)) +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  my_theme +
+  guides(color=guide_legend(ncol=1, override.aes = list(size=9)), 
+         linetype=guide_legend(ncol=2)) +
+  theme(legend.key.height = unit(0.7, "cm"),
+        strip.text = element_text(size = 14)) +
+  facet_wrap(~type) +
+  transition_reveal(date, keep_last = TRUE) +
+  view_follow(fixed_x = TRUE, fixed_y = FALSE) -> chart1
+
+
+
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 250,
+                 width = 615, height = 450, type = "cairo", end_pause = 200)
+
+anim1
+
+```
+
+I also like looking at the distributions of components within CPI because it's fun to watch, but also because it gives an idea of the level of dispersion between inflation for things as varied as men's sweaters and medical services. In the chart below, I take 180 non-overlapping components of CPI and show the distribution of their year-over-year changes over time. Dispersion clearly increased with the onset of the pandemic and then amidst reopening, and since last summer the distribution has shifted to the right. It's striking how few components' prices are declining on a year-over-year basis right now.
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+raw_dat <- read_csv("D://Documents//R directory//inflation//cpi_components.csv")
+
+raw_dat %>% 
+  filter(lowest_level == TRUE) -> dat
+
+dat_bls_1 <- bls_api(dat$series_id[1:50], 
+                   startyear = 2006, 
+                   endyear = 2022, 
+                   Sys.getenv("BLS_KEY"))
+
+dat_bls_2 <- bls_api(dat$series_id[51:100], 
+                   startyear = 2006, 
+                   endyear = 2022, 
+                   Sys.getenv("BLS_KEY"))
+
+dat_bls_3 <- bls_api(dat$series_id[101:150], 
+                   startyear = 2006, 
+                   endyear = 2022, 
+                   Sys.getenv("BLS_KEY"))
+
+dat_bls_4 <- bls_api(dat$series_id[151:180], 
+                   startyear = 2006, 
+                   endyear = 2022, 
+                   Sys.getenv("BLS_KEY"))
+
+
+rbind(dat_bls_1,
+      dat_bls_2,
+      dat_bls_3,
+      dat_bls_4) -> dat_all
+
+key <- data.frame(name = raw_dat$name, code = raw_dat$series_id)
+cat_key <- data.frame(key = raw_dat$name, category = raw_dat$category)
+
+
+
+dat_all %>% 
+  mutate(date = paste0(periodName, " ", year, " 01"),
+         date = as.Date(date, "%B %Y %d")) %>% 
+  rename(code = seriesID) %>% 
+  left_join(key, by = "code") %>% 
+  select(date, name, value) %>% 
+  pivot_wider(names_from = "name", values_from = "value") %>% 
+  arrange(date) -> dat_wide
+
+
+
+dat_wide[,-1] %>%
+  map_df(.f = function (x) {(x / lag(x) - 1) * 100}) %>% 
+  mutate(mean = rowMeans(., na.rm = TRUE),
+         sd = rowSds(as.matrix(.), na.rm = TRUE),
+         mean_plussd = mean + sd,
+         mean_lesssd = mean - sd,
+         x_inter = 0) -> dat_wide_mm 
+
+dat_wide[,-1] %>%
+  map_df(.f = function (x) {(x / lag(x, 12) - 1) * 100}) %>% 
+  mutate(mean = rowMeans(., na.rm = TRUE),
+         sd = rowSds(as.matrix(.), na.rm = TRUE),
+         mean_plussd = mean + sd,
+         mean_lesssd = mean - sd,
+         x_inter = 0) -> dat_wide_yy
+
+dats <- list()
+cbind(dat_wide[,1], dat_wide_mm) -> dats[[1]]
+cbind(dat_wide[,1], dat_wide_yy) -> dats[[2]]
+
+
+dats_final <- list()
+for (i in 1:2) {
+ dats[[i]] %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>% 
+  filter(complete.cases(.),
+         date > "2019-09-01") %>% 
+  left_join(cat_key, by = "key") -> dats_final[[i]]
+}
+
+
+ctitle_1 <- "Distribution of CPI component year-over-year changes"
+unit_label <- "Number of components within 0.8%pt bins"
+x_axis_lab <- "Year-over-year change in component index level, %"
+source_1 <- "Source: BLS, @benbakkum."
+
+dats_final[[2]] %>% 
+  filter(!key %in% c("mean", "sd", "mean_plussd", "mean_lesssd", "x_inter")) %>% 
+  ggplot(aes(x = values, fill = category, label = format(date, "%b '%y"))) +
+  geom_histogram(binwidth = 0.8) +
+  geom_vline(data = dats_final[[2]] %>% filter(key == "x_inter"),
+             aes(xintercept = values, frame = date), 
+             linetype = "dashed") +
+  geom_vline(data = dats_final[[2]] %>% filter(key == "mean"), 
+             aes(xintercept = values, frame = date, color = "Mean"), 
+             linetype = "dashed",
+             size = 1) +
+  geom_vline(data = dats_final[[2]] %>% filter(key == "mean_plussd"), 
+             aes(xintercept = values, frame = date, color = "Mean +1sd"), 
+             linetype = "dotted",
+             size = 1) +
+  geom_vline(data = dats_final[[2]] %>% filter(key == "mean_lesssd"), 
+             aes(xintercept = values, frame = date, color = "Mean -1sd"), 
+             linetype = "dotted",
+             size = 1) +
+  geom_text(data = dats_final[[2]] %>% filter(key == "Bread"),
+            aes(-13, 26), 
+            size = 13, 
+            alpha = .8, 
+            color = cpal("border grey"),
+            family = "Open Sans") +
+  scale_color_manual(values = c(cpal("red"),  cpal("border grey"), cpal("border grey"))) +
+  scale_x_continuous(expand = c(0,0), limits = c(-20, 20)) +
+  scale_y_continuous(expand = c(0,0), breaks = seq(0, 35, 5)) +
+  scale_fill_manual(values = c(cpal("paleblue"), cpal("paleorange"), cpal("green"), 
+                               cpal("blue"), cpal("red"))) +
+  my_theme +
+  theme(axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
+        legend.margin = margin(t = 0, unit = "cm")) +
+  guides(color = guide_legend(nrow = 2, 
+                              override.aes = list(linetype = c("dashed", "dotted", "dotted"))),
+         fill = guide_legend(nrow = 2)) +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  xlab(label = x_axis_lab) +
+  transition_states(date, transition_length = 2, wrap = FALSE) +
+  ease_aes("linear") -> chart1
+
+
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 260,
+                 width = 615, height = 470, type = "cairo", end_pause = 50)
+
+anim1
+```
+
+Looking at their contributions to the overall rate of year-over-year inflation provides a cleaner look at the relative trends of goods and services prices. Based on this perspective, core goods had appeared in large responsible for the updraft in inflation that everyone's talking about, but now core services' contribution has been steadily marching higher for the last eight months.
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+xlist <- list.files(path = "D:\\Documents\\R directory\\inflation\\relative_importance_standard", pattern = "*.csv")
+
+csvs <- list()
+
+for(i in xlist) { 
+  csvs[[i]] <- read.csv(paste0("D:\\Documents\\R directory\\inflation\\relative_importance_standard\\", i), check.names = F)
+}
+
+
+do.call(rbind, csvs) %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  rename(file = rowname) %>% 
+  mutate(file = substr(file, 1, 8)) %>% 
+  separate(file, c("month", "year"), "_") %>% 
+  mutate(month = case_when(month == "jan" ~ "01",
+                           month == "feb" ~ "02",
+                           month == "mar" ~ "03",
+                           month == "apr" ~ "04",
+                           month == "may" ~ "05",
+                           month == "jun" ~ "06",
+                           month == "jul" ~ "07",
+                           month == "aug" ~ "08",
+                           month == "sep" ~ "09",
+                           month == "oct" ~ "10",
+                           month == "nov" ~ "11",
+                           month == "dec" ~ "12")) %>% 
+  mutate(date = paste0(year, "-", month, "-01"),
+         date = as.Date(date, "%Y-%m-%d"),
+         Component = gsub("\\s*\\([^\\)]+\\)","", Component)) %>% 
+  select(-month, -year) %>% 
+  filter(Component %in% c("Commodities less food and energy commodities",
+                          "Services less energy services")) %>% 
+  pivot_wider(names_from = "Component", values_from = "RI") %>% 
+  set_names("date", "core_goods", "core_services") %>% 
+  arrange(date) %>% 
+  mutate(total = core_goods + core_services,
+         core_goods_wt = core_goods / total,
+         core_services_wt = core_services / total) %>% 
+  select(-total, -core_goods, -core_services) -> dat_wts
+
+
+raw_dat <- getSymbols(c("CUSR0000SACL1E", "CUSR0000SASLE", "CPILFESL"), src='FRED', auto.assign=T) 
+
+key <- c("core_goods", "core_services", "core")
+
+
+merge(CUSR0000SACL1E, CUSR0000SASLE, CPILFESL)  %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("date", key) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d"),
+         core_goods = (core_goods / lag(core_goods,12) - 1) * 100,
+         core_services = (core_services / lag(core_services,12) -1) * 100,
+         core = (core / lag(core,12) -1) * 100) %>% 
+  filter(date > "2016-12-31") -> dat_yy
+  
+
+
+dat_wts %>% 
+  right_join(dat_yy, by = "date") %>% 
+  mutate(core_goods_cont = core_goods * lag(core_goods_wt, 12),
+         core_services_cont = core_services * lag(core_services_wt, 12),
+         cont_total = core_goods_cont + core_services_cont) %>% 
+  select(date, core_goods_cont, core_services_cont, core) %>% 
+  filter(date > "2017-12-31") %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>% 
+  mutate(key = case_when(key == "core_goods_cont" ~ "Core goods contribution",
+                         key == "core_services_cont" ~ "Core services contribution",
+                         key == "core" ~ "Core CPI"),
+         placeholder = "x") -> dat_long
+
+
+ctitle_1 <- "Contributions of goods and services to core CPI"
+unit_label <- "%, year-over-year change in core CPI"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+
+
+dat_long %>% 
+  filter(!key == "Core CPI") %>% 
+  ggplot(aes(date, values, fill = key)) +
+  geom_col() +
+  geom_line(data = dat_long %>% filter(key == "Core CPI"),
+            aes(date, values, color = key),
+            show.legend = F,
+            size = 1.2) +
+  scale_fill_manual(values = c(cpal("red"), cpal("paleorange"), cpal("blue"))) +
+  scale_color_manual(values = cpal("red")) +
+  scale_x_date(expand = c(0,0)) +
+  my_theme +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  guides(fill = guide_legend(override.aes = list(size=9),
+                             nrow = 3)) +
+  transition_manual(placeholder) -> p
+  
+anim1 <- animate(p, renderer = gifski_renderer(loop = T), nframe = 1,
+                 width = 615, height = 460, type = "cairo")
+
+anim1
+
+```
+
+As can be seen in the chart below, the current level of core goods inflation flies in the face of decades of flatlining prices in the category. Structural forces of productivity growth, competition from abroad, and other factors have surely kept a lid on core goods prices this century, but when those will return to being the predominant drivers of goods inflation remains an open question.
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+raw_dat <- getSymbols(c("CUSR0000SACL1E", "CUSR0000SASLE"), src='FRED', auto.assign=T) 
+
+key <- c("core_goods", "core_services")
+
+
+merge(CUSR0000SACL1E, CUSR0000SASLE)  %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("date", key) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date > "1999-12-31") %>% 
+  mutate(core_goods = (core_goods / core_goods[1]) * 100,
+         core_services = (core_services / core_services[1]) * 100) %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>% 
+  mutate(key = case_when(key == "core_goods" ~ "Core goods",
+                         key == "core_services" ~ "Core services")) -> dat
+
+
+ctitle_1 <- "Core goods and core services consumer price indices"
+unit_label <- "1/1/2000 = 100"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+
+dat %>% 
+  ggplot(aes(date, values, color = key)) +
+  geom_line(size = 1.4, show.legend = F) +
+  geom_point(size = 3.5) +
+  scale_color_manual(values = c(cpal("orange"), cpal("blue"))) +
+  geom_text(aes(date, values, label = round(values, 0)), 
+                fontface = "bold",
+                hjust = -0.5,
+            size = 5,
+            show.legend = F) +
+  scale_x_date(expand = c(0,0),
+               limits = c(as.Date("2000-01-01"), as.Date(tail(dat,1)$date %m+% months(24)))) +
+  my_theme +
+  guides(colour = guide_legend(override.aes = list(size=9))) +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  transition_reveal(date, keep_last = TRUE) +
+  view_follow(fixed_x = TRUE, fixed_y = FALSE) -> chart1
+
+
+
+
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 280,
+                 width = 615, height = 450, type = "cairo", end_pause = 200)
+
+anim1
+```
+
+Another way to breakdown the year-over-year series of core CPI involves ascribing the overall change in its current level from the level 12 months ago to different periods in-between. It's currently a fairly even split between the past four quarters in terms of their contribution. 
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+raw_dat <- getSymbols(c("CPILFESL"), src='FRED', auto.assign=T) 
+
+key <- c("infl")
+
+
+
+ctitle_1 <- "Contributions by timing of price increases over last 12 months"
+unit_label <- "%, year-over-year change in core CPI"
+source_1 <- "Source: BLS, FRED, @benbakkum."
+
+
+
+CPILFESL %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("date", key) %>% 
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>% 
+  filter(date > "2017-12-31") %>% 
+  mutate(yy = (infl / lag(infl, 12) - 1) * 100,
+         ten_twelve = (lag(infl, 9) / lag(infl, 12) - 1) * 100,
+         seven_nine = ((lag(infl, 6) / lag(infl, 12) - 1) * 100) - ten_twelve,
+         four_six = ((lag(infl, 3) / lag(infl, 12) - 1) * 100) - seven_nine - ten_twelve,
+         one_three = yy - four_six - seven_nine - ten_twelve,
+         total = one_three + four_six + seven_nine + ten_twelve) %>% 
+  select(-infl, -total, - yy) %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>% 
+  mutate(key = case_when(key == "ten_twelve" ~ "10-12 months ago",
+                         key == "seven_nine" ~ "7-9 months ago",
+                         key == "four_six" ~ "4-6 months ago",
+                         key == "one_three" ~ "1-3 months ago"),
+         key = factor(key, levels = c("10-12 months ago", "7-9 months ago", 
+                                      "4-6 months ago", "1-3 months ago")),
+         placeholder = "x") %>% 
+  ggplot(aes(date, values, fill = key)) +
+  geom_col() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = cpal("border grey"), size = 1.1) +
+  scale_x_date(expand = c(0,0),
+               breaks = "3 months",
+               date_labels = "%b '%y") +
+  scale_fill_manual(values = c(cpal("light grey"), cpal("paleorange"),  cpal("paleblue"), cpal("blue"))) +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  my_theme +
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.6)) +
+  guides(fill = guide_legend(override.aes = list(size=9),
+                             nrow = 2)) +
+  transition_manual(placeholder) -> p
+
+
+
+
+anim1 <- animate(p, renderer = gifski_renderer(loop = T), nframe = 1,
+                 width = 615, height = 460, type = "cairo")
+
+anim1
+
+
+```
+
+Hypothetically if inflation begins to moderate from here — though this is very unrealistic, especially because of current rates of services inflation — year-over-year CPIs would start to decline steadily from these elevated levels The chart below extrapolates year-over-year inflation with the following months each exhibiting the average monthly rate of inflation of the last five years. Note that the Fed prefers to base its policy on the PCE price index, which would likely be lower based on the smaller weight of housing in that index. 
+
+```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+dat <- bls_api(c("CUSR0000SA0", "CUSR0000SA0L1E"), 
+              startyear = 2006, 
+              endyear = 2022, 
+              Sys.getenv("BLS_KEY"))
+
+data.frame(name = c("headline_cpi", "core_cpi"),
+           code = c("CUSR0000SA0", "CUSR0000SA0L1E")) -> key
+
+rolling_mean <- rollify(mean, window = 60)
+
+dat %>% 
+  mutate(date = paste0(periodName, " ", year, " 01"),
+         date = as.Date(date, "%B %Y %d")) %>% 
+  rename(code = seriesID) %>% 
+  left_join(key, by = "code") %>% 
+  select(value, date, name) %>% 
+  pivot_wider(names_from = "name", values_from = "value") %>%
+  arrange(date) %>% 
+  mutate(headline_mm      =  (headline_cpi / lag(headline_cpi, 1) - 1) * 100,
+         core_mm          =  (core_cpi / lag(core_cpi, 1) - 1) * 100,
+         headline_mm_avg  =   rolling_mean(headline_mm),
+         core_mm_avg      =   rolling_mean(core_mm),
+         headline_dev     = -(headline_mm - headline_mm_avg),
+         core_dev         = -(core_mm - core_mm_avg),
+         headline_proj    =   headline_cpi,
+         core_proj        =   core_cpi) -> df
+
+
+
+
+x <- nrow(df)
+next_month <- ymd(pull(df[,1])) %m+% months(1)
+for (i in 1:18) {
+  df[x + i,] <- NA
+  
+  df[x + i,1] <- ymd(pull(df[x + i -1,1])) %m+% months(1)
+  
+  df$headline_proj[x + i] <- (1 + df$headline_mm_avg[x]/100) * df$headline_proj[x + i - 1]
+  
+  df$core_proj[x + i] <- (1 + df$core_mm_avg[x]/100) * df$core_proj[x + i - 1]
+  
+  df$headline_mm_avg[x + i] <- df$headline_mm_avg[x]
+  
+  df$core_mm_avg[x + i] <- df$core_mm_avg[x]
+}
+
+df %>% 
+  mutate(headline_dev_lag =   lag(headline_dev,12),
+         core_def_lag     =   lag(core_dev,12),
+         headline_adj     =   (1 + lag(headline_mm_avg,1)/100) * lag(headline_proj,1),
+         core_adj         =   (1 + lag(core_mm_avg,1)/100) * lag(core_proj,1),
+         headline_yy      =   ((headline_proj / lag(headline_proj,12) - 1) * 100),
+         core_yy          =   ((core_proj / lag(core_proj,12) - 1) * 100),
+         headline_yy_adj  =   ((headline_proj / lag(headline_adj,12) - 1) * 100),
+         core_yy_adj      =   ((core_proj / lag(core_adj,12) - 1) * 100),
+         headline_be      =   headline_yy - headline_yy_adj,
+         core_be          =   core_yy - core_yy_adj,
+         headline_yy_ex   =   case_when(date < ymd(next_month) ~ NA_real_,
+                                        date >= ymd(next_month) ~ headline_yy),
+         core_yy_ex       =   case_when(date < ymd(next_month) ~ NA_real_,
+                                        date >= ymd(next_month) ~ core_yy),
+         headline_yy_act  =   case_when(date >= ymd(next_month) ~ NA_real_,
+                                        date < ymd(next_month) ~ headline_yy),
+         core_yy_act      =   case_when(date >= ymd(next_month) ~ NA_real_,
+                                        date < ymd(next_month) ~ core_yy)) -> df_all 
+
+eight_mths_ago <- ymd(pull(df[x,1])) %m+% months(-8)
+five_mths_later <- ymd(pull(df[x,1])) %m+% months(5)
+curr_mth <- ymd(pull(df[x,1])) + days(14)
+twenty_mths_ago <- ymd(pull(df[x,1])) %m+% months(-20)
+sixteen_mths_later <- ymd(pull(df[x,1])) %m+% months(16)
+
+df_all %>% 
+  select(date, headline_yy_ex, core_yy_ex) %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>%
+  mutate(key = case_when(key == "core_yy_ex" ~ "Extrapolated core CPI",
+                         key == "headline_yy_ex" ~ "Extrapolated headline CPI"),
+         placeholder = "X") %>% 
+  filter(date > twenty_mths_ago & date < sixteen_mths_later) -> ex_cht_dat
+
+df_all %>% 
+  select(date, headline_yy_act, core_yy_act) %>% 
+  pivot_longer(-date, names_to = "key", values_to = "values") %>%
+  mutate(key = case_when(key == "core_yy_act" ~ "Core CPI",
+                         key == "headline_yy_act" ~ "Headline CPI"),
+         placeholder = "X") %>% 
+  filter(date > twenty_mths_ago & date < sixteen_mths_later) -> act_cht_dat
+
+ex_cht_dat$key <- factor(ex_cht_dat$key, c("Extrapolated core CPI", "Extrapolated headline CPI"))
+act_cht_dat$key <- factor(act_cht_dat$key, c("Core CPI", "Headline CPI"))
+        
+ctitle_1 <- "Year-over-year CPI extrapolated w/ avg monthly change"
+unit_label <- "%, y/y"
+source_1 <- "Source: BLS, @benbakkum."
+
+ggplot() +
+  geom_step(data = ex_cht_dat, aes(date, values, color = key, linetype = key), size = 1) +
+  geom_step(data = act_cht_dat, aes(date, values, color = key, linetype = key), size = 1) +
+  scale_color_manual(values = c(cpal("blue"), cpal("blue"), cpal("green"), cpal("green"))) +
+  scale_linetype_manual(values = c("solid", "dashed", "dashed", "solid")) +
+  scale_y_continuous(breaks = seq(0,7.5, by = 0.5)) +
+  scale_x_date(expand = c(0,0), date_breaks = "6 months", date_labels = "%b '%y") +
+  geom_vline(xintercept = ymd(curr_mth), linetype = "dashed", color = cpal("border grey"), size = 1) +
+  labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
+  my_theme +
+  guides(color = guide_legend(ncol = 2, byrow = T,
+                              override.aes = list(linetype = c("solid", "twodash", "twodash", "solid"),
+                                                  size = 1))) +
+  transition_manual(placeholder) -> p
+
+anim1 <- animate(p, renderer = gifski_renderer(loop = T), nframe = 1,
+                 width = 615, height = 420, type = "cairo")
+
+anim1
+
+```
+
+For reference, various rates of inflation for important components of CPI can be found in the table below.
+
+```{r inflation_table, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+getSymbols(c("CPIAUCSL", "CPILFESL", "CPIFABSL", "CPIENGSL",
+          "CUSR0000SACL1E", "CUSR0000SASLE", 
+          "CPIAPPSL", "CUSR0000SETA02",
+          "CUSR0000SETG01", "CUSR0000SAH1", "CUSR0000SAM2", 
+          "CUSR0000SAE1", "CUSR0000SAS4"),
+        src='FRED', auto.assign=T) -> fred_import
+
+c("Headline CPI", "Core CPI (~79)", "Food (~14)", "Energy (~7)",
+  "Core goods (~21)", "Core services (~58)", 
+  "Apparel (~3)", "Used cars and trucks (~3)",
+  "Airline fares (~1)", "Shelter (~33)", "Medical care services (~7)",
+  "Education (~3)", "Transportation services (~5)") -> key
+
+merge(CPIAUCSL, CPILFESL, CPIFABSL, CPIENGSL,
+      CUSR0000SACL1E, CUSR0000SASLE, 
+      CPIAPPSL, CUSR0000SETA02,
+      CUSR0000SETG01, CUSR0000SAH1, CUSR0000SAM2, 
+      CUSR0000SAE1, CUSR0000SAS4) %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("date", key) %>%
+  filter(date > "2018-12-31") -> dat
+
+dat %>% 
+  select(-date) %>% 
+  map_df(.f = function (x) {round((x / lag(x) - 1) * 100,1)}) %>%
+  tail(8) %>% 
+  t() %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("Index", format(as.Date(tail(dat,8)$date), "%b-%y")) %>% 
+  mutate(Period = "m/m, %",
+         r = row_number(),
+         type = 1) -> dat_mm
+  
+dat %>% 
+  select(-date) %>% 
+  map_df(.f = function (x) {round(((x / lag(x,3))^4 - 1) * 100,1)}) %>%
+  tail(8) %>% 
+  t() %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("Index", format(as.Date(tail(dat,8)$date), "%b-%y")) %>% 
+  mutate(Period = "3m ann, %",
+         r = row_number(),
+         type = 2) -> dat_3m
+
+dat %>% 
+  select(-date) %>% 
+  map_df(.f = function (x) {round((x / lag(x,12) - 1) * 100,1)}) %>%
+  tail(8) %>% 
+  t() %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column() %>% 
+  set_names("Index", format(as.Date(tail(dat,8)$date), "%b-%y")) %>% 
+  mutate(Period = "y/y, %",
+         r = row_number(),
+         type = 3) -> dat_yy
+  
+rbind(dat_mm, dat_3m, dat_yy) %>% 
+  arrange(r, type) %>% 
+  select(-r, -type) %>% 
+  select(Index, Period, everything()) %>% 
+  as.data.frame() -> df_tbl
+
+
+df_tbl %>% 
+  rename(" " = Period) %>% 
+  mutate(m1_chg = .[[4]] - .[[3]],
+         m2_chg = .[[5]] - .[[4]],
+         m3_chg = .[[6]] - .[[5]],
+         m4_chg = .[[7]] - .[[6]],
+         m5_chg = .[[8]] - .[[7]],
+         m6_chg = .[[9]] - .[[8]],
+         m7_chg = .[[10]] - .[[9]]) -> df_chgs
+
+df_chgs[,c(1,2,11,4,12,5,13,6,14,7,15,8,16,9,17,10)] -> df_tbl
+
+
+## decline is cooling, increasing is heating up
+dec_is_good <- function(i, j) {
+  
+  y <- as.numeric(df_tbl[j,i-1])
+  
+  case_when(y <  -1              ~ color_tile("#90d1fc", "#90d1fc")(df_tbl[j,i]),
+           (y >= -1) & (y < -.3)   ~ color_tile("#d1ecff", "#d1ecff")(df_tbl[j,i]),
+           (y >= -.3) & (y <= .3)           ~ as.character(df_tbl[j,i]),
+           (y <=  1) & (y > .3)   ~ color_tile("#ffd6d6", "#ffd6d6")(df_tbl[j,i]),
+            y >   1              ~ color_tile("#f59393", "#f59393")(df_tbl[j,i])) 
+}
+
+
+for (j in c(1:39)) {
+  for (i in seq(4,(ncol(df_tbl)),2)) {
+    df_tbl[j,i] <- dec_is_good(i, j)
+  }
+}
+
+
+## https://github.com/haozhu233/kableExtra/issues/217
+df_tbl %>% 
+  kable(escape = F,
+        align = c('l', 'l', rep('r', 14))) %>% 
+  kable_paper("hover", full_width = F, html_font = "Open Sans") %>%
+  remove_column(3) %>% 
+  remove_column(4) %>% 
+  remove_column(5) %>% 
+  remove_column(6) %>% 
+  remove_column(7) %>% 
+  remove_column(8) %>% 
+  remove_column(9) %>% 
+  remove_column(1) %>% 
+  group_rows("Headline CPI", 1, 3) %>% 
+  group_rows("Core CPI (~79)", 4, 6) %>% 
+  group_rows("Food (~14)", 7, 9) %>% 
+  group_rows("Energy (~7)", 10, 12) %>% 
+  group_rows("Core goods (~21)", 13, 15) %>% 
+  group_rows("Core services (~58)", 16, 18) %>% 
+  group_rows("Apparel (~3)", 19, 21) %>% 
+  group_rows("Used cars and trucks (~3)", 22, 24) %>% 
+  group_rows("Airline fares (~1)", 25, 27) %>% 
+  group_rows("Shelter (~33)", 28, 30) %>% 
+  group_rows("Medical care services (~7%)", 31, 33) %>% 
+  group_rows("Education (~3%)", 34, 36) %>% 
+  group_rows("Transportation services (~5%)", 37, 39) %>% 
+  add_footnote("Number next to component name represents its weight in the overall index. \nColoring represents the degree of change in the rate of inflation from the \nmonth before. Source: BLS, @benbakkum.", notation = "none") -> table
+
+
+
+table
+```
+
