@@ -6,10 +6,30 @@
     <description>Recent content in Blog on Macro Chronicles: Economics, Markets, Dataviz</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Wed, 11 May 2022 21:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Wed, 13 Jul 2022 21:13:14 -0500</lastBuildDate>
     
 	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Prices -&gt; Diverging headline and core</title>
+      <link>/blog/prices-diverging-headline-and-core/</link>
+      <pubDate>Wed, 13 Jul 2022 21:13:14 -0500</pubDate>
+      
+      <guid>/blog/prices-diverging-headline-and-core/</guid>
+      <description>The US Consumer Price Index numbers for last month were hotter than expected but still showed slowing year-over-year inflation. Headline and core CPI came in at 9.1% and 5.9% year-over-year, respectively.
+Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory.</description>
+    </item>
+    
+    <item>
+      <title>Jobs -&gt; Solid adds but weakening participation</title>
+      <link>/blog/jobs-solid-adds-but-weakening-participation/</link>
+      <pubDate>Fri, 08 Jul 2022 21:13:14 -0500</pubDate>
+      
+      <guid>/blog/jobs-solid-adds-but-weakening-participation/</guid>
+      <description>Job gains in June beat expectations, with gains of 372k jobs. Gains in April and May were revised down by 68k and 6k, respectively.
+On a non-seasonally adjusted basis, the net number of payrolls added in June is above the pre-covid average of the last ten Junes. On a seasonally adjusted basis, June job gains were also above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021 and 2022.</description>
+    </item>
     
     <item>
       <title>Prices -&gt; Hotter than expected but slowing year-over-year</title>
