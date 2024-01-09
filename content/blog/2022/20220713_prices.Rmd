@@ -218,6 +218,7 @@ anim1
 I also like looking at the distributions of components within CPI because it's fun to watch, but also because it gives an idea of the level of dispersion between inflation for things as varied as men's sweaters and medical services. In the chart below, I take 180 non-overlapping components of CPI and show the distribution of their year-over-year changes over time. Dispersion clearly increased with the onset of the pandemic and then amidst reopening, and since last summer the distribution has shifted to the right. It's striking how few components' prices are declining on a year-over-year basis right now.
 
 ```{r echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+Sys.setenv("BLS_KEY"="f03ee0fefa124677b5fae4c8f126c119")
 raw_dat <- read_csv("D://Documents//R directory//inflation//cpi_components.csv")
 
 raw_dat %>% 
@@ -225,22 +226,22 @@ raw_dat %>%
 
 dat_bls_1 <- bls_api(dat$series_id[1:50], 
                    startyear = 2006, 
-                   endyear = 2022, 
+                   endyear = 2023, 
                    Sys.getenv("BLS_KEY"))
 
 dat_bls_2 <- bls_api(dat$series_id[51:100], 
                    startyear = 2006, 
-                   endyear = 2022, 
+                   endyear = 2023, 
                    Sys.getenv("BLS_KEY"))
 
 dat_bls_3 <- bls_api(dat$series_id[101:150], 
                    startyear = 2006, 
-                   endyear = 2022, 
+                   endyear = 2023, 
                    Sys.getenv("BLS_KEY"))
 
 dat_bls_4 <- bls_api(dat$series_id[151:180], 
                    startyear = 2006, 
-                   endyear = 2022, 
+                   endyear = 2023, 
                    Sys.getenv("BLS_KEY"))
 
 
@@ -268,6 +269,7 @@ dat_all %>%
 dat_wide[,-1] %>%
   map_df(.f = function (x) {(x / lag(x) - 1) * 100}) %>% 
   mutate(mean = rowMeans(., na.rm = TRUE),
+         median = rowMedians(as.matrix(.), na.rm = TRUE),
          sd = rowSds(as.matrix(.), na.rm = TRUE),
          mean_plussd = mean + sd,
          mean_lesssd = mean - sd,
@@ -276,6 +278,7 @@ dat_wide[,-1] %>%
 dat_wide[,-1] %>%
   map_df(.f = function (x) {(x / lag(x, 12) - 1) * 100}) %>% 
   mutate(mean = rowMeans(., na.rm = TRUE),
+         median = rowMedians(as.matrix(.), na.rm = TRUE),
          sd = rowSds(as.matrix(.), na.rm = TRUE),
          mean_plussd = mean + sd,
          mean_lesssd = mean - sd,
@@ -302,7 +305,7 @@ x_axis_lab <- "Year-over-year change in component index level, %"
 source_1 <- "Source: BLS, @benbakkum."
 
 dats_final[[2]] %>% 
-  filter(!key %in% c("mean", "sd", "mean_plussd", "mean_lesssd", "x_inter")) %>% 
+  filter(!key %in% c("mean", "median", "sd", "mean_plussd", "mean_lesssd", "x_inter")) %>% 
   ggplot(aes(x = values, fill = category, label = format(date, "%b '%y"))) +
   geom_histogram(binwidth = 0.8) +
   geom_vline(data = dats_final[[2]] %>% filter(key == "x_inter"),
@@ -320,13 +323,17 @@ dats_final[[2]] %>%
              aes(xintercept = values, frame = date, color = "Mean -1sd"), 
              linetype = "dotted",
              size = 1) +
+  geom_vline(data = dats_final[[2]] %>% filter(key == "median"), 
+             aes(xintercept = values, frame = date, color = "Median"), 
+             linetype = "dashed",
+             size = 1) +
   geom_text(data = dats_final[[2]] %>% filter(key == "Bread"),
             aes(-13, 22), 
             size = 13, 
             alpha = .8, 
             color = cpal("border grey"),
             family = "Open Sans") +
-  scale_color_manual(values = c(cpal("red"),  cpal("border grey"), cpal("border grey"))) +
+  scale_color_manual(values = c(cpal("red"), cpal("border grey"), cpal("border grey"), cpal("purple"))) +
   scale_x_continuous(expand = c(0,0), limits = c(-20, 20)) +
   scale_y_continuous(expand = c(0,0), breaks = seq(0, 35, 5)) +
   scale_fill_manual(values = c(cpal("paleblue"), cpal("paleorange"), cpal("green"), 
@@ -335,7 +342,7 @@ dats_final[[2]] %>%
   theme(axis.title.x = element_text(size = 14, color = cpal("text"), family = "Open Sans"),
         legend.margin = margin(t = 0, unit = "cm")) +
   guides(color = guide_legend(nrow = 2, 
-                              override.aes = list(linetype = c("dashed", "dotted", "dotted"))),
+                              override.aes = list(linetype = c("dashed", "dotted", "dotted", "dashed"))),
          fill = guide_legend(nrow = 2)) +
   labs(title = ctitle_1, subtitle = unit_label, caption = source_1) +
   xlab(label = x_axis_lab) +
@@ -344,8 +351,8 @@ dats_final[[2]] %>%
 
 
 
-anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 260,
-                 width = 615, height = 470, type = "cairo", end_pause = 50)
+anim1 <- animate(chart1, renderer = gifski_renderer(loop = T), nframe = 290,
+                 width = 615, height = 470, type = "cairo", end_pause = 80)
 
 anim1
 ```
