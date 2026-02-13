@@ -2,413 +2,305 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Macro Chronicles: Economics, Markets, Dataviz</title>
-    <link>/</link>
+    <link>https://www.macrochronicles.com/</link>
     <description>Recent content on Macro Chronicles: Economics, Markets, Dataviz</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-US</language>
-    <lastBuildDate>Sat, 22 Aug 2015 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Fri, 07 Apr 2023 21:13:14 -0500</lastBuildDate>
+    <atom:link href="https://www.macrochronicles.com/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Jobs -&gt; Strong but underlying signs of slowing</title>
-      <link>/blog/jobs-strong-but-underlying-signs-of-slowing/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-strong-but-underlying-signs-of-slowing/</link>
       <pubDate>Fri, 07 Apr 2023 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-strong-but-underlying-signs-of-slowing/</guid>
-      <description>Job gains in March slightly beat expectations, with gains of 236k jobs. Gains in November and December were revised down by a combined 17k.
-On a non-seasonally adjusted basis, the net number of payrolls added in March is below the pre-covid average of the last ten Marches. On a seasonally adjusted basis, March job gains were about in line with the average based on longer-term history.
-The unemployment rate ticked down back to 3.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-strong-but-underlying-signs-of-slowing/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in March slightly beat expectations, with gains of 236k jobs. Gains in November and December were revised down by a combined 17k.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2023/20230407_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in March is below the pre-covid average of the last ten Marches. On a seasonally adjusted basis, March job gains were about in line with the average based on longer-term history.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Starting the year strong</title>
-      <link>/blog/jobs-starting-the-year-strong/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-starting-the-year-strong/</link>
       <pubDate>Fri, 03 Feb 2023 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-starting-the-year-strong/</guid>
-      <description>Job gains in January beat expectations, with gains of 517k jobs. Gains in November and December were revised up by a combined 71k.
-On a non-seasonally adjusted basis, the net number of payrolls added in January is above the pre-covid average of the last ten Januaries. On a seasonally adjusted basis, January job gains were also above average based on longer-term history, and represent a re-acceleration from the steady pace of seasonal job gains over the last few months.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-starting-the-year-strong/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in January beat expectations, with gains of 517k jobs. Gains in November and December were revised up by a combined 71k.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2023/20230203_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in January is above the pre-covid average of the last ten Januaries. On a seasonally adjusted basis, January job gains were also above average based on longer-term history, and represent a re-acceleration from the steady pace of seasonal job gains over the last few months.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; Diverging headline and core</title>
-      <link>/blog/prices-diverging-headline-and-core/</link>
+      <link>https://www.macrochronicles.com/blog/prices-diverging-headline-and-core/</link>
       <pubDate>Wed, 13 Jul 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-diverging-headline-and-core/</guid>
-      <description>The US Consumer Price Index numbers for last month were hotter than expected but still showed slowing year-over-year inflation. Headline and core CPI came in at 9.1% and 5.9% year-over-year, respectively.
-Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-diverging-headline-and-core/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The US Consumer Price Index numbers for last month were hotter than expected but still showed slowing year-over-year inflation. Headline and core CPI came in at 9.1% and 5.9% year-over-year, respectively.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 and into 2022 far surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last two years.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Solid adds but weakening participation</title>
-      <link>/blog/jobs-solid-adds-but-weakening-participation/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-solid-adds-but-weakening-participation/</link>
       <pubDate>Fri, 08 Jul 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-solid-adds-but-weakening-participation/</guid>
-      <description>Job gains in June beat expectations, with gains of 372k jobs. Gains in April and May were revised down by 68k and 6k, respectively.
-On a non-seasonally adjusted basis, the net number of payrolls added in June is above the pre-covid average of the last ten Junes. On a seasonally adjusted basis, June job gains were also above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021 and 2022.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-solid-adds-but-weakening-participation/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in June beat expectations, with gains of 372k jobs. Gains in April and May were revised down by 68k and 6k, respectively.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2022/20220708_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in June is above the pre-covid average of the last ten Junes. On a seasonally adjusted basis, June job gains were also above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021 and 2022.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; Hotter than expected but slowing year-over-year</title>
-      <link>/blog/prices-hotter-than-expected-but-slowing-year-over-year/</link>
+      <link>https://www.macrochronicles.com/blog/prices-hotter-than-expected-but-slowing-year-over-year/</link>
       <pubDate>Wed, 11 May 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-hotter-than-expected-but-slowing-year-over-year/</guid>
-      <description>The US Consumer Price Index numbers for last month were hotter than expected but still showed slowing year-over-year inflation. Headline and core CPI came in at 8.3% and 6.2% year-over-year, respectively. Used cars and truck prices continued to decline in April, but airfare inflation increased sharply on the back of rising costs for airlines.
-Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-hotter-than-expected-but-slowing-year-over-year/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The US Consumer Price Index numbers for last month were hotter than expected but still showed slowing year-over-year inflation. Headline and core CPI came in at 8.3% and 6.2% year-over-year, respectively. Used cars and truck prices continued to decline in April, but airfare inflation increased sharply on the back of rising costs for airlines.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 and into 2022 far surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last two years.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Moderating pace but things are hot</title>
-      <link>/blog/jobs-moderating-pace-but-things-are-hot/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-moderating-pace-but-things-are-hot/</link>
       <pubDate>Fri, 06 May 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-moderating-pace-but-things-are-hot/</guid>
-      <description>Job gains in April beat expectations, with both of the previous two months gaining 428k jobs. Gains in February were revised down. There are now roughly 1.2 million fewer jobs now than before the pandemic as the recovery in the labor market continues steadily.
-On a non-seasonally adjusted basis, the net number of payrolls added in April is close to the pre-covid average of the last ten Aprils.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-moderating-pace-but-things-are-hot/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in April beat expectations, with both of the previous two months gaining 428k jobs. Gains in February were revised down. There are now roughly 1.2 million fewer jobs now than before the pandemic as the recovery in the labor market continues steadily.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2022/20220506_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in April is close to the pre-covid average of the last ten Aprils. On a seasonally adjusted basis, April job gains were also above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021 and 2022.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Prime-age participation on fire</title>
-      <link>/blog/jobs-prime-age-participation-on-fire/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-prime-age-participation-on-fire/</link>
       <pubDate>Fri, 01 Apr 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-prime-age-participation-on-fire/</guid>
-      <description>Job gains in March beat expectations. Gains in January and February were both revised up. There are now roughly 1.6 million fewer jobs now than before the pandemic as the recovery in the labor market continues steadily.
-On a non-seasonally adjusted basis, the net number of payrolls added in February increased sharply after January’s seasonal lay-offs. On a seasonally adjusted basis, February job gains were above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-prime-age-participation-on-fire/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in March beat expectations. Gains in January and February were both revised up. There are now roughly 1.6 million fewer jobs now than before the pandemic as the recovery in the labor market continues steadily.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2022/20220401_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in February increased sharply after January’s seasonal lay-offs. On a seasonally adjusted basis, February job gains were above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; Hot energy and services offset a softer month for goods</title>
-      <link>/blog/prices-hot-energy-and-services-offset-a-softer-month-for-goods/</link>
+      <link>https://www.macrochronicles.com/blog/prices-hot-energy-and-services-offset-a-softer-month-for-goods/</link>
       <pubDate>Thu, 10 Mar 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-hot-energy-and-services-offset-a-softer-month-for-goods/</guid>
-      <description>The US Consumer Price Index numbers for February were in line with expectations. Headline and core CPI came in at 7.9% and 6.4% year-over-year, respectively. Used cars and truck prices actually declined in Feb, but remain up 41.2% over the previous year and accelerating services inflation is offsetting a relatively softer month for goods inflation.
-Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-hot-energy-and-services-offset-a-softer-month-for-goods/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The US Consumer Price Index numbers for February were in line with expectations. Headline and core CPI came in at 7.9% and 6.4% year-over-year, respectively. Used cars and truck prices actually declined in Feb, but remain up 41.2% over the previous year and accelerating services inflation is offsetting a relatively softer month for goods inflation.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 and into 2022 far surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last two years.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Continued strength</title>
-      <link>/blog/jobs-continued-strength/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-continued-strength/</link>
       <pubDate>Fri, 04 Mar 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-continued-strength/</guid>
-      <description>Job gains in February surpassed expectations and were the largest monthly increase since last July. Gains in December and January were both revised up. There are now roughly 2 million fewer jobs now than before the pandemic as the recovery in the labor market continues steadily.
-On a non-seasonally adjusted basis, the net number of payrolls added in February increased sharply after January’s seasonal lay-offs. On a seasonally adjusted basis, February job gains were above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-continued-strength/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in February surpassed expectations and were the largest monthly increase since last July. Gains in December and January were both revised up. There are now roughly 2 million fewer jobs now than before the pandemic as the recovery in the labor market continues steadily.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2022/20220304_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in February increased sharply after January’s seasonal lay-offs. On a seasonally adjusted basis, February job gains were above average based on longer-term history, and appear consistent with the steady trend of seasonally adjusted job gains in 2021.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; Just keeps getting worse</title>
-      <link>/blog/prices-just-keeps-getting-worse/</link>
+      <link>https://www.macrochronicles.com/blog/prices-just-keeps-getting-worse/</link>
       <pubDate>Thu, 10 Feb 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-just-keeps-getting-worse/</guid>
-      <description>The US Consumer Price Index numbers for January were on the hotter side, again. Headline and core CPI came in at 7.5% and 6.0% year-over-year, respectively.
-Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-just-keeps-getting-worse/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The US Consumer Price Index numbers for January were on the hotter side, again. Headline and core CPI came in at 7.5% and 6.0% year-over-year, respectively.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 and into 2022 far surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last year and a half.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Defying expectations</title>
-      <link>/blog/jobs-defying-expectations/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-defying-expectations/</link>
       <pubDate>Fri, 04 Feb 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-defying-expectations/</guid>
-      <description>Job gains in January far surpassed expectations, which were low going into the report on account of the prominence of Omicron last month. The BLS also revised 2021 levels of employment in its establishment survey after updating its seasonal adjustment models as part of its annual benchmark process. As a result of these adjustments, job gains at the end of the year were actually stronger than first estimated but were lower last summer, netting out to 217k more total payrolls added in 2021 when compared with the data before the adjustments.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-defying-expectations/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in January far surpassed expectations, which were low going into the report on account of the prominence of Omicron last month. The BLS also revised 2021 levels of employment in its establishment survey after updating its seasonal adjustment models as part of its annual benchmark process. As a result of these adjustments, job gains at the end of the year were actually stronger than first estimated but were lower last summer, netting out to 217k more total payrolls added in 2021 when compared with the data before the adjustments.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; Services inflation continuing to accelerate</title>
-      <link>/blog/prices-services-inflation-continuing-to-accelerate/</link>
+      <link>https://www.macrochronicles.com/blog/prices-services-inflation-continuing-to-accelerate/</link>
       <pubDate>Wed, 12 Jan 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-services-inflation-continuing-to-accelerate/</guid>
-      <description>The US Consumer Price Index numbers for December were fairly in line with expectations while at multi-decade highs, but core CPI was a bit hotter than expected. Headline and core CPI came in at 7.0% and 5.5% respectively.
-Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-services-inflation-continuing-to-accelerate/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The US Consumer Price Index numbers for December were fairly in line with expectations while at multi-decade highs, but core CPI was a bit hotter than expected. Headline and core CPI came in at 7.0% and 5.5% respectively.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 far surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last year and a half.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Payrolls miss but household survey strong again</title>
-      <link>/blog/jobs-payrolls-miss-but-household-survey-strong-again/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-payrolls-miss-but-household-survey-strong-again/</link>
       <pubDate>Fri, 07 Jan 2022 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-payrolls-miss-but-household-survey-strong-again/</guid>
-      <description>Job gains in December came in below expectations. A more holistic view of the data, however, shows that the recovery in the labor market remains on track, similar to the dynamic of the November report. Establishment survey metrics continue to look weaker relative to the metrics based on the Household survey. Interestingly, some of this disparity may be coming from non-sampling error due to the establishment survey’s inability to capture employment generated by new firms.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-payrolls-miss-but-household-survey-strong-again/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in December came in below expectations. A more holistic view of the data, however, shows that the recovery in the labor market remains on track, similar to the dynamic of the November report. Establishment survey metrics continue to look weaker relative to the metrics based on the Household survey. Interestingly, some of this disparity may be coming from non-sampling error due to the establishment survey’s inability to capture employment generated by new firms. The BLS tries to make a couple adjustments to address this error, but it’s possible that the level of new business creation has been so elevated recently that the BLS’ adjustments do not fully account for it.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; They&#39;re rising a lot</title>
-      <link>/blog/prices-theyre-rising-a-lot/</link>
+      <link>https://www.macrochronicles.com/blog/prices-theyre-rising-a-lot/</link>
       <pubDate>Fri, 10 Dec 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-theyre-rising-a-lot/</guid>
-      <description>The US Consumer Price Index numbers for November were a bit anticlimactic as they were essentially inline with analyst expectations, but the levels of inflation are certainly quite anamolous from a historical perspective. Headline and core CPI came in at 6.8% and 4.9% respectively. That’s the fastest rate of headline inflation since 1982.
-Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-theyre-rising-a-lot/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The US Consumer Price Index numbers for November were a bit anticlimactic as they were essentially inline with analyst expectations, but the levels of inflation are certainly quite anamolous from a historical perspective. Headline and core CPI came in at 6.8% and 4.9% respectively. That’s the fastest rate of headline inflation since 1982.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;Year-over-year rates of inflation can be contextualized with the path of the index and price levels that underlie them. A dip in price levels and a later rebound creates a “base effect” boosting the year-over-year measure of change, even when the index resumes something close to its original trajectory. The beginning of the pandemic certainly saw a drop in prices, but the surge in 2021 has far surpassed even where index levels would have been expected to end up had they hypothetically maintained a steady 2% rate of increase over the last year and a half.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Fed Chronicles -&gt; The Upside Down</title>
-      <link>/blog/fed-chronicles-the-upside-down/</link>
+      <link>https://www.macrochronicles.com/blog/fed-chronicles-the-upside-down/</link>
       <pubDate>Tue, 07 Dec 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/fed-chronicles-the-upside-down/</guid>
-      <description>When the Fed announced its new policy framework in August 2020, it did so believing the update to its approach would help it address over a decade of anemic, low inflation. After such a long period of relatively stable prices, at that point Jay Powell and crew likely didn’t think it would only be a matter of months until they would face levels of inflation unseen in 30 years.</description>
+      <guid>https://www.macrochronicles.com/blog/fed-chronicles-the-upside-down/</guid>
+      <description>&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;When the Fed announced its new policy framework in August 2020, it did so believing the update to its approach would help it address over a decade of anemic, low inflation. After such a long period of relatively stable prices, at that point Jay Powell and crew likely didn’t think it would only be a matter of months until they would face levels of inflation unseen in 30 years.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;The question has since flipped from whether the new framework can succeed where policy guidance in the 2010s failed in buoying inflation to whether it can do the exact opposite, containing inflation before it stays too high for too long. The FOMC has pivoted abruptly on the pace of tapering after getting spooked by recent inflation readings, and I’ll describe why this isn’t actually an abandonment of the new framework and what that framework means for 2022.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Payrolls miss expectations but broader measures improve</title>
-      <link>/blog/jobs-payrolls-miss-expectations-but-broader-measures-improve/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-payrolls-miss-expectations-but-broader-measures-improve/</link>
       <pubDate>Fri, 03 Dec 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-payrolls-miss-expectations-but-broader-measures-improve/</guid>
-      <description>Job gains in November came in below expectations. A more holistic view of the data, however, shows that the recovery in the labor market remains on track. The mixed signals appear in large part to stem from varying strengths of conditions in household survey and establishment survey data.
-On a non-seasonally adjusted basis, the net number of payrolls added in November was higher than the average of all the Novembers of the 10 years preceding covid.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-payrolls-miss-expectations-but-broader-measures-improve/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in November came in below expectations. A more holistic view of the data, however, shows that the recovery in the labor market remains on track. The mixed signals appear in large part to stem from varying strengths of conditions in household survey and establishment survey data.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2020/20211203_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in November was higher than the average of all the Novembers of the 10 years preceding covid. If the recovery can maintain its average pace over the last four months on a seasonally adjusted basis, it won’t be very long until (likely sometime in mid-2022) when the Fed believes the labor market has returned to something like full employment.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; The recovery regaining its pace</title>
-      <link>/blog/jobs-the-recovery-regaining-its-pace/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-the-recovery-regaining-its-pace/</link>
       <pubDate>Fri, 05 Nov 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-the-recovery-regaining-its-pace/</guid>
-      <description>Job gains in October beat expectations, with positive upward revisions to previous months as well. The labor market is back on track, though arguably it had never really gotten off track given these updated estimates of August and September numbers.
-On a non-seasonally adjusted basis, the net number of payrolls added in October was much higher than even the elevated average of all the Octobers of the 10 years preceding covid.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-the-recovery-regaining-its-pace/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in October beat expectations, with positive upward revisions to previous months as well. The labor market is back on track, though arguably it had never really gotten off track given these updated estimates of August and September numbers.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2020/20211105_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;On a non-seasonally adjusted basis, the net number of payrolls added in October was much higher than even the elevated average of all the Octobers of the 10 years preceding covid. If the recovery can maintain a pace of adding half a million jobs every month on a seasonally adjusted basis, it won’t be very long until (likely sometime in mid-2022) when the Fed believes the labor market has returned to something like full employment.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; A look under the index&#39;s hood</title>
-      <link>/blog/prices-a-look-under-the-indexs-hood/</link>
+      <link>https://www.macrochronicles.com/blog/prices-a-look-under-the-indexs-hood/</link>
       <pubDate>Tue, 02 Nov 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-a-look-under-the-indexs-hood/</guid>
-      <description>Inflation has reached levels not seen in decades, and it would be an understatement to say that the world’s noticed. There’s a camp that calls inflation’s current clip “Transitory.” There’s a faction pointing to any and all price charts still with an upward trajectory that identifies inflation as “Persistent,” and there’s folks with a slightly more nuanced view that belong to “Team Transitorily Elevated in Pandemic-Affected Categories Followed by a Moderate Broadening Out That’s Unfortunate but Still Much Better than the Alternative That We Experienced after the Last Recession,” as Michael Redmond notes.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-a-look-under-the-indexs-hood/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Inflation has reached levels not seen in decades, and it would be an understatement to say that the world’s noticed. There’s a camp that calls inflation’s current clip “Transitory.” There’s a faction pointing to any and all price charts still with an upward trajectory that identifies inflation as “Persistent,” and there’s folks with a slightly more nuanced view that belong to “Team Transitorily Elevated in Pandemic-Affected Categories Followed by a Moderate Broadening Out That’s Unfortunate but Still Much Better than the Alternative That We Experienced after the Last Recession,” as Michael Redmond notes. My goal in this piece is to take a sober look at what the data shows and may be telling us, though I’m likely in large part blind to the extent my biases.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Delta weighing on labor demand in September</title>
-      <link>/blog/jobs-delta-weighing-on-labor-demand-in-september/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-delta-weighing-on-labor-demand-in-september/</link>
       <pubDate>Fri, 08 Oct 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-delta-weighing-on-labor-demand-in-september/</guid>
-      <description>Job gains in September disappointed, showing the impact of the Delta variant but also letting down expectations that the expiration of unemployment insurance benefits would drive increased job growth. Some of this weakness showed up in non-seasonally adjusted public education jobs not returning for the fall to the same extent they would have before the pandemic, causing a dip in the seasonally adjust measure of those jobs.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-delta-weighing-on-labor-demand-in-september/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in September disappointed, showing the impact of the Delta variant but also letting down expectations that the expiration of unemployment insurance benefits would drive increased job growth. Some of this weakness showed up in non-seasonally adjusted public education jobs not returning for the fall to the same extent they would have before the pandemic, causing a dip in the seasonally adjust measure of those jobs.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2020/20211008_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; A look at the 2021 trend</title>
-      <link>/blog/jobs-a-look-at-the-2021-trend/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-a-look-at-the-2021-trend/</link>
       <pubDate>Sat, 05 Jun 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-a-look-at-the-2021-trend/</guid>
-      <description>Job gains in May came in closer to analyst expectations relative to the big miss in April, with over half a million jobs added during the month. The chart below shows how the nonfarm payroll numbers have developed over the last nine months, including revisions that have been released for previous reports.
-Despite the deceleration in April, the last four months have strung together a fairly consistent trend, with seasonally adjusted job adds averaging around 500,000 and non-seasonally adjusted gains averaging just above 1 million.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-a-look-at-the-2021-trend/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in May came in closer to analyst expectations relative to the big miss in April, with over half a million jobs added during the month. The chart below shows how the nonfarm payroll numbers have developed over the last nine months, including revisions that have been released for previous reports.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2020/20210604_jobs_files/figure-html/unnamed-chunk-1-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;Despite the deceleration in April, the last four months have strung together a fairly consistent trend, with seasonally adjusted job adds averaging around 500,000 and non-seasonally adjusted gains averaging just above 1 million. As Michael Redmond has noted, potentially a “speed limit” exists on just how many jobs can be created in any given month, and these type of averages may be what we should expect going forward for this recovery. While this kind of rebound in the labor market is likely not as strong as many would have hoped, on the bright side the current trend is still much better than the average job growth of the previous cycle.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; An uncertain future</title>
-      <link>/blog/prices-an-uncertain-future/</link>
+      <link>https://www.macrochronicles.com/blog/prices-an-uncertain-future/</link>
       <pubDate>Thu, 20 May 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-an-uncertain-future/</guid>
-      <description>I wrote last month about how base effects would cause year-over-year inflation numbers in the US to appear to rocket higher, and the headline Consumer Price Index (CPI) print of 4.2% for April certainly got everyone’s attention. Not just base effects, however, drove the year-over-year figure that high, with large jumps in certain components such as used cars making historic contributions to the overall index change. We can easily foresee when the base effects will fall off, but knowing to what extent inflation will return to a lower clip when various transitory factors abate (as the Fed assures us) or if it can maintain a high rate on the back of significant fiscal and monetary stimulus (as certain economists, bitcoin boosters, and financial pundits warn), remains uncertain.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-an-uncertain-future/</guid>
+      <description>&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;I wrote last month about how &lt;a href=&#34;https://www.macrochronicles.com/blog/prices-here-come-the-base-effects/&#34;&gt;base effects&lt;/a&gt; would cause year-over-year inflation numbers in the US to appear to rocket higher, and the headline Consumer Price Index (CPI) print of 4.2% for April certainly got everyone’s attention. Not just base effects, however, drove the year-over-year figure that high, with large jumps in certain components such as used cars making historic contributions to the overall index change. We can easily foresee when the base effects will fall off, but knowing to what extent inflation will return to a lower clip when various transitory factors abate (as the Fed assures us) or if it can maintain a high rate on the back of significant fiscal and monetary stimulus (as certain economists, bitcoin boosters, and financial pundits warn), remains uncertain.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Shouldn&#39;t be surprised to be surprised</title>
-      <link>/blog/jobs-shouldnt-be-surprised-to-be-surprised/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-shouldnt-be-surprised-to-be-surprised/</link>
       <pubDate>Tue, 11 May 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-shouldnt-be-surprised-to-be-surprised/</guid>
-      <description>Last Friday gave us a head scratcher of a jobs report for April with gains way below expectations. Often, however, the lesson to learn from surprising monthly NFP numbers is that monthly NFP numbers can often be surprising (to adapt a Kahneman quip) and that we shouldn’t put too much weight on any given month. In my view, May gains could easily end up the barn burner people were expecting in April.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-shouldnt-be-surprised-to-be-surprised/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Last Friday gave us a head scratcher of a jobs report for April with gains way below expectations. Often, however, the lesson to learn from surprising monthly NFP numbers is that monthly NFP numbers can often be surprising (to adapt a Kahneman quip) and that we shouldn’t put too much weight on any given month. In my view, May gains could easily end up the barn burner people were expecting in April.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Prices -&gt; Here come the base effects</title>
-      <link>/blog/prices-here-come-the-base-effects/</link>
+      <link>https://www.macrochronicles.com/blog/prices-here-come-the-base-effects/</link>
       <pubDate>Sun, 11 Apr 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/prices-here-come-the-base-effects/</guid>
-      <description>Mike Konczal, J.W. Mason, and Lauren Melodia at the Roosevelt Institute and Jay Shambaugh at The Hamilton Project recently published two great pieces on the outlook for inflation in the US, including how prices will appear to be leaping higher in the coming months but not because of any significant acceleration in 2021. You can find the articles here and here. They make a somewhat basic but important point that base effects will have an outsized impact on many year-over-year measures of inflation over the next couple months, with CPI numbers for March coming out on Tuesday.</description>
+      <guid>https://www.macrochronicles.com/blog/prices-here-come-the-base-effects/</guid>
+      <description>&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Mike Konczal, J.W. Mason, and Lauren Melodia at the Roosevelt Institute and Jay Shambaugh at The Hamilton Project recently published two great pieces on the outlook for inflation in the US, including how prices will appear to be leaping higher in the coming months but not because of any significant acceleration in 2021. You can find the articles &lt;a href=&#34;https://rooseveltinstitute.org/2021/04/08/the-illusion-of-inflation-why-this-springs-numbers-will-look-artificially-high/&#34;&gt;here&lt;/a&gt; and &lt;a href=&#34;https://www.hamiltonproject.org/blog/dont_overreact_to_inflation_data_this_spring&#34;&gt;here&lt;/a&gt;. They make a somewhat basic but important point that base effects will have an outsized impact on many year-over-year measures of inflation over the next couple months, with CPI numbers for March coming out on Tuesday. Regardless of the durability of the causes behind the coming upticks in year-over-year inflation, news headlines, pundits, and policy hawks will likely key off of the reported numbers with little regard for the underlying dynamics, taking the opportunity to fearmonger about runaway inflation stoked by the policy response to the pandemic.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; The start of a stronger upswing</title>
-      <link>/blog/jobs-the-start-of-a-stronger-upswing/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-the-start-of-a-stronger-upswing/</link>
       <pubDate>Fri, 02 Apr 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-the-start-of-a-stronger-upswing/</guid>
-      <description>The labor market recovery picked up across the board in March, with over 900k nonfarm payrolls added to the economy. Un- and under-employment metrics fell while labor force participation rates (LFPRs) and employment to population ratios (EPOPs) rose. Such broad based improvement hadn’t occurred since October, before the winter COVID surge, when the unemployment rate was a full percentage point higher. The colored shading in the table below highlights the changes in a given metric from the month before.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-the-start-of-a-stronger-upswing/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The labor market recovery picked up across the board in March, with over 900k nonfarm payrolls added to the economy. Un- and under-employment metrics fell while labor force participation rates (LFPRs) and employment to population ratios (EPOPs) rose. Such broad based improvement hadn’t occurred since October, before the winter COVID surge, when the unemployment rate was a full percentage point higher. The colored shading in the table below highlights the changes in a given metric from the month before.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>GameStop and the memestock discourse</title>
-      <link>/blog/gamestop-and-the-memestock-discourse/</link>
+      <link>https://www.macrochronicles.com/blog/gamestop-and-the-memestock-discourse/</link>
       <pubDate>Fri, 29 Jan 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/gamestop-and-the-memestock-discourse/</guid>
-      <description>Everyone and their aunt’s goldendoodle have penned a substack piece or tweetstorm on the happenings in the market this week, so there’s hardly any original thoughts on the topic left to have, but it does feel as though 15 years from now we’ll all still sometimes pause to muse on the Great GameStop Short Squeeze of ’21. I can’t, in that case, help but take down a few notes on some of the memorable bits born out of current market conditions.</description>
+      <guid>https://www.macrochronicles.com/blog/gamestop-and-the-memestock-discourse/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/twitter-widget/widgets.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Everyone and their aunt’s goldendoodle have penned a substack piece or tweetstorm on the happenings in the market this week, so there’s hardly any original thoughts on the topic left to have, but it does feel as though 15 years from now we’ll all still sometimes pause to muse on the Great GameStop Short Squeeze of ’21. I can’t, in that case, help but take down a few notes on some of the memorable bits born out of current market conditions.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Jobs -&gt; Rolling over</title>
-      <link>/blog/jobs-rolling-over/</link>
+      <link>https://www.macrochronicles.com/blog/jobs-rolling-over/</link>
       <pubDate>Sat, 09 Jan 2021 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/jobs-rolling-over/</guid>
-      <description>Nonfarm payrolls declined by 140,000 jobs in December, coming after the rebound in job growth steadily slowed during the second half of the year. December marks the first fall in employment since April’s collapse, as the high levels of COVID cases have buffeted employers. The headline unemployment rate stayed at 6.7%.
-As shown in the chart above, with the recovery rolling over around the percentage of job losses reached in the depths of the recession caused by the Global Financial Crisis, the economy is a long, long way away from the health of the labor market pre-pandemic.</description>
+      <guid>https://www.macrochronicles.com/blog/jobs-rolling-over/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/twitter-widget/widgets.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Nonfarm payrolls declined by 140,000 jobs in December, coming after the rebound in job growth steadily slowed during the second half of the year. December marks the first fall in employment since April’s collapse, as the high levels of COVID cases have buffeted employers. The headline unemployment rate stayed at 6.7%.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2020/20210109_jobs_files/figure-html/PAYEMS-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;As shown in the chart above, with the recovery rolling over around the percentage of job losses reached in the depths of the recession caused by the Global Financial Crisis, the economy is a long, long way away from the health of the labor market pre-pandemic. Ernie Tedeschi notes that averaging the job growth of the last three months and assuming that pace continues, it would still take around three years to reach the employment level of February 2020, not to speak of where the labor market would be at that point had it maintained its pre-pandemic rate of job gains.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>COVID-19 -&gt; Inflection points</title>
-      <link>/blog/covid-19-inflection-points/</link>
+      <link>https://www.macrochronicles.com/blog/covid-19-inflection-points/</link>
       <pubDate>Mon, 30 Nov 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/covid-19-inflection-points/</guid>
-      <description>The fall brought with it a surge in virus cases, especially in the Midwest, yet daily positive test numbers averaged over a week appear to have recently rolled over in the most hard hit states. This is good news, given that typically once states have stopped the rise in daily new infections, the growth in cases has continued to slow over the short-term. The context of this surge relative to those of the spring and summer, however, is important.</description>
+      <guid>https://www.macrochronicles.com/blog/covid-19-inflection-points/</guid>
+      <description>&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The fall brought with it a surge in virus cases, especially in the Midwest, yet daily positive test numbers averaged over a week appear to have recently rolled over in the most hard hit states. This is good news, given that typically once states have stopped the rise in daily new infections, the growth in cases has continued to slow over the short-term. The context of this surge relative to those of the spring and summer, however, is important. It’s likely that what spread resulted from recent holiday travel has not yet shown up in the numbers, creating the potential that the recent peaks in many states may be surpassed as daily new cases inflect higher again.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Political Detour -&gt; Which way will Pennsylvania swing?</title>
-      <link>/blog/political-detour-which-way-will-pennsylvania-swing/</link>
+      <link>https://www.macrochronicles.com/blog/political-detour-which-way-will-pennsylvania-swing/</link>
       <pubDate>Mon, 02 Nov 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/political-detour-which-way-will-pennsylvania-swing/</guid>
-      <description>After mapping Florida&#39;s electoral history and looking at the outlook there for this cycle last week, I was curious what the equivalent charts for Pennsylvania would show. Pennsylvania was one of the three Rust Belt states that flipped in 2016, eroding the Blue Wall in the North that previously seemed unlikely gains for Republicans. Trump very narrowly carried Pennsylvania, Michigan, and Wisconsin, with less than 45,000 votes in each state differentiating the candidates and ultimately determining which way the electoral college swung.</description>
+      <guid>https://www.macrochronicles.com/blog/political-detour-which-way-will-pennsylvania-swing/</guid>
+      <description>&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;After mapping Florida&#39;s electoral history and looking at the outlook there for this cycle &lt;a href=&#34;https://www.macrochronicles.com/blog/political-detour-which-way-will-florida-swing/&#34;&gt;last week&lt;/a&gt;, I was curious what the equivalent charts for Pennsylvania would show. Pennsylvania was one of the three Rust Belt states that flipped in 2016, eroding the Blue Wall in the North that previously seemed unlikely gains for Republicans. Trump very narrowly carried Pennsylvania, Michigan, and Wisconsin, with less than 45,000 votes in each state differentiating the candidates and ultimately determining which way the electoral college swung.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Political Detour -&gt; Which way will Florida swing?</title>
-      <link>/blog/political-detour-which-way-will-florida-swing/</link>
+      <link>https://www.macrochronicles.com/blog/political-detour-which-way-will-florida-swing/</link>
       <pubDate>Thu, 29 Oct 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/political-detour-which-way-will-florida-swing/</guid>
-      <description>It&#39;s almost November, which often means Florida has the attention of poll watchers given the tradition of Federal elections in the state coming down to razer thin margins, typically with significant implications at the national level. This year, Florida is essentially a must-win for Trump to gain re-election. FiveThirtyEight now estimates that if Biden takes Florida, Trump has less than a 1 in 100 chance of coming out on top in electoral votes.</description>
+      <guid>https://www.macrochronicles.com/blog/political-detour-which-way-will-florida-swing/</guid>
+      <description>&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;It&#39;s almost November, which often means Florida has the attention of poll watchers given the tradition of Federal elections in the state coming down to razer thin margins, typically with significant implications at the national level. This year, Florida is essentially a must-win for Trump to gain re-election. FiveThirtyEight now estimates that if Biden takes Florida, Trump has less than a 1 in 100 chance of coming out on top in electoral votes. Biden has other paths to victory, but a win in Florida would allow losses in other swing states such as Pennsylvania and Wisconsin without at all putting the kibosh on the former VP&#39;s chances.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>60 years of US population pyramids</title>
-      <link>/blog/60-years-of-us-population-pyramids/</link>
+      <link>https://www.macrochronicles.com/blog/60-years-of-us-population-pyramids/</link>
       <pubDate>Wed, 30 Sep 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/60-years-of-us-population-pyramids/</guid>
-      <description>I recently went down a rabbit hole of Census Bureau (CB) data initially spurred by an interest in how the demographics of swing states are changing. I also just read Matt Yglesias&#39; One Billion Americans: The Case for Thinking Bigger, a call for a range of policies to push US population growth in a new direction. I ended up with the chart below, a picture of the past, present, and future demographics of the country combining five variables: (1) Population (2) Age (3) Race (4) Gender (5) Calendar year.</description>
+      <guid>https://www.macrochronicles.com/blog/60-years-of-us-population-pyramids/</guid>
+      <description>&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;I recently went down a rabbit hole of Census Bureau (CB) data initially spurred by an interest in how the demographics of swing states are changing. I also just read Matt Yglesias&#39; &lt;a href=&#34;https://www.amazon.com/One-Billion-Americans-Thinking-Bigger-ebook/dp/B082ZR6827&#34;&gt;&lt;em&gt;One Billion Americans: The Case for Thinking Bigger&lt;/em&gt;&lt;/a&gt;, a call for a range of policies to push US population growth in a new direction. I ended up with the chart below, a picture of the past, present, and future demographics of the country combining five variables: (1) Population (2) Age (3) Race (4) Gender (5) Calendar year. A few significant long-term trends that have far-reaching impacts appear.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>COVID-19 -&gt; Europe&#39;s Resurgence</title>
-      <link>/blog/covid-19-europes-resurgence/</link>
+      <link>https://www.macrochronicles.com/blog/covid-19-europes-resurgence/</link>
       <pubDate>Sun, 30 Aug 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/covid-19-europes-resurgence/</guid>
-      <description>In a previous post from June called The American Surge, I wrote about the debate at the time over whether the US had entered a second wave given it seemed clear that the first wave to hit the country had never really passed. I also suggested that fire may be a more fitting metaphor and that &amp;quot;in the places where the fire has been brought down to a smoldering remnant, a handful of embers can still exist that erupt again when oxygen returns.</description>
+      <guid>https://www.macrochronicles.com/blog/covid-19-europes-resurgence/</guid>
+      <description>&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;In a previous post from June called &lt;a href=&#34;https://www.macrochronicles.com/blog/the-american-surge/&#34;&gt;The American Surge&lt;/a&gt;, I wrote about the debate at the time over whether the US had entered a second wave given it seemed clear that the first wave to hit the country had never really passed. I also suggested that fire may be a more fitting metaphor and that &amp;quot;in the places where the fire has been brought down to a smoldering remnant, a handful of embers can still exist that erupt again when oxygen returns.&amp;quot; Whether you call it a fresh flame or another wave, unfortunately it&#39;s happening in Europe right now. After lockdowns successfully dampened the spread of COVID-19 across the continent through most of the spring and summer, many major European countries are now again reporting new cases in the thousands each day.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>The Damage Done to the Labor Market</title>
-      <link>/blog/the-damage-done-to-the-labor-market/</link>
+      <link>https://www.macrochronicles.com/blog/the-damage-done-to-the-labor-market/</link>
       <pubDate>Sun, 16 Aug 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/the-damage-done-to-the-labor-market/</guid>
-      <description>The US unemployment rate (UR) has fallen for the last three months, fortunately snapping back from the official high of 14.7% in April, declining to 10.2% in July. Even excluding everyone that has gotten their old job back or has found a new position over the last several months, however, it&#39;s still the case that more people in the US have lost their job this year than during the depths of the Global Financial Crisis.</description>
+      <guid>https://www.macrochronicles.com/blog/the-damage-done-to-the-labor-market/</guid>
+      <description>&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;The US unemployment rate (UR) has fallen for the last three months, fortunately snapping back from the &lt;em&gt;official&lt;/em&gt; high of 14.7% in April, declining to 10.2% in July. Even excluding everyone that has gotten their old job back or has found a new position over the last several months, however, it&#39;s still the case that more people in the US have lost their job this year than during the depths of the Global Financial Crisis. Also, the headline UR and the net change in jobs don&#39;t tell the whole story. For instance, a classification error in the BLS&#39; monthly survey entails that the actual UR is likely around a percentage point higher than officially reported at this point, reflecting roughly a million more workers out of the job. And &amp;quot;core&amp;quot; unemployment, excluding unemployment due to temporary layoffs, is on the rise. This piece will also describe other ways in which the current crisis has taken a toll on the labor market beyond what we can see in the most frequently cited statistics.&lt;a href=&#34;#fn1&#34; class=&#34;footnoteRef&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt;&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Muddling Through</title>
-      <link>/blog/muddling-through/</link>
+      <link>https://www.macrochronicles.com/blog/muddling-through/</link>
       <pubDate>Sun, 26 Jul 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/muddling-through/</guid>
-      <description>Since this blog&#39;s last update on COVID-19 numbers, the US has made progress in the number of tests administered daily, and the positivity rate of testing appeared to stop increasing in July. The now large number of daily tests and the positivity rate in the high single digits, however, entails a significant amount of new cases each day. States walking back plans to reopen and the publics&#39; self-policing are moderating case growth, but the lack of a coordinated national plan to stamp out the virus means that most states will muddle through the next few months with outbreaks neither out of control nor much less prevalent.</description>
+      <guid>https://www.macrochronicles.com/blog/muddling-through/</guid>
+      <description>&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Since this blog&#39;s last update on COVID-19 numbers, the US has made progress in the number of tests administered daily, and the positivity rate of testing appeared to stop increasing in July. The now large number of daily tests and the positivity rate in the high single digits, however, entails a significant amount of new cases each day. States walking back plans to reopen and the publics&#39; self-policing are moderating case growth, but the lack of a coordinated national plan to stamp out the virus means that most states will muddle through the next few months with outbreaks neither out of control nor much less prevalent.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>TSLA, the Moon&#39;s New Neighbor</title>
-      <link>/blog/tsla-the-moons-new-neighbor/</link>
+      <link>https://www.macrochronicles.com/blog/tsla-the-moons-new-neighbor/</link>
       <pubDate>Sun, 19 Jul 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/tsla-the-moons-new-neighbor/</guid>
-      <description>Tesla&#39;s share price has risen so far that it has settled down not far from the moon, and who knows how long it will spend outside the stratosphere. The chart below, indexing each stock price to 100 at the end of 2014, shows roughly that if the same amounts were invested in Tesla and other major automakers five and a half years ago, Tesla provided an almost 7x return while most others lost money.</description>
+      <guid>https://www.macrochronicles.com/blog/tsla-the-moons-new-neighbor/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/twitter-widget/widgets.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Tesla&#39;s share price has risen so far that it has settled down not far from the moon, and who knows how long it will spend outside the stratosphere. The chart below, indexing each stock price to 100 at the end of 2014, shows roughly that if the same amounts were invested in Tesla and other major automakers five and a half years ago, Tesla provided an almost 7x return while most others lost money. I&#39;ve often read claims that Tesla shouldn&#39;t be compared to automakers because it&#39;s more of a tech company than a car producer. Anecdotally, people made similar arguments that WeWork&#39;s competitive advantage lies in tech rather than real estate, and we know how that turned out.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>On Trading and the Poster Boy of Retail Bros</title>
-      <link>/blog/on-trading-and-the-poster-boy-of-retail-bros/</link>
+      <link>https://www.macrochronicles.com/blog/on-trading-and-the-poster-boy-of-retail-bros/</link>
       <pubDate>Sat, 11 Jul 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/on-trading-and-the-poster-boy-of-retail-bros/</guid>
-      <description>When the market crashed in late-February and March, a lot of Americans decided it was time to open up a brokerage account or more actively trade their existing one. Apart from trading volumes, Tesla’s stock going to the moon, and Hertz’s rising share price as the company filed for Chapter 11 bankruptcy, we can tell retail trading has increased by the interest people have expressed in their Google search bars.</description>
+      <guid>https://www.macrochronicles.com/blog/on-trading-and-the-poster-boy-of-retail-bros/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/twitter-widget/widgets.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;When the market crashed in late-February and March, a lot of Americans decided it was time to open up a brokerage account or more actively trade their existing one. Apart from trading volumes, Tesla’s stock going to the moon, and Hertz’s rising share price as the company filed for Chapter 11 bankruptcy, we can tell retail trading has increased by the interest people have expressed in their Google search bars.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>The American Surge</title>
-      <link>/blog/the-american-surge/</link>
+      <link>https://www.macrochronicles.com/blog/the-american-surge/</link>
       <pubDate>Thu, 25 Jun 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/the-american-surge/</guid>
-      <description>We’re in the midst of a great, if somewhat semantic, debate about waves. Given a swift increase in the number of new COVID-19 cases each day across a large number of US states in June, commentators have sounded the alarm that The Second Wave is now upon us. Others, including Dr. Fauci, have emphasized that “we’re still in the first wave.”1 The first never passed to allow another to follow.</description>
+      <guid>https://www.macrochronicles.com/blog/the-american-surge/</guid>
+      <description>&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;We’re in the midst of a great, if somewhat semantic, debate about waves. Given a swift increase in the number of new COVID-19 cases each day across a large number of US states in June, commentators have sounded the alarm that The Second Wave is now upon us. Others, including Dr. Fauci, have emphasized that “we’re still in the first wave.”&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt; The first never passed to allow another to follow. Meanwhile, Pence recently penned an op-ed in the Journal entitled “There Isn’t a Coronavirus ‘Second Wave’”&lt;a href=&#34;#fn2&#34; class=&#34;footnote-ref&#34; id=&#34;fnref2&#34;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt; and Kudlow took to CNBC at the beginning of the week to claim “there is no second wave coming,”&lt;a href=&#34;#fn3&#34; class=&#34;footnote-ref&#34; id=&#34;fnref3&#34;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/a&gt; an immensely credible and eagerly sought after perspective in the wake of his late-February pronouncement that “we have contained this. I won’t say [it’s] airtight, but it’s pretty close to airtight.”&lt;a href=&#34;#fn4&#34; class=&#34;footnote-ref&#34; id=&#34;fnref4&#34;&gt;&lt;sup&gt;4&lt;/sup&gt;&lt;/a&gt;&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Making Sense of the Jobs Numbers</title>
-      <link>/blog/making-sense-of-the-jobs-numbers/</link>
+      <link>https://www.macrochronicles.com/blog/making-sense-of-the-jobs-numbers/</link>
       <pubDate>Mon, 08 Jun 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/making-sense-of-the-jobs-numbers/</guid>
-      <description>I have recently donated to the Real Justice PAC, which works to elect reform-minded prosecutors at the county and municipal level, and encourage you to consider also donating. Last week&#39;s US nonfarm payrolls report caused a lot of head scratching, as it showed total employment increased by 2.5 million jobs in May despite a range of other data points leading up to the report that suggested the economy continued to hemorrhage jobs last month.</description>
+      <guid>https://www.macrochronicles.com/blog/making-sense-of-the-jobs-numbers/</guid>
+      <description>&lt;p&gt; &lt;/p&gt;&#xD;&#xA;&lt;table&gt;&#xD;&#xA;&lt;tbody&gt;&#xD;&#xA;&lt;tr class=&#34;odd&#34;&gt;&#xD;&#xA;&lt;td&gt;I have recently donated to the &lt;a href=&#34;https://realjusticepac.org/&#34;&gt;Real Justice PAC&lt;/a&gt;, which works to elect reform-minded prosecutors at the county and municipal level, and encourage you to consider also donating.&lt;/td&gt;&#xD;&#xA;&lt;/tr&gt;&#xD;&#xA;&lt;/tbody&gt;&#xD;&#xA;&lt;/table&gt;&#xD;&#xA;&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Last week&#39;s US nonfarm payrolls report caused a lot of head scratching, as it showed total employment increased by 2.5 million jobs in May despite a range of other data points leading up to the report that suggested the economy continued to hemorrhage jobs last month. The unemployment rate changed course and declined 1.4%pts to 13.3%, while some analysts&#39; forecasts placed it as reaching around 20% in May.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Far From Out of the Woods</title>
-      <link>/blog/far-from-out-of-the-woods/</link>
+      <link>https://www.macrochronicles.com/blog/far-from-out-of-the-woods/</link>
       <pubDate>Mon, 18 May 2020 21:13:14 -0500</pubDate>
-      
-      <guid>/blog/far-from-out-of-the-woods/</guid>
-      <description>There surely isn’t a country right now whose people aren’t collectively wondering when things will be totally back to normal, and whether things can ever be the kind of normal they were before. For countries that have battled the virus to a trickle of new cases or none at all, many appear well on their way in opening their economies up, yet their paths to normalcy resemble less a snapback than a slow, incremental recovery still constrained by uncertainty.</description>
+      <guid>https://www.macrochronicles.com/blog/far-from-out-of-the-woods/</guid>
+      <description>&lt;p&gt;   &lt;/p&gt;&#xD;&#xA;&lt;p&gt;There surely isn’t a country right now whose people aren’t collectively wondering when things will be totally back to normal, and whether things can ever be the kind of normal they were before. For countries that have battled the virus to a trickle of new cases or none at all, many appear well on their way in opening their economies up, yet their paths to normalcy resemble less a snapback than a slow, incremental recovery still constrained by uncertainty. For countries in the midst of outbreaks, particularly the US, there exists significant pressure to begin or continue normalizing and lessen the economic damage being wrought. At this point, however, the risk of a Wave 2 appears high.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>About</title>
-      <link>/about/</link>
+      <link>https://www.macrochronicles.com/about/</link>
       <pubDate>Sat, 22 Aug 2015 00:00:00 +0000</pubDate>
-      
-      <guid>/about/</guid>
-      <description>My name is Ben Bakkum, and I&amp;rsquo;m the author of Macro Chronicles. I live in Brooklyn and do investment research and portfolio management at a robo-advisor. All views expressed here are my own.
-Previously, I worked on the data team at GiveDirectly, a nonprofit that operates cash transfer and basic income programs across a range of African countries and has provided disaster relief in the US, Puerto Rico, the Bahamas, and Yemen.</description>
+      <guid>https://www.macrochronicles.com/about/</guid>
+      <description>&lt;p&gt;My name is Ben Bakkum, and I&amp;rsquo;m the author of Macro Chronicles. I live in Brooklyn and do investment research and portfolio management at a robo-advisor. All views expressed here are my own.&lt;/p&gt;&#xA;&lt;p&gt;Previously, I worked on the data team at &lt;a href=&#34;https://www.givedirectly.org/&#34;&gt;GiveDirectly&lt;/a&gt;, a nonprofit that operates cash transfer and basic income programs around the world. Prior to GiveDirectly, I worked on the Private Bank Chief Investment Officer&amp;rsquo;s team at J.P. Morgan, where I contributed to macroeconomic and global financial market research and analysis. I am a CFA® charterholder and a CERTIFIED FINANCIAL PLANNER™ professional.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Subscribe</title>
-      <link>/subscribe/</link>
+      <link>https://www.macrochronicles.com/subscribe/</link>
       <pubDate>Sat, 22 Aug 2015 00:00:00 +0000</pubDate>
-      
-      <guid>/subscribe/</guid>
-      <description>Click here to then enter your email address.</description>
+      <guid>https://www.macrochronicles.com/subscribe/</guid>
+      <description>&lt;p&gt;Click &lt;a href=&#34;http://eepurl.com/hojL9H&#34;&gt;here&lt;/a&gt; to then enter your email address.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Home</title>
-      <link>/home/</link>
+      <link>https://www.macrochronicles.com/home/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/home/</guid>
+      <guid>https://www.macrochronicles.com/home/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>License</title>
-      <link>/license/</link>
+      <link>https://www.macrochronicles.com/license/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/license/</guid>
-      <description>You can use this page to put a license on the contents of your blog, like so:
- The MIT License (MIT)
-Copyright (c) 2015 Nishanth Shanmughamnishanth.gerrard@gmail.com
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &amp;ldquo;Software&amp;rdquo;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</description>
+      <guid>https://www.macrochronicles.com/license/</guid>
+      <description>&lt;p&gt;You can use this page to put a license on the contents of your blog, like so:&lt;/p&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;The MIT License (MIT)&lt;/p&gt;&#xA;&lt;p&gt;Copyright (c) 2015 Nishanth Shanmugham&lt;a href=&#34;mailto:nishanth.gerrard@gmail.com&#34;&gt;nishanth.gerrard@gmail.com&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;Permission is hereby granted, free of charge, to any person obtaining a copy&#xA;of this software and associated documentation files (the &amp;ldquo;Software&amp;rdquo;), to deal&#xA;in the Software without restriction, including without limitation the rights&#xA;to use, copy, modify, merge, publish, distribute, sublicense, and/or sell&#xA;copies of the Software, and to permit persons to whom the Software is&#xA;furnished to do so, subject to the following conditions:&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

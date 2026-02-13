@@ -88,7 +88,7 @@
                 {{ end }}
             </div>
             {{ end }}
-            {{ if .Site.DisqusShortname }}
+            {{ if .Site.Config.Services.Disqus.Shortname }}
             <br>
             <div class="disqus">
                 {{ template "_internal/disqus.html" . }}

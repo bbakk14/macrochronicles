@@ -108,9 +108,9 @@
             </a>
         {{ end }}
 
-        {{ if .Site.RSSLink }}
-            <a href="{{ .Site.RSSLink }}">
-                <img class="icon" src="{{ .Site.BaseURL }}img/rss.svg" alt="rss" />
+        {{ with .OutputFormats.Get "RSS" }}
+            <a href="{{ .Permalink }}">
+                <img class="icon" src="{{ $.Site.BaseURL }}img/rss.svg" alt="rss" />
             </a>
         {{ end }}
 
