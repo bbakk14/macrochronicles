@@ -6,8 +6,22 @@
     <description>Recent content in Blog on Macro Chronicles: Economics, Markets, Dataviz</description>
     <generator>Hugo</generator>
     <language>en-US</language>
-    <lastBuildDate>Fri, 07 Apr 2023 21:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Fri, 06 Mar 2026 21:13:14 -0500</lastBuildDate>
     <atom:link href="https://www.macrochronicles.com/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>US Labor Market Update</title>
+      <link>https://www.macrochronicles.com/blog/us-labor-market-update/</link>
+      <pubDate>Fri, 06 Mar 2026 21:13:14 -0500</pubDate>
+      <guid>https://www.macrochronicles.com/blog/us-labor-market-update/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Nonfarm payrolls fell by 92k in February, well below the consensus estimate of a gain of about 50k. Health care shed 28k jobs, largely due to a Kaiser Permanente strike that sidelined over 30k workers in California and Hawaii, while federal government employment fell by 10k. December was revised down sharply from +48k to -17k.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;The chart below shows the evolution of estimates for monthly job gains/losses and later revisions (the “Last” estimate can represent either the final monthly revision or the annual benchmark revision, which tries to address drift in the sample of employers surveyed from reality due to business births and deaths). If anything, this chart illustrates the monthly payrolls figures’ ability to serve as a random number generator, being both difficult to forecast and heavily subject to revision.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>US Labor Market Update</title>
+      <link>https://www.macrochronicles.com/blog/us-labor-market-update-february-2026/</link>
+      <pubDate>Wed, 11 Feb 2026 21:13:14 -0500</pubDate>
+      <guid>https://www.macrochronicles.com/blog/us-labor-market-update-february-2026/</guid>
+      <description>&lt;script src=&#34;https://www.macrochronicles.com/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;&#xD;&#xA;&lt;link href=&#34;https://www.macrochronicles.com/rmarkdown-libs/lightable/lightable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&lt;p&gt; &#xD;&#xA; &lt;/p&gt;&#xD;&#xA;&lt;p&gt;Job gains in January beat expectations, with gains of 130k jobs compared to a consensus estimate of about 70k. This was the strongest month of job growth since December 2024. The report also contained the annual benchmark revision to 2025 data, which revised total 2025 job gains from 584k to just 181k, implying an average of only 15k jobs per month last year.&lt;/p&gt;&#xD;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.macrochronicles.com/blog/2026/20260211_jobs_files/figure-html/monthly_jobs-1.gif&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;&#xD;&#xA;&lt;p&gt;The actual net change in payrolls in January, without adjusting for seasonal effects, was a loss of over 2.5 million, still above the average of the last 10 Januaries. On a seasonally adjusted basis, January job gains were well above the recent trend, providing a welcome positive surprise.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Jobs -&gt; Strong but underlying signs of slowing</title>
       <link>https://www.macrochronicles.com/blog/jobs-strong-but-underlying-signs-of-slowing/</link>

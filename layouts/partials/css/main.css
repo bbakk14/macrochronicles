@@ -620,6 +620,11 @@ div.main .content .markdown ol {
 }
 div.main .content .markdown li {
   margin-left: 2em;
+  {{if .Site.Params.align_left}}
+  text-align: left;
+  {{else}}
+  text-align: justify;
+  {{end}}
 }
 div.main .content .markdown em {
   font-style: italic;
