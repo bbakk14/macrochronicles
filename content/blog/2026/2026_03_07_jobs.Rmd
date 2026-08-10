@@ -1,6 +1,7 @@
 ---
 title: "US Labor Market Update"
 slug: "us-labor-market-update-march-2026"
+aliases: ["/blog/us-labor-market-update/"]
 date: 2026-03-06T21:13:14-05:00
 draft: false
 ---
@@ -388,7 +389,7 @@ The chart below shows the actual (non-seasonally adjusted) and seasonally adjust
 ```{r seasonals, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 
 ## --- Pull SA and NSA payroll data from BLS ---
-Sys.setenv("BLS_KEY" = "bd90968fc0a2404b88fd607916cd5042")
+## BLS_KEY is read from ~/.Renviron so the key stays out of the post source.
 
 dat <- bls_api(
   c("CEU0000000001", "CES0000000001"),

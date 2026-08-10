@@ -1,7 +1,7 @@
 ---
 title: "US Labor Market Update"
-slug: "us-labor-market-update-february-2026"
-date: 2026-02-11T21:13:14-05:00
+slug: "us-labor-market-update-august-2026"
+date: 2026-08-07T12:00:00-05:00
 draft: false
 ---
 &nbsp;
@@ -9,7 +9,9 @@ draft: false
 
 
 
-Job gains in January beat expectations, with gains of 130k jobs compared to a consensus estimate of about 70k. This was the strongest month of job growth since December 2024. The report also contained the annual benchmark revision to 2025 data, which revised total 2025 job gains from 584k to just 181k, implying an average of only 15k jobs per month last year. 
+Nonfarm payrolls fell by 23k in July, the first monthly decline since February and well below the consensus estimate of a gain of about 80k. Government payrolls dropped by 53k, leisure and hospitality shed 40k, and retail lost 19k. Health care, the engine of job growth for the past two years, added just 22k, a fraction of its recent pace. The BLS also revised down its estimate for May by 66k (to a gain of 63k) and for June by 37k (to a gain of 20k), leaving the two months combined 103k lower than previously reported.
+
+The chart below shows the evolution of estimates for monthly job gains/losses and later revisions (the "Last" estimate can represent either the final monthly revision or the annual benchmark revision, which tries to address drift in the sample of employers surveyed from reality due to business births and deaths). If anything, this chart illustrates the monthly payrolls figures' ability to serve as a random number generator, being both difficult to forecast and heavily subject to revision.
 ```{r setup, include=FALSE}
 
 ## --- Libraries ---------------------------------------------------------------
@@ -287,8 +289,18 @@ df$Estimate <- factor(
   levels = c("Consensus", "1st", "2nd", "Last")
 )
 
-label_x <- min(df$rank_index) + 1.2
-label_y <- min(na.omit(df$values)) + 20
+## Reserve an empty band beneath the data for the big grey release-month
+## watermark, sized from the data range so it can never sit on top of a
+## point no matter how large that month's prints happen to be.
+val_rng  <- range(df$values, na.rm = TRUE)
+val_span <- diff(val_rng)
+
+label_x  <- min(df$rank_index) + 1.2
+label_y  <- val_rng[1] - 0.16 * val_span
+
+## y limits must be computed with na.rm: df$values carries NAs for
+## revisions that haven't been released yet.
+y_limits <- c(label_y - 0.09 * val_span, val_rng[2] + 0.05 * val_span)
 
 
 ## --- Build animated chart ---
@@ -339,7 +351,7 @@ df %>%
     labels = na.omit(unique(df$released[order(df$rank_index)]))
   ) +
   scale_y_continuous(
-    limits = c(min(df$values) - 50, max(df$values) + 50)
+    limits = y_limits
   ) +
 
   ## Theme — only override legend.margin from my_theme
@@ -378,13 +390,16 @@ anim
 ```
 
 
-The actual net change in payrolls in January, without adjusting for seasonal effects, was a loss of over 2.5 million, still above the average of the last 10 Januaries. On a seasonally adjusted basis, January job gains were well above the recent trend, providing a welcome positive surprise.
+The actual net change in payrolls in July, without adjusting for seasonal effects, was a decline of about 1.1 million. July is reliably a big down month as education payrolls roll off for the summer, but this one was about a quarter deeper than the trailing 10 year average for July of roughly 860k (excluding 2020).
+
+The chart below shows the actual (non-seasonally adjusted) and seasonally adjusted figures for the last seven months, along with the rolling 10 year average for that month of the year and the average of the last four months.
 
 
 ```{r seasonals, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 
 ## --- Pull SA and NSA payroll data from BLS ---
-## BLS_KEY is read from ~/.Renviron so the key stays out of the post source.
+## BLS_KEY is read from ~/.Renviron so the key stays out of the post
+## source, which Hugo would otherwise publish verbatim.
 
 dat <- bls_api(
   c("CEU0000000001", "CES0000000001"),
@@ -426,8 +441,14 @@ dat_chg[1:4, ] %>%
 
 
 ## --- Compute trailing 10-year monthly averages ---
+## 2020 is excluded: the pandemic collapse and rebound (April -19.7M NSA,
+## June +5.1M) are one-off outliers that swamp a 10-observation mean --
+## with them in, April's "average" reads -1.1M against actual Aprils of
+## roughly +1M. The chart labels the exclusion. Revisit in 2030 when
+## 2020 rolls out of the window anyway.
 dat_chg %>%
   filter(date > (max(date) %m-% months(120))) %>%
+  filter(year(date) != 2020) %>%
   select(date, nfp_chg_nsa, nfp_chg_sa) %>%
   mutate(month = month(date)) %>%
   group_by(month) %>%
@@ -546,7 +567,7 @@ dat_final %>%
       "avg_curr_nsa" = 18
     ),
     labels = c(
-      "Trailing 10y avg for given month",
+      "Trailing 10y avg, excl. 2020",
       "Last four month avg"
     ),
     breaks = c("avg_10_nsa", "avg_curr_sa")
@@ -559,7 +580,7 @@ dat_final %>%
       "avg_curr_nsa" = cpal("orange")
     ),
     labels = c(
-      "Trailing 10y avg for given month",
+      "Trailing 10y avg, excl. 2020",
       "Last four month avg"
     ),
     breaks = c("avg_10_nsa", "avg_curr_nsa")
@@ -617,18 +638,20 @@ anim1
 
 A quick guide to the table and charts below:
 
-- **NFP growth** — the monthly change in total nonfarm payrolls, in thousands.
-- **UR** — the unemployment rate, i.e. the share of people in the labor force who don't have a job and are actively looking for one as a percentage of the labor force. 
-- **UR** — the prime-age unemployment rate, a UR 25-54 year olds, filtering out students and retirees. This to a large extent controls for changes in the UR due to demographic shifts.
-- **U6** — the broader unemployment measure that also includes people who are marginally attached to the labor market, having looked for a job in the last 12 months but not in the last four weeks, and people stuck in part-time jobs who want full-time work. 
-- **LFPR** — labor force participation rate, the share of the civilian population that is either working or looking for work.
-- **EPOP** — the employment-to-population ratio. What share of the population has a job?
-- **PTER** — part-time for economic reasons, people working part-time because they can't find full-time work, as a share of total payrolls.
-- **Long-term UR** — the share of unemployed workers who've been out of a job for 27 weeks or more.
-- **AHE** — average hourly earnings. How much workers are getting paid per hour, shown both month-over-month and year-over-year.
+- **NFP growth**: the monthly change in total nonfarm payrolls, in thousands.
+- **UR**: the unemployment rate, i.e. the share of people in the labor force who don't have a job and are actively looking for one as a percentage of the labor force.
+- **Prime-age UR**: the unemployment rate for 25-54 year olds, filtering out students and retirees. This to a large extent controls for changes in the UR due to demographic shifts.
+- **U6**: the broader unemployment measure that also includes people who are marginally attached to the labor market, having looked for a job in the last 12 months but not in the last four weeks, and people stuck in part-time jobs who want full-time work.
+- **LFPR**: labor force participation rate, the share of the civilian population that is either working or looking for work. The higher the labor force participation, the healthier the labor market.
+- **EPOP**: the employment-to-population ratio. What share of the population has a job? This metric accounts for both employment and labor force participation in measuring job market conditions. That combo, along with stripping out some of the effects of demographics, makes prime-age EPOP arguably the most well rounded metric.
+- **PTER**: part-time for economic reasons, people working part-time because they can't find full-time work, as a share of total payrolls.
+- **Long-term UR**: the share of unemployed workers who've been out of a job for 27 weeks or more.
+- **AHE**: average hourly earnings. How much workers are getting paid per hour, shown both month-over-month and year-over-year.
 
-Recent winter months have seen a nearly across the board firming in these various metrics.
+July's drop in the unemployment rate to 4.1% flatters the household survey: the labor force shrank by 264k and participation fell to 61.4%, its lowest in over five years, so fewer people counted as unemployed largely because fewer people counted at all. Wage growth was nearly flat on the month, with the year-over-year pace of average hourly earnings slipping to 3.2%, the slowest since May 2021. Prime-age EPOP ticking up two-tenths is the one genuinely firm-looking number in the set.
 
+
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 ```{r table, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE, results='asis'}
 
@@ -963,7 +986,7 @@ anim1
 ```
 
 
-Looking at longer-term trends across industries, the post-pandemic labor market has been defined by a lopsided recovery. Health care and government have been the dominant drivers of job growth, while goods-producing sectors like manufacturing and mining have been flat to declining. Leisure and hospitality, which bore the brunt of pandemic layoffs, has largely recovered but job growth there has stalled. Information sector employment, which the BLS defines as publishing (including software), film and sound recording, broadcasting, telecom, and data processing, has trended lower since the over-hiring of the pandemic recovery. 
+Looking at longer-term trends across industries, the post-pandemic labor market has been defined by a lopsided recovery. Health care has been the dominant driver of job growth among the industries below, while goods-producing sectors like manufacturing and mining have been flat to declining. Leisure and hospitality, which bore the brunt of pandemic layoffs, has largely recovered but job growth there has stalled. Information sector employment, which the BLS defines as publishing (including software), film and sound recording, broadcasting, telecom, and data processing, has trended lower since the over-hiring of the pandemic recovery. 
 
 
 ```{r industries, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
@@ -981,7 +1004,9 @@ codes <- c(
 key <- c(
   "Construction",         "Manufacturing",
   "Mining & Logging",     "Wholesale Trade",
-  "Retail Trade",         "Transport & Warehouse",
+  ## "Transport & Whse" is abbreviated deliberately: the full
+  ## "Transport & Warehouse" overruns the facet strip at this panel width.
+  "Retail Trade",         "Transport & Whse",
   "Utilities",            "Professional Svcs",
   "Information",          "Financial",
   "Admin & Waste Svcs",   "Educational Svcs",
@@ -1068,7 +1093,7 @@ anim1
 ```
 
 
-The flattish job growth of 2025 has widened the gap between current overall employment and levels in the unlikely case the pre-pandemic trend of job growth had continued.
+The flattish job growth of 2025 and 2026 (so far) has widened the gap between current overall employment and levels in the unlikely case the pre-pandemic trend of job growth had continued.
 
 
 ```{r trajectory, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
@@ -1429,8 +1454,8 @@ BL_chart <- BL %>%
 
   ## Inset zoom panel for recent years
   facet_zoom(
-    xy        = date > "2018/11/1" &
-                date < format(Sys.Date(), "%Y/%m/%d"),
+    xlim      = c(as.Date("2018/11/01"), Sys.Date()),
+    ylim      = c(-2, 6),
     zoom.size = 0.4
   ) +
 
@@ -1440,7 +1465,7 @@ BL_chart <- BL %>%
     aes(x = date, y = total),
     size     = 0.8,
     alpha    = 0.5,
-    linetype = "dashed"
+    linetype = "solid"
   ) +
 
   ## Scales
@@ -1448,7 +1473,7 @@ BL_chart <- BL %>%
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_date(
     date_labels = "'%y",
-    expand      = c(0, 50)
+    expand      = expansion(mult = c(0, 0.03))
   ) +
 
   ## Theme — add horizontal spacing between legend items
@@ -1491,11 +1516,169 @@ anim
 
 The various measures of tightness/slack above include:
 
-- **Unemployment gap** — the difference between the unemployment rate and an estimate of the non-accelerating inflation rate of unemployment (NAIRU). NAIRU is a rough estimate of the level of unemployment that neither places upward or downward pressure on inflation.
-- **Participation gap** — the difference between the labor force participation rate (LFPR) and the Congressional Budget Office’s estimate of the potential LFPR. The CBO’s "potential" version is their best guess at what that number should be given demographics (aging population, school enrollment etc). When actual participation falls below potential, it suggests there are people on the sidelines who would normally be in the workforce.
-- **Underemployment gap** — the difference between the number of employees working part-time for economic reasons as a percentage of the labor force, adjusted for the difference in average hours worked by part-time and full-time employees, and the 1994-2007 average of this calculation.
+- **Unemployment gap**: the difference between the unemployment rate and an estimate of the non-accelerating inflation rate of unemployment (NAIRU). NAIRU is a rough estimate of the level of unemployment that neither places upward or downward pressure on inflation.
+- **Participation gap**: the difference between the labor force participation rate (LFPR) and the Congressional Budget Office’s estimate of the potential LFPR. The CBO’s "potential" version is their best guess at what that number should be given demographics (aging population, school enrollment etc). When actual participation falls below potential, it suggests there are people on the sidelines who would normally be in the workforce.
+- **Underemployment gap**: the difference between the number of employees working part-time for economic reasons as a percentage of the labor force, adjusted for the difference in average hours worked by part-time and full-time employees, and the 1994-2007 average of this calculation.
 
 
+The chart below shows the Beveridge curve, plotting the job openings rate (y-axis) against the unemployment rate (x-axis). It illustrates the inverse relationship between the two. When there are many openings as a percentage of the labor force, unemployment tends to be low, and vice versa. Recent data sits on a kink in the curve, suggesting that were the openings rate to continue to fall, the unemployment rate may increase at a faster pace.
+
+
+```{r beveridge, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
+
+## --- Pull data ---------------------------------------------------------------
+
+raw_bev <- getSymbols(c("UNRATE", "JTSJOR"), src = "FRED", auto.assign = TRUE)
+
+dat_bev <- merge(UNRATE, JTSJOR) %>%
+  as_tibble(rownames = NA) %>%
+  rownames_to_column() %>%
+  rename(
+    date = rowname,
+    ur   = UNRATE,
+    jor  = JTSJOR
+  ) %>%
+  mutate(date = as.Date(date, "%Y-%m-%d")) %>%
+  filter(!is.na(ur)) %>%
+  ## Forward-fill openings rate so latest UR data uses most recent JOR
+  fill(jor, .direction = "down") %>%
+  filter(!is.na(jor)) %>%
+  ## Remove covid outliers
+  filter(date < as.Date("2020-03-01") | date > as.Date("2022-02-01")) %>%
+  mutate(
+    decade = paste0(floor(year(date) / 10) * 10, "s"),
+    is_last     = row_number() == n(),
+    placeholder = 1
+  )
+
+
+## --- Chart labels ------------------------------------------------------------
+
+ctitle_1 <- "Beveridge curve"
+unit_label <- "Job openings rate vs. unemployment rate"
+
+last_pt  <- dat_bev %>% filter(is_last)
+label_dt <- format(last_pt$date, "%b '%y")
+
+decade_pal <- c(cpal("blue"), cpal("green"), cpal("red"), cpal("purple"),
+                cpal("orange"), cpal("brown"))
+decade_lvls <- sort(unique(dat_bev$decade))
+decade_colors <- setNames(decade_pal[seq_along(decade_lvls)], decade_lvls)
+
+
+## --- Build chart -------------------------------------------------------------
+
+bev_chart <- dat_bev %>%
+  filter(!is_last) %>%
+  ggplot(aes(x = ur, y = jor)) +
+
+  geom_point(
+    aes(color = decade),
+    size  = 2.5,
+    alpha = 0.8
+  ) +
+
+  ## Latest data point (purple diamond, larger)
+  geom_point(
+    data  = last_pt,
+    color = cpal("purple"),
+    shape = 18,
+    size  = 8
+  ) +
+
+  ## Arrow annotation to most recent point
+  geom_curve(
+    data = last_pt,
+    aes(
+      x    = ur + 1.4,
+      y    = jor + 0.8,
+      xend = ur + 0.15,
+      yend = jor + 0.08
+    ),
+    curvature = -0.3,
+    arrow     = arrow(length = unit(0.08, "inches"), type = "closed"),
+    color     = cpal("purple"),
+    size      = 0.4,
+    inherit.aes = FALSE
+  ) +
+  geom_text(
+    data = last_pt,
+    aes(
+      x     = ur + 1.45,
+      y     = jor + 0.9,
+      label = label_dt
+    ),
+    size     = 4,
+    color    = cpal("purple"),
+    fontface = "bold",
+    family   = "Open Sans",
+    inherit.aes = FALSE
+  ) +
+
+  ## Covid exclusion note
+  annotate(
+    "text",
+    x      = Inf,
+    y      = Inf,
+    label  = "Mar '20 – Feb '22 excluded",
+    hjust  = 1.05,
+    vjust  = 1.5,
+    size   = 3,
+    color  = "grey50",
+    family = "Open Sans"
+  ) +
+
+  ## Scales
+  scale_color_manual(values = decade_colors) +
+  scale_x_continuous(
+    labels = function(x) paste0(x, "%"),
+    breaks = function(x) seq(floor(x[1]), ceiling(x[2]), by = 1),
+    expand = expansion(mult = 0.05)
+  ) +
+  scale_y_continuous(
+    labels = function(x) paste0(x, "%"),
+    breaks = function(x) seq(floor(x[1]), ceiling(x[2]), by = 1),
+    expand = expansion(mult = 0.05)
+  ) +
+
+  ## Labels
+  my_theme +
+  theme(
+    axis.title.x = element_text(
+      size   = 10.8,
+      color  = cpal("text"),
+      family = "Open Sans"
+    ),
+    axis.title.y = element_text(
+      size   = 10.8,
+      color  = cpal("text"),
+      family = "Open Sans"
+    ),
+    legend.margin = margin(t = 0, unit = "cm")
+  ) +
+  labs(
+    title    = ctitle_1,
+    subtitle = unit_label,
+    x        = "Unemployment rate",
+    y        = "Job openings rate",
+    caption  = "Source: BLS, @benbakkum."
+  ) +
+  transition_states(placeholder)
+
+anim <- animate(
+  bev_chart,
+  renderer = gifski_renderer(loop = TRUE),
+  fps      = 1,
+  duration = 1,
+  width    = 615,
+  height   = 420,
+  units    = "px",
+  res      = 72,
+  type     = "cairo"
+)
+
+anim
+```
 
 
 

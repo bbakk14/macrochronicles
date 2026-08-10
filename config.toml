@@ -11,7 +11,7 @@ title = "Macro Chronicles: Economics, Markets, Dataviz"
 disqusshortname = ""
 pluralizelisttitles = false
 disableKinds = ["taxonomy", "taxonomyTerm"]
-ignoreFiles = ["_files$", "_cache$"]
+ignoreFiles = ["_files$", "_cache$", "\\.Rmd$"]
  
 [permalinks]
 blog = "blog/:slug/"

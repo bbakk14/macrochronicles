@@ -1,7 +1,7 @@
 ---
 title: "US Labor Market Update"
 slug: "us-labor-market-update-april-2026"
-date: 2026-04-05T21:13:14-05:00
+date: 2026-04-05T01:13:14-05:00
 draft: false
 ---
 &nbsp;
@@ -388,7 +388,7 @@ The chart below shows the actual (non-seasonally adjusted) and seasonally adjust
 ```{r seasonals, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
 
 ## --- Pull SA and NSA payroll data from BLS ---
-Sys.setenv("BLS_KEY" = "bd90968fc0a2404b88fd607916cd5042")
+## BLS_KEY is read from ~/.Renviron so the key stays out of the post source.
 
 dat <- bls_api(
   c("CEU0000000001", "CES0000000001"),
@@ -623,7 +623,7 @@ A quick guide to the table and charts below:
 
 - **NFP growth** — the monthly change in total nonfarm payrolls, in thousands.
 - **UR** — the unemployment rate, i.e. the share of people in the labor force who don't have a job and are actively looking for one as a percentage of the labor force. 
-- **UR** — the prime-age unemployment rate, a UR 25-54 year olds, filtering out students and retirees. This to a large extent controls for changes in the UR due to demographic shifts.
+- **Prime-age UR** — the unemployment rate for 25-54 year olds, filtering out students and retirees. This to a large extent controls for changes in the UR due to demographic shifts.
 - **U6** — the broader unemployment measure that also includes people who are marginally attached to the labor market, having looked for a job in the last 12 months but not in the last four weeks, and people stuck in part-time jobs who want full-time work. 
 - **LFPR** — labor force participation rate, the share of the civilian population that is either working or looking for work. The higher the labor force participation, the healthier the labor market.
 - **EPOP** — the employment-to-population ratio. What share of the population has a job? This metric accounts for both employment and labor force participation in measuring job market conditions. That combo, along with stripping out some of the effects of demographics, makes prime-age EPOP arguably the most well rounded metric.
@@ -969,7 +969,7 @@ anim1
 ```
 
 
-Looking at longer-term trends across industries, the post-pandemic labor market has been defined by a lopsided recovery. Health care and government have been the dominant drivers of job growth, while goods-producing sectors like manufacturing and mining have been flat to declining. Leisure and hospitality, which bore the brunt of pandemic layoffs, has largely recovered but job growth there has stalled. Information sector employment, which the BLS defines as publishing (including software), film and sound recording, broadcasting, telecom, and data processing, has trended lower since the over-hiring of the pandemic recovery. 
+Looking at longer-term trends across industries, the post-pandemic labor market has been defined by a lopsided recovery. Health care has been the dominant driver of job growth among the industries below, while goods-producing sectors like manufacturing and mining have been flat to declining. Leisure and hospitality, which bore the brunt of pandemic layoffs, has largely recovered but job growth there has stalled. Information sector employment, which the BLS defines as publishing (including software), film and sound recording, broadcasting, telecom, and data processing, has trended lower since the over-hiring of the pandemic recovery. 
 
 
 ```{r industries, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
@@ -1502,7 +1502,7 @@ The various measures of tightness/slack above include:
 - **Underemployment gap** — the difference between the number of employees working part-time for economic reasons as a percentage of the labor force, adjusted for the difference in average hours worked by part-time and full-time employees, and the 1994-2007 average of this calculation.
 
 
-The chart below shows the Beveridge curve, plotting the job openings rate (y-axis) against the unemployment rate (x-axis). It illustrates the inverse relationship between the two. When there are many openings as a percentage of the labor force, unemployment tends to low, and vice versa. Recent data sits at on a kink in the curve, suggesting that were the openings rate to continue to fall, the unemployment rate may increase at a faster pace.
+The chart below shows the Beveridge curve, plotting the job openings rate (y-axis) against the unemployment rate (x-axis). It illustrates the inverse relationship between the two. When there are many openings as a percentage of the labor force, unemployment tends to be low, and vice versa. Recent data sits on a kink in the curve, suggesting that were the openings rate to continue to fall, the unemployment rate may increase at a faster pace.
 
 
 ```{r beveridge, echo=FALSE, warning=FALSE, message = FALSE, tidy=FALSE}
